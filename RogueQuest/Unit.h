@@ -1,46 +1,59 @@
-﻿#include "olcPixelGameEngine.h"
+﻿#pragma once
+
+#include "olcPixelGameEngine.h"
 #include "sol/sol.hpp"
+#include "Assets.h"
+#include <map>
+
+
 
 class Unit
 {
-	Unit(std::string name, sol::table Unitdata);
-	virtual ~Unit();
+	Unit(); // keep private
+
 public:
-	std::string sUnitName;
-	sol::table  tUnitdata;
-	bool bFriendly;
-	bool bOwnership;
-	bool bSelected;
-	bool bIsRanged;
-	bool bIsAttackable;
-	bool bDead;
-	bool bLoot;
+	virtual ~Unit();
+
+	// Data
+	std::string sUnitName; //Name
+	bool bFriendly; //Will i attack the Player?
+	bool bOwnership; //Does the player own me
+	bool bSelected; //Did the player select me?
+	bool bIsRanged; // Am i Ranged?
+	bool bIsAttackable; //Can you Attack me
+	bool bDead; // Am I dead?
+	bool bLoot; //If dead then drop some loot?
 	//Unit vPOS + vVel +Θ<-float
-	float Unit_Collision_Radius;
-	olc::vf2d vUnitPosition;
-	olc::vf2d vUnitVelocity;
-	olc::vf2d vRubberBand;
-	olc::vf2d vTarget;
-	float fUnitAngle;
-	//
-	float fAttackSpeed;
-	float fAttackDamage;
-	float fHealth;
-	float fMaxHealth;
-	float fMana;
-	float fMaxMana;
-	float fAmmo;
-	float fMaxAmmo;
-	float fMoveSpeed;
-	float fAttackRange;
-	float m_fKnockBackTimer;
-	float m_fKnockBackDX;
-	float m_fKnockBackDY;
-	float fKBPower;
+	olc::vf2d vUnitPosition; // X, Y Position
+	olc::vf2d vUnitVelocity; // Vx, Vy Velocity
+	olc::vf2d vRubberBand;   // X, Y, Position to go back to
+	olc::vf2d vTarget;       //Where to move after the player clicked on screen
+	float fUnitAngle;        // Angle of the player 0->2pi Radians
+
+	// Parameters
+	float Unit_Collision_Radius;//How big is my collision circle?
+
+	// Stats
+	float fHealth; // How much health do i have?
+	float fMaxHealth;//Whats my max health?
+	float fMana;//mana
+	float fMaxMana;//maximum mana
+	float fAmmo;//ammo
+	float fMaxAmmo;//max-ammo
+	float fMoveSpeed;//Move speed
+	float fAttackRange;//Range of attack if ranged
+	float fAttackDamage;//How much damage do I do?
+	float fAttackSpeed;      //How fast do I attack
+	float fSpellCooldown;//How fast do I attack
+	float fKnockBackResist;
+	float m_fKnockBackTimer;//KnockBack
+
+	float fKBPower;//How much knockBack This unit will incure
 	
-	olc::vi2d SpriteSheetTileSize;//ForExample 64x64 or 32x64 ect..
+	olc::vi2d SpriteSheetTileSize;//For Example 64x64 or 32x64 ect..
 	olc::vi2d SpriteSheetSize;//Total Sprite Size say 640 x 256
-	int AnimationLength; //length say = 9 or = SpriteSheetSize.x / SpriteSheetTileSize.x  
+
+
 	enum
 	{
 		SONorth,
@@ -48,97 +61,45 @@ public:
 		SOEast,
 		SOWest
 	}SpriteOrder;//Order of sprite facing directions in sprite sheet
-
-
-	olc::Sprite* UnitSpriteSheet;
-	olc::Sprite* Weapon;
 	enum UnitLogic
 	{
 		Attack, //If you say attack a pos Search and Kill anything within agro-range
 		Neutral,//if attacked switch to attack mode
 		Passive //stay
 	};
+
 public:
-	void DrawUnit(olc::PixelGameEngine* gfx, olc::vf2d Offset, float fElapsedTime); //Decal not pge :/
-	void MovementUpdate(float fElapsedTime, UnitLogic Logic);	  //Behaviour inside this Logic;
-	void PerformAttack();
-	void KnockBack(float power,float dx, float dy, float dist); 
+	void DrawUnit(olc::PixelGameEngine* gfx, olc::vf2d Offset, float fElapsedTime); //renderable not pge :/
+	void MovementUpdate(float fElapsedTime, UnitLogic Logic); //Behaviour inside this Logic;
+	void PerformAttack();//Kill this fool
+	void KnockBack(float power,float dx, float dy, float dist); //I have benn hit!
+
 protected:
-	enum 
+	enum GFXState
 	{
-		Idle,
 		Walking,
+		Attacking,
 		Dead
 	} Graphic_State;
+
 	enum
 	{
 		North,
 		South,
 		East,
 		West
-	}FacingDirection;
-	float m_fTimer;
-	int m_nGraphicCounter;
-	float m_fStateTick;
+	} FacingDirection;
 
+	float m_fTimer;//Graphics timer
+	float m_fStateTick;// How long unil i can do action tick again
+
+private:
+	int curFrame;//current frame of the animation
+	std::map<GFXState, std::unique_ptr<olc::Decal>> decals; // multiple textures for different states
+	std::map<GFXState, size_t> AnimationLengths; //length say = 9 or = SpriteSheetSize.x / SpriteSheetTileSize.x
+
+	friend class Engine;
+	friend class cAssets;
+	friend class UnitManager;
+	
 };
-/*
-MagaData:
-"MageWalk.png"
-Sprite offset {64x64}
-Maybe an enum [N,W,S,E];
-Sprite Length =  9 ie
-Sprite Down = 4.
-Idle Down = 0, 
-
-
-
-
-*/
-
-
-
-
-
-/*
-Class Unit = {}
-
-//For colision detection
-enum...
-	Circle
-	BigCircle
-	...
-	bFriendly = //Is that computer a baddy
-	bOwnership = //Do you own it
-	bSelected = //Did you select the unit
-	bRanged = //Is this unit a ranged unit I.E. ATTACK LOGIC
-	bDead = //Is Dead
-	bLoot = // Drop Loot if able
-	std::string Name//Name of Unit
-
-	enum ...
-	Attack
-	Neutal
-	Stop
-	...//how far will it search to attack target
-
-	olc::vf2d RubberBand = //Where will unit go back to if you get out of range
-	olc::vf2d Position = //Position
-	olc::vf2d Velocity = // Movement
-	olc::vf2d Target = //Moves to targeted location
-
-	float Radius = //Unit Collision Radius
-	float fAngle = //Unit Angle
-	float AttackSpeed = //attack per ...
-	float AttackDamage = //Damage per attack
-	float Health = //Health
-	float MaxHealth = //Max Health
-	float Mana = //Mana
-	float MaxMana = //Max Mana
-	float Speed = //Movement Speed
-	float Range = // if ranged how far can it attack
-	olc::Sprite * Sprite = //Spritesheet for Unit <These should be Decals
-	olc::Sprite * Weapon = //WeaponSheet for Unit <These should be Decals
-	void Attack Animation() < -Takes name of unit and give currect attack sprite
-	void MovementUpdate() < -Takes data above and gives currect move animation
-*/

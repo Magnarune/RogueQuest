@@ -2,6 +2,7 @@
 #include <set>
 #include <functional>
 #include <string>
+
 std::string StringifyObject(sol::object val) {
     std::set<const void*> tableMap;
     std::function<std::string(sol::object)> Stringify = [&](sol::object value) -> std::string {
@@ -46,12 +47,23 @@ std::string StringifyObject(sol::object val) {
 
     return Stringify(val); // begin recursion
 }
+
+Game_Engine* Game_Engine::self = nullptr;
+
 Game_Engine::Game_Engine()
 {
     sAppName = "Simple RTS GAME";
+    self = this;
 }
+
+Game_Engine::~Game_Engine()
+{
+    self = nullptr;
+}
+
 bool Game_Engine::OnUserCreate()
 {
+    /*
     //debug sprites
     Demo = new olc::Sprite("Sword.png");
     DemoDecal = new olc::Decal(Demo);
@@ -59,11 +71,21 @@ bool Game_Engine::OnUserCreate()
     ErzaDcl = new olc::Decal(Erzaspr);
     Flagspr = new olc::Sprite("flag.png");
     FlagDcl = new olc::Decal(Flagspr);
-  // Backroundspr = new olc::Sprite("map.png");
-    //Backrounddcl = new olc::Decal(Backroundspr);
+    */
+
+    // Setup Controllers
+
+    TextureCache::InitCache(); // initialize texture cache
+
+    unitManager.reset(new UnitManager); // create the unit manager
+    
+    assetManager.reset(new cAssets); // create the asset manager
+    // Configure Controllers
+    assetManager->LoadUnitAssets(); //Load all the Lua files
     //debug sprites
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });
-   // object.vPOS = { ScreenWidth() / 2.0f, ScreenHeight() / 2.0f };
+    //object.vPOS = { ScreenWidth() / 2.0f, ScreenHeight() / 2.0f };
+    
     //Rain
     Rain = new olc::Sprite("rain.png");
     RainDcl = new olc::Decal(Rain);
@@ -74,6 +96,8 @@ bool Game_Engine::OnUserCreate()
 
     }
     //Rain end
+    
+    
     lua.open_libraries(sol::lib::base);
     lua.open_libraries(sol::lib::math);
     lua.open_libraries(sol::lib::package);
@@ -82,7 +106,7 @@ bool Game_Engine::OnUserCreate()
     lua["cout"] = [](sol::object value){
         std::cout << StringifyObject(value) << "\n";
     };
-    sol::load_result script = lua.load_file("\MapData.lua");
+    sol::load_result script = lua.load_file("MapData.lua");
     sol::protected_function_result rcode = script(); // run script
     if(!rcode.valid()){ // check if script ran okay
         sol::error e = rcode;
@@ -105,19 +129,7 @@ bool Game_Engine::OnUserCreate()
        // olc::Decal* Dfx = new olc::Decal(gfx);
         renderGraphics.emplace_back(Rfx);
     }
-    /*
-    for(int i=0; i < tileSets.size(); ++i){ //Load all the tile sprites
-        sol::table tileSet = tileSets[i+1];        
-        olc::Sprite* gfx = new olc::Sprite;
-        if (gfx->LoadFromFile(StringifyObject(tileSet["filename"])) != olc::OK) {
-            std::cout << "Error loading: " << StringifyObject(tileSet["filename"]) << "\n";
-            ; // no memory leak this time
-            continue;
-        }
-        renderGraphics.emplace_back(gfx);
-    } 
-    */
-    
+
     vTileSize = { mapData["tilewidth"], mapData["tileheight"] };//32x32, 16x16, 64x64 etc
     mapLayers = mapData["layers"];//All the layers and their data
     vLayerData.resize(mapLayers.size());
@@ -137,31 +149,10 @@ bool Game_Engine::OnUserCreate()
     }
     
     SetPixelMode(olc::Pixel::ALPHA);
-    /*
-    CreateLayer(); // console layer
-    EnableLayer(1, true);
-    SetDrawTarget(nullptr);
-    SetPixelMode(olc::Pixel::ALPHA);
-    Clear(olc::BLANK);
-    tv.GetTopLeftTile().max({ 0,0 });
-    tv.GetBottomRightTile().min({ 32,30 });
-    for(int i = 0; i < mapLayers.size(); ++i){ //maplayers.size tells you the amount of layers .size()
-        sol::table layer = mapLayers[i+1];//lua starts at 1 and look at first layer loop draw then draw second layer
-        sol::table data = layer["data"];//RAW Layer Data [ number 11,22, 7, 1, ect...]
-        olc::vi2d offset = {layer["offsetx"], layer["offsety"]};//The X and Y offset in the sprite Sheet Usally 0;
-        olc::vi2d layerSize = {layer["width"], layer["height"]};//How Wide and Tall the layer is     
-        for(int j=0; j < data.size(); ++j){//total size of layer Data
-            if(j >= layerSize.x * layerSize.y) break;
-            int tile = data[j+1];
-            if(tile == 0) continue;
-            olc::vi2d pos {j % layerSize.x, j / layerSize.x}; // truncate tile pos so it can be passed in 1D
-           tv.DrawPartialSprite(offset + pos * vTileSize, GetTileSet(tile).gfx, GetTile(tile) * vTileSize, vTileSize);           
-        }
-    }
- */
     ConsoleCaptureStdOut(true);
     return true;
 }
+
 bool Game_Engine::OnUserUpdate(float fElapsedTime)
 {    
     if (GetKey(olc::Key::F1).bPressed)
@@ -175,8 +166,12 @@ bool Game_Engine::OnUserUpdate(float fElapsedTime)
     }
     return true;
 }
+
 bool Game_Engine::UpdateLocalMap(float fElapsedTime)
-{    
+{
+
+    unitManager->Update(fElapsedTime); // update all the units - this is because this engine space is too messy to implement everything here
+
     olc::vi2d Topleft = tv.GetWorldTL();
     olc::vi2d BOTRight = tv.GetWorldBR();
     TopleftTile = { (int)(Topleft.x / vTileSize.x),(int)(Topleft.y / vTileSize.y) };   
@@ -210,7 +205,7 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime)
                 
             }
         }
-    }    
+    }
    //tv.DrawStringDecal(object.vPOS + olc::vf2d( { 0.0f, 20.0f }), std::to_string((BottomeRightTile.x - TopleftTile.x + 1) * (BottomeRightTile.y - TopleftTile.y + 1)));
     object.vVel = { 0.0f,0.0f };
     if (GetKey(olc::Key::TAB).bReleased) bFollowObject = !bFollowObject;
@@ -226,20 +221,18 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime)
         tv.SetWorldOffset(object.vPOS + olc::vf2d( { 8.0f, 8.0f }) - tv.ScaleToWorld(olc::vf2d(ScreenWidth() / 2.0f, ScreenHeight() / 2.0f)));
     }
     //tv.DrawCircle(object.vPOS, object.fRadius);
-    static Clock profile;
-    profile.restart();
     //tv.DrawDecal(object.vPOS, ErzaDcl, { 0.2f,0.2f}, olc::Pixel((int)TimeofDay, (int)TimeofDay, (int)TimeofDay, 255));
-    double time = profile.getMilliseconds();
+ 
    // tv.Draw(object.vPOS);
     //if (object.vVel.mag2() > 0)
      //   tv.DrawLine(object.vPOS, object.vPOS + object.vVel.norm() * object.fRadius, olc::BLUE);
-    fAngle += 2*fElapsedTime;//rotateSwords    
+    //rotateSwords    
     if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
     if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
     if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
     if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
     if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
-     if (!IsConsoleShowing())
+    if (!IsConsoleShowing())
      {
         if (IsFocused())
         {
@@ -283,98 +276,22 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime)
             {
                 Clicked = true;
                 olc::vf2d FinalWH = GetMousePos() - Initial;
-                 //tv.DrawRect(Initial, FinalWH);
-                 //tv.Draw
-                 //DrawString(100, 100, "Width= " + std::to_string((int)FinalWH.x) + " H= " + std::to_string((int)FinalWH.y));
-                for (auto& ball : Balls)
-                {
-                    if (ball.POSITION.x > Initial.x && ball.POSITION.y > Initial.y && ball.POSITION.x < (FinalWH.x + Initial.x) && ball.POSITION.y < (FinalWH.y + Initial.y))
-                    {
-                        ball.Selected = true;
-                    }
-                }
+             
             }
             else
             {
-                for (auto& ball : Balls)
-                {
-                    //ball.Selected = false;
-                }
-                Clicked = false;
+               
             }
             if (GetMouse(1).bHeld)
             {
-                for (auto& ball : Balls)
-                {
-                    if (ball.Selected == true)
-                    {
-                        ball.Targeted = true;
-                        ball.Target = GetMousePos() - ball.POSITION;
-                        tv.DrawDecal(GetMousePos(), FlagDcl, { 0.2f,0.2f });
-                        //ball.VELOCITY = { ball.Target.x ,ball.Target.y};
-                    }
-                }
+                
             }
             if (GetKey(olc::SPACE).bPressed)
             {
-                for (auto& ball : Balls)
-                {
-                    if (ball.Selected == false)
-                    {
-                        //ball.Selected = true;
-                    }
-                    else if (ball.Selected == true)
-                    {
-                        ball.Selected = false;
-                        ball.VELOCITY = { 0.0f,0.0f };
-                        //  float fAngle = float(rand()) / float(RAND_MAX) * 2.0f * 3.14159f - 0.3f;
-                         // float fSpeed = float(rand()) / float(RAND_MAX) * 100.0f + 20.0f;
-                         // ball.VELOCITY = olc::vf2d(fSpeed * cosf(fAngle), fSpeed * sinf(fAngle));
-                    }
-
-                }
+              
             }
         }
      }
-     if (GetKey(olc::TAB).bReleased)
-     {
-         bFollowObject = true;
-     }
-     else
-     {
-         //bFollowObject = false;
-     }
-    if (GetKey(olc::L).bReleased)
-    {
-    }
-    /*
-
-    CameraPos = object.vPOS;//Cam Position = Object position
-    vVisabletiles = { ScreenWidth() / 32,ScreenHeight() / 32 };
-   // fTileOffset =  { CameraPos.x - (float)vVisabletiles.x, CameraPos.y - (float)vVisabletiles.y};
-    if (fTileOffset.x < 0) fTileOffset.x = 0;if (fTileOffset.y < 0) fTileOffset.y = 0;
-    if (fTileOffset.x > 32 - vVisabletiles.x) fTileOffset.x = 32 - vVisabletiles.x;
-    if (fTileOffset.y > 32 - vVisabletiles.y) fTileOffset.y = 32 - vVisabletiles.y;
-    */
-    /*    
-    vVisabletiles = { ScreenWidth() / vTileSize.x,ScreenHeight() / vTileSize.y };
-    SpriteOffset = { (POS.x - (float)(vVisabletiles.x) / 2.0f), (POS.y - (float)(vVisabletiles.y) / 2.0f) };
-    fTileOffset = { (SpriteOffset.x - (int)SpriteOffset.x) * vTileSize.x, (SpriteOffset.y - (int)SpriteOffset.y) * vTileSize.y };
-
-    for (int x = -1; x < vVisabletiles.x + 1; x++)
-    {
-        for (int y = -1; y < vVisabletiles.y + 1; y++)
-        {
-            int idx =(x + SpriteOffset.x, y + SpriteOffset.y); //<-Index on sprite sheet        
-            int sx = idx % 10;
-            int sy = idx / 10;
-            olc::vi2d S = { idx % 10, idx / 10 };
-            olc::vi2d Tiles = { x * vTileSize.x - fTileOffset.x, y * vTileSize.y - fTileOffset.y };
-            DrawPartialSprite(Tiles, GetTileSet(idx).gfx, S * vTileSize, vTileSize);
-        }
-    }
-    */   
-    //SetDrawTarget(1); 
     if (DayTime == true)
     {
         TimeofDay += 15 * fElapsedTime;
@@ -398,21 +315,26 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime)
             FTIME = 0;
             DayTime = true;
         }
-    }   
-   // DrawString(object.vPOS, std::to_string(TopleftTile.x));
-    //UpdateAndDraw(fElapsedTime); //<-- Rain
-    //SetDrawTarget(2);
+    }
     return true;    
 };
+
 bool Game_Engine::OnUserDestroy()
 {
+    unitManager.reset(); // free the unit manager
+    assetManager.reset(); // free the asset manager
+
+    TextureCache::FreeCache(); // free the texture cache database
+
     return true; // true for successful close
 }
+
 void Game_Engine::UpdateRect(olc::vi2d Initial, olc::vi2d Current)
 {   
     bool Clicked = true;
     tv.DrawRect(Initial, Current);
 }
+
 olc::vi2d Game_Engine::GetTile(int id) {
     const TileSet tileset = GetTileSet(id);
     id -= tileset.gid;
@@ -420,12 +342,48 @@ olc::vi2d Game_Engine::GetTile(int id) {
                            tileset.Rfx->Sprite()->height / vTileSize.y};
     return olc::vi2d { id % tileCount.x, id / tileCount.x };
 }
+
 Game_Engine::TileSet Game_Engine::GetTileSet(int id) {
     for(int i=1; i <= tileSets.size(); ++i){
-        //sol::table tileset = tileSets[i];
-        int gid = vFirstGid[i - 1];     // tileset["firstgid"];
-        //if (id > gid && id < vFirstGid[i]) return TileSet{ renderGraphics[i - 1], vFirstGid[i-1]};       
+        int gid = vFirstGid[i - 1];              
         if(id < gid) return TileSet {renderGraphics[i-2], tileSets[i-1]["firstgid"]};
     }
     return TileSet {renderGraphics.back(), tileSets[tileSets.size()]["firstgid"]};
+}
+
+bool Game_Engine::OnConsoleCommand(const std::string& stext)
+{
+    std::stringstream ss;
+    ss << stext;
+    std::string c1;
+    ss >> c1;
+    if (c1 == "addhead")
+    {
+        
+        std::cout << "Head added\n";
+    }
+
+    return true;
+}
+
+
+void Game_Engine::UpdateRain(float FelapsedTime)
+{
+    for (auto& Raindrops : RainDrops)
+    {
+        //Raindrops.PositionX += 1.0;
+        //Raindrops.PositionY += 1.0;
+        Raindrops.Position += {1.0, 1.0};
+        //olc::vi2d Screen = tv.GetVisibleTiles();
+        if (Raindrops.Position.x >tv.GetWorldBR().x)
+        {
+            Raindrops.Position.x = tv.GetWorldTL().x;
+        }
+        if (Raindrops.Position.y > tv.GetWorldBR().y)
+        {
+            Raindrops.Position.y = tv.GetWorldTL().y;
+        }
+
+        tv.DrawRotatedDecal( Raindrops.Position, RainDcl, 7 * 3.14159f / 4, {0,0}, { 0.01f, 0.01f },olc::Pixel((int)TimeofDay, (int)TimeofDay, (int)TimeofDay, 255));
+    }
 }

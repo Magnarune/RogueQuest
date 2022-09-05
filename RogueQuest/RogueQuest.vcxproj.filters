@@ -27,7 +27,7 @@
     <ClCompile Include="Assets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="clock.cpp">
+    <ClCompile Include="UnitManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,7 +47,7 @@
     <ClInclude Include="Assets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="clock.h">
+    <ClInclude Include="UnitManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -55,7 +55,7 @@
     <None Include="MapData.lua">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="Mage.lua">
+    <None Include="Assets\Units\Mage\Mage.lua">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

@@ -80,6 +80,18 @@
     <SourcePath>$(SourcePath)</SourcePath>
     <ExternalIncludePath>C:\Users\BloodworthJr\source\repos\STK\Lua\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>liblua-main/include;C:\Users\BloodworthJr\source\repos\RogueQuest\RogueQuest\lua-5.4.4\src;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>C:\Users\BloodworthJr\source\repos\STK\Lua\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <SourcePath>$(SourcePath)</SourcePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>liblua-main/include;C:\Users\BloodworthJr\source\repos\RogueQuest\RogueQuest\lua-5.4.4\src;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>C:\Users\BloodworthJr\source\repos\STK\Lua\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <SourcePath>$(SourcePath)</SourcePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -146,21 +158,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Assets.cpp" />
-    <ClCompile Include="clock.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Unit.cpp" />
+    <ClCompile Include="UnitManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assets.h" />
-    <ClInclude Include="clock.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="olcPGEX_TransformedView.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
     <ClInclude Include="Unit.h" />
+    <ClInclude Include="UnitManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Mage.lua" />
+    <None Include="Assets\Units\Mage\Mage.lua" />
     <None Include="MapData.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

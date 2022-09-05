@@ -16,13 +16,13 @@ return {
     {
       name = "Ground",
       firstgid = 1,
-      filename = "C:/Users/BloodworthJr/source/repos/RogueQuest/RogueQuest/Assets/Maps/tallgrass.png",
+      filename = "Assets/Maps/Map-Tiles/tallgrass.png",
       exportfilename = "Ground.lua"
     },
     {
       name = "fishing",
       firstgid = 19,
-      filename = "C:/Users/BloodworthJr/source/repos/RogueQuest/RogueQuest/Assets/Maps/farming_fishing.png",
+      filename = "Assets/Maps/Map-Tiles/farming_fishing.png",
       exportfilename = "fishing.lua"
     }
   },
