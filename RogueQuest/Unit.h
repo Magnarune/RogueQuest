@@ -1,15 +1,19 @@
 ﻿#pragma once
 
 #include "olcPixelGameEngine.h"
+#include "olcPGEX_TransformedView.h"
 #include "sol/sol.hpp"
 #include "Assets.h"
+#include "clock.h"
 #include <map>
-
 
 
 class Unit
 {
-	Unit(); // keep private
+	Unit();
+
+	void UpdateUnit(float fElapsedTime);
+	void DrawUnit(olc::TileTransformedView* gfx);
 
 public:
 	virtual ~Unit();
@@ -50,9 +54,6 @@ public:
 
 	float fKBPower;//How much knockBack This unit will incure
 	
-	olc::vi2d SpriteSheetTileSize;//For Example 64x64 or 32x64 ect..
-	olc::vi2d SpriteSheetSize;//Total Sprite Size say 640 x 256
-
 
 	enum
 	{
@@ -60,7 +61,8 @@ public:
 		SOSouth,
 		SOEast,
 		SOWest
-	}SpriteOrder;//Order of sprite facing directions in sprite sheet
+	} SpriteOrder;//Order of sprite facing directions in sprite sheet
+
 	enum UnitLogic
 	{
 		Attack, //If you say attack a pos Search and Kill anything within agro-range
@@ -69,7 +71,6 @@ public:
 	};
 
 public:
-	void DrawUnit(olc::PixelGameEngine* gfx, olc::vf2d Offset, float fElapsedTime); //renderable not pge :/
 	void MovementUpdate(float fElapsedTime, UnitLogic Logic); //Behaviour inside this Logic;
 	void PerformAttack();//Kill this fool
 	void KnockBack(float power,float dx, float dy, float dist); //I have benn hit!
@@ -85,9 +86,10 @@ protected:
 	enum
 	{
 		North,
+		West,		
 		South,
-		East,
-		West
+		East
+		
 	} FacingDirection;
 
 	float m_fTimer;//Graphics timer
@@ -96,7 +98,8 @@ protected:
 private:
 	int curFrame;//current frame of the animation
 	std::map<GFXState, std::unique_ptr<olc::Decal>> decals; // multiple textures for different states
-	std::map<GFXState, size_t> AnimationLengths; //length say = 9 or = SpriteSheetSize.x / SpriteSheetTileSize.x
+	std::map<GFXState, cAssets::UnitType::TextureMetaData> textureMetadata;
+	Clock sClock; // slow clock for expensive update operations
 
 	friend class Engine;
 	friend class cAssets;

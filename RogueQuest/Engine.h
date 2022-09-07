@@ -6,11 +6,10 @@
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_TransformedView.h"
 #include "sol/sol.hpp"
-//#include "clock.h"
 #include "Unit.h"
 #include "Assets.h"
 #include "UnitManager.h"
-
+#include "clock.h"
 
 class Game_Engine : public olc::PixelGameEngine
 {
@@ -20,7 +19,7 @@ class Game_Engine : public olc::PixelGameEngine
 public:
     Game_Engine();
     virtual ~Game_Engine();
-
+	float StandardTime= 0.0f;
 	// give the audience a way to access the game engine instance from anywhere - we need it
 	static inline Game_Engine& Current() { assert(self != nullptr); return *self; }
 	olc::TileTransformedView tv;
@@ -42,18 +41,15 @@ public:
 	std::vector<int> vFirstGid;
 	olc::vi2d TopleftTile;
 	olc::vi2d BottomeRightTile;
-
+	struct TileSet {
+	        olc::Renderable* Rfx;
+	        int gid;
+	};
 	
-	
-    
-   
-    
+    //Selection click
 	olc::vi2d Initial;
 	bool Clicked = false;
-    struct TileSet {
-        olc::Renderable* Rfx;
-        int gid;
-    };
+    
 private:
     enum MapModes
     {
@@ -71,10 +67,8 @@ protected:
     bool UpdateLocalMap(float fElapsedTime);
 
 public:
-
 	// Unit Manager
 	std::unique_ptr<UnitManager> unitManager;
-	
 	// Asset Manager
 	std::unique_ptr<cAssets> assetManager;
 
@@ -84,14 +78,16 @@ public:
 	float FTIME = 0;
 	bool DayTime = true;
 	bool NightTime = false;
-	struct Player //Debug player testing
+
+	struct Player //Debug camera
 	{
 			olc::vf2d vPOS;
 			olc::vf2d vVel;
-			float fRadius = 10.0f;	
+			
 	};
 	Player object;
-	bool bFollowObject = false;
+	std::weak_ptr<Unit> followUnit;
+
 		//Rain
 	struct Rain
 	{

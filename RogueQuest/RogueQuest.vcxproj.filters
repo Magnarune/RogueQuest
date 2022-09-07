@@ -30,6 +30,9 @@
     <ClCompile Include="UnitManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="clock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -48,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UnitManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="clock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

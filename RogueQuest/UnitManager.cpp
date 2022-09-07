@@ -3,18 +3,23 @@
 
 
 UnitManager::UnitManager() {
-    unitList.reserve(1024 * 1024 * 1024); // preserve lots of unit ptrs
+    unitList.reserve(1024 * 1024); // preserve lots of unit ptrs
 }
 
 
-std::shared_ptr<Unit> UnitManager::GenerateUnit(const std::string& name) {
+std::shared_ptr<Unit> UnitManager::GenerateUnit(const std::string& name, olc::vf2d pos) {
+    Game_Engine& engine = Game_Engine::Current();
+
+    if(!engine.assetManager->UnitExists(name)) return nullptr;
+
+    const auto& data = engine.assetManager->GetUnitData(name);
+
+    // Make Unit
     std::shared_ptr<Unit> unit;
     unit.reset(new Unit());
 
-    Game_Engine& engine = Game_Engine::Current();
+    unit->vUnitPosition = pos;
 
-    const auto& data = engine.assetManager->GetUnitData(name);
-    
     // Update Internal Values Of New Unit
     
     unit->sUnitName = data.lua_data["Name"]; //This is in top of .lua
@@ -33,24 +38,25 @@ std::shared_ptr<Unit> UnitManager::GenerateUnit(const std::string& name) {
     unit->fSpellCooldown = data.lua_data["Stats"]["SpellCooldown"];
     unit->fKnockBackResist = data.lua_data["Stats"]["KnockBackResist"];
     
+    // make sure to update this when adding new GFXStates - enums don't magically connect to a string
     static std::map<std::string, Unit::GFXState> States = {
         {"Walking", Unit::Walking},
         {"Attacking", Unit::Attacking},
         {"Dead", Unit::Dead}
     };
 
+
     // create decals for each texture state
-    for(auto& [ name, id ] : data.tex_ids){
+    for(auto& [ name, meta ] : data.texture_metadata){
+        const Unit::GFXState& state = States[name]; // local state ref
+
+        // load a decal texture and add to decal map
         std::unique_ptr<olc::Decal> decal;
-        decal.reset(new olc::Decal(TextureCache::GetCache().GetTexture(id)));
+        decal.reset(new olc::Decal(TextureCache::GetCache().GetTexture(meta.tex_id)));
+        unit->decals.insert_or_assign(state, std::move(decal));
 
-        // make sure to update this when adding new GFXStates - enums don't magically connect to a string
-
-        unit->decals.insert_or_assign(States[name], std::move(decal));
-    }
-    // assign animation lengths - ehh so rudimentary :(
-    for(auto& [ name, len ] : data.ani_lens){
-        unit->AnimationLengths.insert_or_assign(States[name], len);
+        // copy texture metadata
+        unit->textureMetadata.insert_or_assign(state, meta);
     }
 
     unitList.emplace_back(unit);
@@ -58,6 +64,35 @@ std::shared_ptr<Unit> UnitManager::GenerateUnit(const std::string& name) {
     return unit;
 }
 
+size_t UnitManager::GetUnitCount(const std::string& name) {//got it
+    return std::accumulate(unitList.begin(), unitList.end(), 0ULL,
+        [&](size_t n, const auto& unit) -> size_t {
+            return n + (unit->sUnitName == name);
+        });
+}
+
+std::shared_ptr<Unit> UnitManager::GetUnit(const std::string& name, size_t index) {
+    size_t n = 0;
+    for(auto& unit : unitList){
+        if(unit->sUnitName == name && n++ == index){
+            return unit;
+        }
+    }
+    return nullptr; // couldn't find unit
+}
+
 void UnitManager::Update(float delta) {
     // units update here
+    for(auto& unit : unitList){
+        unit->UpdateUnit(delta);
+    }
+}
+
+void UnitManager::Draw() {
+    Game_Engine& engine = Game_Engine::Current();
+
+    for(auto& unit : unitList){
+        unit->DrawUnit(&engine.tv);
+    }
+
 }

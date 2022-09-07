@@ -12,19 +12,26 @@
 #include "olcPixelGameEngine.h"
 #include "sol/sol.hpp"
 
-#include "Unit.h"
-
 
 class cAssets
 {
 	sol::state lua_state;
+public:
 
     struct UnitType {
-        std::map<std::string, size_t> tex_ids;
-        std::map<std::string, size_t> ani_lens;
+        
+        struct TextureMetaData {
+            size_t tex_id, ani_len;
+            olc::vi2d sprite_size, tile_size, target_size;
+
+            olc::vf2d scale;
+        };
+
+        std::map<std::string, TextureMetaData> texture_metadata;
         sol::table lua_data;
     };
 
+private:
     //Unit name, Unit data
     std::map<std::string, UnitType> assetCache;
 
@@ -35,6 +42,7 @@ public:
 	olc::vi2d vTileSize;
     int Animation;
 
+    inline bool UnitExists(const std::string& Name) { return !!assetCache.count(Name); }
     inline const UnitType& GetUnitData(const std::string& Name) { return assetCache[Name]; }
   
     void LoadUnitAssets();
