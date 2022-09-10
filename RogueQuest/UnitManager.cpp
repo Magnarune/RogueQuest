@@ -80,10 +80,40 @@ std::shared_ptr<Unit> UnitManager::GetUnit(const std::string& name, size_t index
     }
     return nullptr; // couldn't find unit
 }
+void UnitManager::SelectUnits(olc::vf2d Initial, olc::vf2d Final) {    
+    Game_Engine& engine = Game_Engine::Current();
+    engine.tv.DrawLineDecal(Final,   { Initial.x,Final.y }, olc::RED);//Draw Rect
+    engine.tv.DrawLineDecal(Initial, { Initial.x,Final.y }, olc::RED);
+    engine.tv.DrawLineDecal(Initial, { Final.x,Initial.y }, olc::RED);
+    engine.tv.DrawLineDecal(Final,   { Final.x,Initial.y }, olc::RED);
+  //  engine.tv.DrawLineDecal(Initial, Final);
+    for (auto& unit : unitList)
+    {
+        if (unit->vUnitPosition.x  > std::min(Initial.x, Final.x) && 
+            unit->vUnitPosition.y  > std::min(Initial.y, Final.y) &&
+            unit->vUnitPosition.x  < std::max(Final.x, Initial.x) &&
+            unit->vUnitPosition.y  < std::max(Final.y, Initial.y))
+        {
+           unit->bSelected = true;
+        }
+        else { unit->bSelected = false; };        
+    }
 
+
+}
+void UnitManager::MoveUnits(olc::vf2d Target)
+{
+    for (auto& unit : unitList) {
+        if (unit->bSelected == true)
+        {
+            unit->MarchingtoTarget(Target);
+        }
+    }
+}
 void UnitManager::Update(float delta) {
     // units update here
     for(auto& unit : unitList){
+        unit->CheckCollision(unitList);
         unit->UpdateUnit(delta);
     }
 }

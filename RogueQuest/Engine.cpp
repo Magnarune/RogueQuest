@@ -47,20 +47,16 @@ std::string StringifyObject(sol::object val) {
 
     return Stringify(val); // begin recursion
 }
-
 Game_Engine* Game_Engine::self = nullptr;
-
 Game_Engine::Game_Engine()
 {
     sAppName = "Simple RTS GAME";
     self = this;
 }
-
 Game_Engine::~Game_Engine()
 {
     self = nullptr;
 }
-
 bool Game_Engine::OnUserCreate()
 {
     /*
@@ -69,9 +65,9 @@ bool Game_Engine::OnUserCreate()
     DemoDecal = new olc::Decal(Demo);
     Erzaspr = new olc::Sprite("Erza.png");
     ErzaDcl = new olc::Decal(Erzaspr);
-    Flagspr = new olc::Sprite("flag.png");
-    FlagDcl = new olc::Decal(Flagspr);
     */
+   
+    Flag->Load("flag.png");
 
     // Setup Controllers    
     TextureCache::InitCache(); // initialize texture cache
@@ -148,13 +144,10 @@ bool Game_Engine::OnUserCreate()
     Clear(olc::Pixel(100,164,44,255)); // once needed
     return true;
 }
-
 bool Game_Engine::OnUserUpdate(float fElapsedTime)
 {    
     if (GetKey(olc::Key::F1).bPressed)
-    {
-        ConsoleShow(olc::Key::ESCAPE);
-    }
+      {ConsoleShow(olc::Key::ESCAPE);}
     switch (m_nGameMode) 
     {
         case MODE_LOCAL_MAP:
@@ -162,131 +155,37 @@ bool Game_Engine::OnUserUpdate(float fElapsedTime)
     }
     return true;
 }
-
 bool Game_Engine::UpdateLocalMap(float fElapsedTime)
 {
-    StandardTime += fElapsedTime;
-    if (StandardTime >= 1.0f / 120.0f) {
+         GetUserInput(fElapsedTime);
+    unitManager->Update(fElapsedTime);        
+        UpdateMap();
+   
         
-
-        unitManager->Update(StandardTime); // update all the units - this is because this engine space is too messy to implement everything here
-
-        olc::vi2d Topleft = tv.GetWorldTL();
-        olc::vi2d BOTRight = tv.GetWorldBR();
-        TopleftTile = { (int)(Topleft.x / vTileSize.x),(int)(Topleft.y / vTileSize.y) };
-        BottomeRightTile = { (int)ceil(BOTRight.x / vTileSize.x),(int)ceil(BOTRight.y / vTileSize.y) };
-        if (TimeofDay >= 255)
-            TimeofDay = 255.0f;
-        if (TimeofDay < 50)
-            TimeofDay = 50.0f;
-        if (TopleftTile.x < 0)
-            TopleftTile.x = 0;
-        if (TopleftTile.y < 0)
-            TopleftTile.y = 0;
-        if (BottomeRightTile.x >= 32)
-            BottomeRightTile.x = 32;
-        if (BottomeRightTile.y >= 30)
-            BottomeRightTile.y = 30;
-        TimeofDay = 255.0f;//Turn off D/N cycle
-        //                    ---[CAMERA]--- 
-        object.vVel = { 0.0f,0.0f };
-        //if (GetKey(olc::Key::TAB).bReleased) followUnit = followUnit.expired()         
-        if (followUnit.expired()) {
-            if (GetKey(olc::Key::UP).bHeld) object.vVel += {0.0f, -20.f};
-            if (GetKey(olc::Key::DOWN).bHeld) object.vVel += {0.0f, 20.0f};
-            if (GetKey(olc::Key::LEFT).bHeld) object.vVel += {-20.0f, 0.0f};
-            if (GetKey(olc::Key::RIGHT).bHeld) object.vVel += {20.0f, 0.0f};
-            if (object.vVel.mag2() > 0)
-                object.vVel = object.vVel.norm() * (GetKey(olc::Key::SHIFT).bHeld ? 80.0f : 40.0f);
-            object.vPOS += object.vVel * StandardTime;
-        }
-        else {
-            auto unit = followUnit.lock();
-            unit->vUnitVelocity += olc::vf2d(unit->fMoveSpeed * GetKey(olc::Key::RIGHT).bHeld - unit->fMoveSpeed * GetKey(olc::Key::LEFT).bHeld,
-                                   unit->fMoveSpeed * GetKey(olc::Key::DOWN).bHeld - unit->fMoveSpeed * GetKey(olc::Key::UP).bHeld) * StandardTime;
-            object.vPOS = unit->vUnitPosition;
-        }        
-        StandardTime = 0;
-    }
-        if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
-        if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
-        if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
-        if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
-        if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
-        if (!IsConsoleShowing())
-        {
-            if (IsFocused())
-            {
-                if (Clicked == false)
-                {
-                    Initial.x = GetMouseX();
-                    Initial.y = GetMouseY();
-                }
-                if (GetMouse(0).bHeld)
-                {
-                    Clicked = true;
-                    olc::vf2d FinalWH = GetMousePos() - Initial;
-
-                }
-                if (GetMouse(1).bHeld)
-                {
-
-                }
-            }
-        }
-        if (DayTime == true)
-        {
-            TimeofDay += 15 * fElapsedTime;
-            FTIME += fElapsedTime;
-            if (FTIME > 30)
-            {
-                FTIME = 0.0f;
-                DayTime = false;
-            }
-        }
-        else
-        {
-            TimeofDay -= 15 * fElapsedTime;
-        }
-        if (TimeofDay < 50)
-        {
-            UpdateRain(fElapsedTime);
-            FTIME += fElapsedTime;
-            if (FTIME > 20)
-            {
-                FTIME = 0;
-                DayTime = true;
-            }
-        }
-        tv.SetWorldOffset(object.vPOS - tv.ScaleToWorld(olc::vf2d(ScreenWidth() / 2.0f, ScreenHeight() / 2.0f)));
-        // Drawing
-        for (int i = 0; i < mapLayers.size(); i++)
-        {
-            for (int y = TopleftTile.y; y <= BottomeRightTile.y; y++) {
-                for (int x = TopleftTile.x; x <= BottomeRightTile.x; x++) {
-                    int Pos = x + y * layerSize.x;
-                    if (Pos >= layerSize.x * layerSize.y) break;
-                    int tile = vLayerData[i][Pos];
-                    if (tile == 0) continue;
-                    pos = { x,  y };
-                    tv.DrawPartialDecal(offset + pos * vTileSize, GetTileSet(tile).Rfx->Decal(), GetTile(tile) * vTileSize, vTileSize, { 1.0,1.0 }, olc::Pixel((int)TimeofDay, (int)TimeofDay, (int)TimeofDay, 255));
-                }
-            }
-        }
-        unitManager->Draw(); // draw units  
+        if (TopleftTile.x >= 0 && TopleftTile.y >= 0 )
+            tv.DrawStringDecal(object.vPOS + olc::vf2d({ -20,-20 }), "MX: "+std::to_string(GetMouseX() + tv.GetWorldTL().x) + "\n" + "MY:"
+            + std::to_string(GetMouseY() + tv.GetWorldTL().y), olc::WHITE, {0.5f,0.5f});
+        tv.DrawStringDecal(object.vPOS + olc::vf2d({ 20, -20 }), std::to_string(tv.GetWorldTL().x) + "\n" + std::to_string(tv.GetWorldTL().y));
+        tv.DrawStringDecal(object.vPOS + olc::vf2d({ 20,20 }),"X: " + std::to_string(ceilf(object.vPOS.x / 32.0f)) + "\n" +
+                                                              "Y: " + std::to_string(ceilf(object.vPOS.y / 32.0f)),olc::WHITE,{0.4f,0.4f});
+        tv.DrawStringDecal(object.vPOS + olc::vf2d({ -80,20 }), "Layer 1: " + std::to_string(vLayerData[0][int(object.vPOS.x / 32.0f)]) +
+                                                         "\n" + "Layer 2: " + std::to_string(vLayerData[1][int(object.vPOS.x / 32.0f) + int(object.vPOS.y / 32.0f) * 32]),olc::WHITE, { 0.4f,0.4f });
+        tv.DrawLineDecal(object.vPOS - olc::vf2d(5, -5), object.vPOS + olc::vf2d(5, -5), olc::RED);tv.DrawLineDecal(object.vPOS + olc::vf2d(-5, -5), object.vPOS + olc::vf2d(5, 5), olc::RED);
+              
+       unitManager->Draw(); // draw units  
+       UpdateTimeofDay(fElapsedTime);
     return true;    
 };
+
+
+
+
 bool Game_Engine::OnUserDestroy()
 {
     unitManager.reset(); // free the unit manager
     assetManager.reset(); // free the asset manager
     TextureCache::FreeCache(); // free the texture cache database
     return true; // true for successful close
-}
-void Game_Engine::UpdateRect(olc::vi2d Initial, olc::vi2d Current)
-{   
-    bool Clicked = true;
-    tv.DrawRect(Initial, Current);
 }
 olc::vi2d Game_Engine::GetTile(int id) {
     const TileSet tileset = GetTileSet(id);
@@ -315,13 +214,13 @@ bool Game_Engine::OnConsoleCommand(const std::string& stext)
         ss >> name;
         if(!ss.eof()) ss >> x;
         if(!ss.eof()) ss >> y;
-        for (int i = 0; i < 100; i++)
-        {
+       // for (int i = 0; i < 100; i++)
+       // {
             auto unit = unitManager->GenerateUnit(name, { x,y });
             if (unit) {
                 std::cout << name << " created at " << x << ", " << y << "\n";
             }
-        }
+       // }
     }
     if(c1 == "count"){
         std::string name;
@@ -361,5 +260,111 @@ void Game_Engine::UpdateRain(float FelapsedTime)
             Raindrops.Position.y = tv.GetWorldTL().y;
         }
         tv.DrawRotatedDecal( Raindrops.Position, RainDcl, 7 * 3.14159f / 4, {0,0}, { 0.01f, 0.01f },olc::Pixel((int)TimeofDay, (int)TimeofDay, (int)TimeofDay, 255));
+    }
+}
+void Game_Engine::UpdateTimeofDay(float felapsedtime)
+{
+    TimeofDay = 255;
+    if (TimeofDay >= 255)
+        TimeofDay = 255.0f;
+    if (TimeofDay < 50)
+        TimeofDay = 50.0f;
+    if (DayTime == true)
+    {
+        TimeofDay += 20 * felapsedtime;
+        FTIME += felapsedtime;
+        if (FTIME > 30)
+        {
+            FTIME = 0.0f;
+            DayTime = false;
+        }
+    }
+    else
+    {
+        TimeofDay -= 20 * felapsedtime;
+    }
+    if (TimeofDay < 50)
+    {
+        UpdateRain(felapsedtime);
+        FTIME += felapsedtime;
+        if (FTIME > 20)
+        {
+            FTIME = 0;
+            DayTime = true;
+        }
+    }
+}
+void Game_Engine::UpdateMap() {
+    TopleftTile = { (int)(tv.GetWorldTL().x / vTileSize.x),(int)(tv.GetWorldTL().y / vTileSize.y) };
+    BottomeRightTile = { (int)ceil(tv.GetWorldBR().x / vTileSize.x),(int)ceil(tv.GetWorldBR().y / vTileSize.y) };
+    if (TopleftTile.x < 0)
+        TopleftTile.x = 0;
+    if (TopleftTile.y < 0)
+        TopleftTile.y = 0;
+    if (BottomeRightTile.x >= 32)
+        BottomeRightTile.x = 32;
+    if (BottomeRightTile.y >= 30)
+        BottomeRightTile.y = 30;
+    for (int i = 0; i < mapLayers.size(); i++) {
+        for (int y = TopleftTile.y; y <= BottomeRightTile.y; y++) {
+            for (int x = TopleftTile.x; x <= BottomeRightTile.x; x++) {
+                int Pos = x + y * layerSize.x;
+                if (Pos >= layerSize.x * layerSize.y) break;
+                int tile = vLayerData[i][Pos];
+                if (tile == 0) continue;
+                pos = { x,  y };
+                tv.DrawPartialDecal(offset + pos * vTileSize, GetTileSet(tile).Rfx->Decal(), GetTile(tile) * vTileSize, vTileSize, { 1.0,1.0 }, olc::Pixel((int)TimeofDay, (int)TimeofDay, (int)TimeofDay, 255));
+            }
+        }
+    }
+}
+void Game_Engine::GetUserInput(float felapsedtime) {
+    if (followUnit.expired()) {
+        if (GetKey(olc::Key::UP).bHeld) object.vVel += {0.0f, -20.f};
+        if (GetKey(olc::Key::DOWN).bHeld) object.vVel += {0.0f, 20.0f};
+        if (GetKey(olc::Key::LEFT).bHeld) object.vVel += {-20.0f, 0.0f};
+        if (GetKey(olc::Key::RIGHT).bHeld) object.vVel += {20.0f, 0.0f};
+        if (object.vVel.mag2() > 0)
+            object.vVel = object.vVel.norm() * (GetKey(olc::Key::SHIFT).bHeld ? 80.0f : 40.0f);
+        object.vPOS += object.vVel * felapsedtime;object.vVel = { 0.0f,0.0f };
+    }
+    else {
+        auto unit = followUnit.lock();
+        unit->vUnitVelocity += olc::vf2d(unit->fMoveSpeed * GetKey(olc::Key::RIGHT).bHeld - unit->fMoveSpeed * GetKey(olc::Key::LEFT).bHeld,
+            unit->fMoveSpeed * GetKey(olc::Key::DOWN).bHeld - unit->fMoveSpeed * GetKey(olc::Key::UP).bHeld) * felapsedtime;
+        object.vPOS = unit->vUnitPosition;
+        unit->bSelected = true;
+    }
+    if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
+    if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
+    if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
+    if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
+    if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
+    tv.SetWorldOffset(object.vPOS - tv.ScaleToWorld(olc::vf2d(ScreenWidth() / 2.0f, ScreenHeight() / 2.0f)));
+    if (!IsConsoleShowing())
+    {
+        if (IsFocused())
+        {
+            if (Clicked == false)
+            {
+                Initial.x = GetMouseX() + tv.GetWorldTL().x;
+                Initial.y = GetMouseY() + tv.GetWorldTL().y;
+            }
+            if (GetMouse(0).bHeld)
+            {
+                Clicked = true;
+                olc::vf2d FinalWH = GetMousePos() + tv.GetWorldTL();
+                unitManager->SelectUnits(Initial, FinalWH);
+            }
+            else
+            {
+                Clicked = false;
+            }
+            if (GetMouse(1).bPressed)
+            {
+                tv.DrawDecal(GetMousePos() + tv.GetWorldTL(), Flag->Decal());
+                   unitManager->MoveUnits(GetMousePos() + tv.GetWorldTL());//pixel XY 
+            }
+        }
     }
 }

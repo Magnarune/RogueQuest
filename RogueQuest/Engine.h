@@ -41,6 +41,9 @@ public:
 	std::vector<int> vFirstGid;
 	olc::vi2d TopleftTile;
 	olc::vi2d BottomeRightTile;
+	olc::vi2d Topleft;
+	olc::vi2d BOTRight;
+	olc::Renderable* Flag = new olc::Renderable; 
 	struct TileSet {
 	        olc::Renderable* Rfx;
 	        int gid;
@@ -59,7 +62,6 @@ private:
     int m_nGameMode = MODE_LOCAL_MAP;
     TileSet GetTileSet(int id);
     olc::vi2d GetTile(int id);
-    virtual void UpdateRect(olc::vi2d Initial, olc::vi2d Finial);
 protected:
     bool OnUserCreate() override;
     bool OnUserUpdate(float fElapsedTime) override;
@@ -67,9 +69,7 @@ protected:
     bool UpdateLocalMap(float fElapsedTime);
 
 public:
-	// Unit Manager
 	std::unique_ptr<UnitManager> unitManager;
-	// Asset Manager
 	std::unique_ptr<cAssets> assetManager;
 
 
@@ -87,7 +87,6 @@ public:
 	};
 	Player object;
 	std::weak_ptr<Unit> followUnit;
-
 		//Rain
 	struct Rain
 	{
@@ -97,6 +96,9 @@ public:
 	std::vector<Rain> RainDrops;
 	olc::Sprite* Rain;
 	olc::Decal* RainDcl;
+	void GetUserInput(float felapsedtime);
+	void UpdateMap();
+	void UpdateTimeofDay(float felapsedtime);
 	void UpdateRain(float FelapsedTime);
 	//Debug Commands
 	bool OnConsoleCommand(const std::string& stext) override;

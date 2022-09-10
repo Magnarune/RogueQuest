@@ -8,7 +8,6 @@
 #include <map>
 #include <vector>
 #include <assert.h>
-
 #include "olcPixelGameEngine.h"
 #include "sol/sol.hpp"
 

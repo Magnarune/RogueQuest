@@ -42,7 +42,7 @@ return
 		MaxMana = 20,
 		Ammo = 0, 
 		MaxAmmo = 0,
-		MoveSpeed = 10000,       --Need to find a good value for this
+		MoveSpeed = 5000,       --Need to find a good value for this
 		AttackRange = 10,
 		AttackDamage = 2,
 		AttackSpeed = 1,
