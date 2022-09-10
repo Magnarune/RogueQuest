@@ -9,24 +9,16 @@ UnitManager::UnitManager() {
 
 std::shared_ptr<Unit> UnitManager::GenerateUnit(const std::string& name, olc::vf2d pos) {
     Game_Engine& engine = Game_Engine::Current();
-
     if(!engine.assetManager->UnitExists(name)) return nullptr;
-
     const auto& data = engine.assetManager->GetUnitData(name);
-
     // Make Unit
     std::shared_ptr<Unit> unit;
     unit.reset(new Unit());
-
     unit->vUnitPosition = pos;
-
-    // Update Internal Values Of New Unit
-    
+    // Update Internal Values Of New Unit    
     unit->sUnitName = data.lua_data["Name"]; //This is in top of .lua
-
     // Load Parameters
     unit->Unit_Collision_Radius = data.lua_data["Parameters"]["CollisionRadius"]; //I'm not in stats section of .lua
-
     // Load Stats
     unit->fHealth = data.lua_data["Stats"]["Health"]; unit->fMaxHealth = data.lua_data["Stats"]["MaxHealth"];
     unit->fMana = data.lua_data["Stats"]["Mana"];     unit->fMaxMana = data.lua_data["Stats"]["MaxMana"];
@@ -36,31 +28,24 @@ std::shared_ptr<Unit> UnitManager::GenerateUnit(const std::string& name, olc::vf
     unit->fAttackDamage = data.lua_data["Stats"]["AttackDamage"];
     unit->fAttackSpeed = data.lua_data["Stats"]["AttackSpeed"];
     unit->fSpellCooldown = data.lua_data["Stats"]["SpellCooldown"];
-    unit->fKnockBackResist = data.lua_data["Stats"]["KnockBackResist"];
-    
+    unit->fKnockBackResist = data.lua_data["Stats"]["KnockBackResist"];    
     // make sure to update this when adding new GFXStates - enums don't magically connect to a string
     static std::map<std::string, Unit::GFXState> States = {
         {"Walking", Unit::Walking},
         {"Attacking", Unit::Attacking},
         {"Dead", Unit::Dead}
     };
-
-
     // create decals for each texture state
     for(auto& [ name, meta ] : data.texture_metadata){
         const Unit::GFXState& state = States[name]; // local state ref
-
         // load a decal texture and add to decal map
         std::unique_ptr<olc::Decal> decal;
         decal.reset(new olc::Decal(TextureCache::GetCache().GetTexture(meta.tex_id)));
         unit->decals.insert_or_assign(state, std::move(decal));
-
         // copy texture metadata
         unit->textureMetadata.insert_or_assign(state, meta);
     }
-
     unitList.emplace_back(unit);
-
     return unit;
 }
 
@@ -113,9 +98,11 @@ void UnitManager::MoveUnits(olc::vf2d Target)
 void UnitManager::Update(float delta) {
     // units update here
     for(auto& unit : unitList){
+        if (unit == nullptr) continue;
         unit->CheckCollision(unitList);
         unit->UpdateUnit(delta);
     }
+  //  GarbageList.clear();
 }
 
 void UnitManager::Draw() {
@@ -125,4 +112,45 @@ void UnitManager::Draw() {
         unit->DrawUnit(&engine.tv);
     }
 
+}
+void UnitManager::KillUnit() {
+
+}
+void UnitManager::SharedptrGarbage() {
+    for (auto& unit : unitList)
+    {
+        unit == nullptr;
+    }
+    GarbageList.clear();
+    /*
+    / pre-destruction actions commence here
+    size_t len = garbage.size();
+    if(len){ // if there is garbage, we need to clean the missing links
+        size_t pos = 1;
+
+        auto itr = objects.begin();
+        do {
+            if(!!*itr) continue; // keep valid objects
+            do { // keep swapping until there's no more invalid object here
+                std::swap(*itr, *(objects.end() - pos) ); // move garbage to end of list
+                ++pos; // increase found garbage
+            } while(!*itr);
+
+        } while(pos <= len && ++itr != objects.end() - len); // continue looking for missing link garbage
+
+        for(int i=0; i < len; ++i) objects.pop_back(); // slice off the garbage - resize instead?
+
+        garbage.clear(); // clear the garbage bin
+        grid.Clean(); // cleanup the game grid / auto-remove any references to missing/destroyed game objects
+
+        size_t c = std::count(objects.begin(), objects.end(), nullptr);
+        assert(c == 0); // there cannot be left over garbage!
+    }
+
+    if(periodicGarbageCollection.getSeconds() > 15.f){
+        Particle::GarbageCollectParticles();
+
+        periodicGarbageCollection.restart();
+    }
+    */
 }

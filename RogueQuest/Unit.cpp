@@ -1,12 +1,16 @@
 #include "Unit.h"
 #include "Engine.h"
 
-Unit::Unit(): vUnitPosition({0.f,0.f}), vUnitVelocity({0.f,0.f}), vTarget({0.f,0.f}), fUnitAngle(0.f) {}
+Unit::Unit() : vUnitPosition({ 0.f,0.f }), vUnitVelocity({ 0.f,0.f }), vTarget({ 0.f,0.f }), fUnitAngle(0.f), Graphic_State(Unit::Walking) {}
 Unit::~Unit() {}
 void Unit::MarchingtoTarget(olc::vf2d Target)
 {
 	vTarget = Target;
 
+}
+void Unit::DestroyUnit() {
+	bDelete = true;
+	
 }
 void Unit::CheckCollision(std::vector<std::shared_ptr<Unit>> unitList) {
 
@@ -49,9 +53,17 @@ void Unit::UpdateUnit(float fElapsedTime) {
 	//float friction = 0.1f;	
 	//vUnitVelocity += {float(rand() % 60), float(rand() % 60)};
 	//vUnitVelocity *= std::pow(friction, fElapsedTime);
-	vUnitPosition += vUnitVelocity * fElapsedTime;
+	if(Graphic_State == Walking)
+		vUnitPosition += vUnitVelocity * fElapsedTime;
 	if (fHealth <= 0)
 		Graphic_State = Dead;
+	if (fHealth > fMaxHealth)
+	{
+		curFrame = 0;
+		Graphic_State = Attacking;
+		fHealth = fMaxHealth;
+	}
+	//if (Graphic_State = Attacking){}
 }
 void Unit::DrawUnit(olc::TileTransformedView* gfx) {
 	const auto& meta = textureMetadata[Graphic_State];
@@ -60,34 +72,50 @@ void Unit::DrawUnit(olc::TileTransformedView* gfx) {
 	const olc::vf2d& SpriteScale = meta.scale;
 	olc::vf2d Origin = olc::vf2d(SpriteSheetTileSize) * SpriteScale / 2.f;
 	//Calculate graphic facing Direction
-	if(sClock.getMilliseconds() > 100.f){
-		if(vUnitVelocity != olc::vf2d( { 0.0f, 0.0f }))
-			fUnitAngle = std::fmod(2.0f*PI + vUnitVelocity.polar().y, 2.0f*PI);
-		if(!std::isnan(fUnitAngle)){
-			if (fUnitAngle >= 7.0f*PI/4.0f || fUnitAngle < PI/4.0f)
-				FacingDirection = East;
-			if (fUnitAngle >= PI/4.0f && fUnitAngle <= 3.0f*PI/4.0f)
+	switch (Graphic_State)
+	{
+	case Walking:
+		if (sClock.getMilliseconds() > 100.f) {
+			if (vUnitVelocity != olc::vf2d({ 0.0f, 0.0f }))
+				fUnitAngle = std::fmod(2.0f * PI + vUnitVelocity.polar().y, 2.0f * PI);
+			if (!std::isnan(fUnitAngle)) {
+				if (fUnitAngle >= 7.0f * PI / 4.0f || fUnitAngle < PI / 4.0f)
+					FacingDirection = East;
+				if (fUnitAngle >= PI / 4.0f && fUnitAngle <= 3.0f * PI / 4.0f)
+					FacingDirection = South;
+				if (fUnitAngle >= 3.0f * PI / 4.0f && fUnitAngle <= 5.0f * PI / 4.0f)
+					FacingDirection = West;
+				if (fUnitAngle >= 5.0f * PI / 4.0f && fUnitAngle <= 7.0f * PI / 4.0f)
+					FacingDirection = North;
+			}
+			else {
 				FacingDirection = South;
-			if (fUnitAngle >= 3.0f*PI/4.0f && fUnitAngle <= 5.0f*PI/4.0f)
-				FacingDirection = West;
-			if (fUnitAngle >= 5.0f*PI/4.0f && fUnitAngle <= 7.0f*PI/4.0f)
-				FacingDirection = North;
-		} else {
-			FacingDirection = South;
+			}
+			sClock.restart();
 		}
-		sClock.restart();
+		if (vUnitVelocity.mag2() > 0.f) {
+			SpriteSheetOffset.y = FacingDirection * SpriteSheetTileSize.y;
+			SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;//Start at 0 and go mod N to loop animation
+		}
+		else {
+			SpriteSheetOffset.y = FacingDirection * SpriteSheetTileSize.y;//Say South = 3 & Spritetile = 64 * 64 so its 192 but the X needs to be 0?
+		}
+		break;
+	case Dead:		
+		SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;
+
+		
+		break;
+	case Attacking:
+			SpriteSheetOffset.y = FacingDirection * SpriteSheetTileSize.y;
+			SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;//Start at 0 and go mod N to loop animation	
+		if (curFrame == textureMetadata[Graphic_State].ani_len - 1)
+			Graphic_State = Walking;
+		break;
 	}
-	if (vUnitVelocity.mag2() > 0.f) {
-		SpriteSheetOffset.y = FacingDirection * SpriteSheetTileSize.y;
-		SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;//Start at 0 and go mod N to loop animation
-	} else {
-		SpriteSheetOffset.y = FacingDirection * SpriteSheetTileSize.y;//Say South = 3 & Spritetile = 64 * 64 so its 192 but the X needs to be 0?
-	}
-	
 	gfx->DrawPartialDecal((vUnitPosition - Origin), decals[Graphic_State].get(),
 		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, bSelected ? olc::WHITE : olc::GREY);
 	vUnitVelocity = { 0.0f,0.0f };
-	
 	/*
 	auto& pge = Game_Engine::Current();
 

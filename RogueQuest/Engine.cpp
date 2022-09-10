@@ -165,7 +165,7 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime)
         if (TopleftTile.x >= 0 && TopleftTile.y >= 0 )
             tv.DrawStringDecal(object.vPOS + olc::vf2d({ -20,-20 }), "MX: "+std::to_string(GetMouseX() + tv.GetWorldTL().x) + "\n" + "MY:"
             + std::to_string(GetMouseY() + tv.GetWorldTL().y), olc::WHITE, {0.5f,0.5f});
-        tv.DrawStringDecal(object.vPOS + olc::vf2d({ 20, -20 }), std::to_string(tv.GetWorldTL().x) + "\n" + std::to_string(tv.GetWorldTL().y));
+        tv.DrawStringDecal(object.vPOS + olc::vf2d({ 20, -20 }), std::to_string(tv.GetWorldTL().x) + "\n" + std::to_string(tv.GetWorldTL().y),olc::WHITE, {0.4f, 0.4f});
         tv.DrawStringDecal(object.vPOS + olc::vf2d({ 20,20 }),"X: " + std::to_string(ceilf(object.vPOS.x / 32.0f)) + "\n" +
                                                               "Y: " + std::to_string(ceilf(object.vPOS.y / 32.0f)),olc::WHITE,{0.4f,0.4f});
         tv.DrawStringDecal(object.vPOS + olc::vf2d({ -80,20 }), "Layer 1: " + std::to_string(vLayerData[0][int(object.vPOS.x / 32.0f)]) +
@@ -333,6 +333,14 @@ void Game_Engine::GetUserInput(float felapsedtime) {
         unit->vUnitVelocity += olc::vf2d(unit->fMoveSpeed * GetKey(olc::Key::RIGHT).bHeld - unit->fMoveSpeed * GetKey(olc::Key::LEFT).bHeld,
             unit->fMoveSpeed * GetKey(olc::Key::DOWN).bHeld - unit->fMoveSpeed * GetKey(olc::Key::UP).bHeld) * felapsedtime;
         object.vPOS = unit->vUnitPosition;
+        if (GetKey(olc::Key::T).bPressed)
+        {
+            unit->fHealth -= 5;
+        }
+        if (GetKey(olc::Key::SPACE).bPressed)
+        {
+            unit->fHealth += 5;
+        }
         unit->bSelected = true;
     }
     if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());

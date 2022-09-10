@@ -15,9 +15,11 @@ class Unit
 	void DrawUnit(olc::TileTransformedView* gfx);
 	void CheckCollision(std::vector<std::shared_ptr<Unit>> unitList);
 	void MarchingtoTarget(olc::vf2d Target);
+	void DestroyUnit();
 public:
 	virtual ~Unit();
 	// Data
+	bool bDelete;
 	std::string sUnitName; //Name
 	bool bFriendly;		//Will i attack the Player?
 	bool bOwnership;	//Does the player own me
