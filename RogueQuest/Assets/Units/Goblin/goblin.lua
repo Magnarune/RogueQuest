@@ -1,6 +1,6 @@
 return 
 {
-	Name = "Mage", -- used for Engine::GenerateUnit()
+	Name = "Goblin", -- used for Engine::GenerateUnit()
 	Files = 
 	{
 		{
@@ -8,23 +8,23 @@ return
 			SpriteOrder= { 1 , 4 , 2 , 3 },--1 = North, 2 = South , 3 =East , 4 = West  
 			TileSize = { 64 , 64},
 			SpriteSize = {576 , 256 },
-			AnimationLength = 576 / 64, 
-			FileName = "Assets/Units/Mage/MageMageWalk.png" --in Assets
+			AnimationLength = 448/ 64, 
+			FileName = "Assets/Units/Goblin/Walk.png" --in Assets
 		},
 		{
 			Name = "Attacking",
 			SpriteOrder= { 1 , 4 , 2 , 3 },
 			TileSize = { 64 , 64},
 			SpriteSize = {448, 256},
-			AnimationLength = 448 / 64,
-			FileName = "Assets/Units/Mage/MageAttack.png"
+			AnimationLength = 256 / 64,
+			FileName = "Assets/Units/Goblin/Attack.png"
 		},
 		{
 			Name = "Dead",
 			TileSize = { 64 , 64 },
 			SpriteSize = { 384 , 64 },
-			AnimationLength = 384 / 64,
-			FileName = "Assets/Units/Mage/MageDead.png"
+			AnimationLength = 320 / 64,
+			FileName = "Assets/Units/Goblin/Dead.png"
 		}
 	},
 	Parameters =
@@ -39,8 +39,8 @@ return
 		MaxMana = 20,
 		Ammo = 0, 
 		MaxAmmo = 0,
-		MoveSpeed = 5,       --Need to find a good value for this
-		AttackRange = 10,
+		MoveSpeed = 80,       
+		AttackRange = 40,
 		AttackDamage = 2,
 		AttackSpeed = 1,
 		SpellCooldown = 1,

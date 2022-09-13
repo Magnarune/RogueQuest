@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <map>
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_TransformedView.h"
@@ -9,26 +10,30 @@
 #include "Unit.h"
 #include "Assets.h"
 #include "UnitManager.h"
+#include "WorldObject.h"
+#include "WorldObjectManager.h"
 #include "clock.h"
 
-class Game_Engine : public olc::PixelGameEngine
-{
-
+class Game_Engine : public olc::PixelGameEngine {
 	static Game_Engine* self;
 
 public:
     Game_Engine();
     virtual ~Game_Engine();
+
+	Game_Engine(const Game_Engine&) = delete;
+	Game_Engine& operator=(const Game_Engine&) = delete;
+
 	float StandardTime= 0.0f;
-	// give the audience a way to access the game engine instance from anywhere - we need it
+
 	static inline Game_Engine& Current() { assert(self != nullptr); return *self; }
 	olc::TileTransformedView tv;
-    //lua_State* state;
-	sol::table mapLayers; //Mine
+   
     sol::state lua;
+	sol::table mapLayers; 
 	sol::table mapData, tileSets;
 	olc::vi2d vTileSize;
-    std::vector<olc::Renderable*> renderGraphics; //For Background
+    std::vector<olc::Renderable*> renderGraphics; 
 	//Map Logic
 	std::vector<int> vLayer;
 	std::vector<std::vector<int>> vLayerData;
@@ -58,7 +63,7 @@ private:
     {
         MODE_LOCAL_MAP
     };
-private:
+
     int m_nGameMode = MODE_LOCAL_MAP;
     TileSet GetTileSet(int id);
     olc::vi2d GetTile(int id);
@@ -69,6 +74,7 @@ protected:
     bool UpdateLocalMap(float fElapsedTime);
 
 public:
+	std::unique_ptr<WorldManager> worldManager;
 	std::unique_ptr<UnitManager> unitManager;
 	std::unique_ptr<cAssets> assetManager;
 
@@ -85,7 +91,7 @@ public:
 			olc::vf2d vVel;
 			
 	};
-	Player object;
+	Player Camera;
 	std::weak_ptr<Unit> followUnit;
 		//Rain
 	struct Rain
@@ -97,9 +103,8 @@ public:
 	olc::Sprite* Rain;
 	olc::Decal* RainDcl;
 	void GetUserInput(float felapsedtime);
-	void UpdateMap();
+	void DrawMap();
 	void UpdateTimeofDay(float felapsedtime);
 	void UpdateRain(float FelapsedTime);
-	//Debug Commands
 	bool OnConsoleCommand(const std::string& stext) override;
 };

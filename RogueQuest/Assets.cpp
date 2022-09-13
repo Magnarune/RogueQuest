@@ -1,18 +1,12 @@
 #include "Assets.h"
-
-
-cAssets::cAssets()
-{
+cAssets::cAssets(){
 
 }
-
-cAssets::~cAssets()
-{
-
+cAssets::~cAssets(){
+    
 }
 
-void cAssets::LoadUnitAssets()
-{
+void cAssets::LoadUnitAssets(){
     sol::table UnitData, FileSets, UnitStats;
 
     auto to_vi2d = [](sol::table obj) -> olc::vi2d {
@@ -59,7 +53,7 @@ void cAssets::LoadUnitAssets()
                 std::string name = fileset["Name"], path = fileset["FileName"];
 
                 UnitType::TextureMetaData meta;
-                meta.tex_id = TextureCache::GetCache().CreateTexture(path);
+                meta.tex_id = TextureCache::GetCache().CreateTexture(path);//SUS BACKA
                 meta.ani_len = sol::object(fileset["AnimationLength"]).as<int>();
                 meta.sprite_size = to_vi2d(fileset["SpriteSize"]);
                 meta.tile_size = to_vi2d(fileset["TileSize"]);

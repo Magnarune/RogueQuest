@@ -161,8 +161,11 @@
     <ClCompile Include="clock.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Projectiles.cpp" />
     <ClCompile Include="Unit.cpp" />
     <ClCompile Include="UnitManager.cpp" />
+    <ClCompile Include="WorldObject.cpp" />
+    <ClCompile Include="WorldObjectManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assets.h" />
@@ -170,8 +173,11 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="olcPGEX_TransformedView.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
+    <ClInclude Include="Projectiles.h" />
     <ClInclude Include="Unit.h" />
     <ClInclude Include="UnitManager.h" />
+    <ClInclude Include="WorldObject.h" />
+    <ClInclude Include="WorldObjectManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Units\Mage\Mage.lua" />

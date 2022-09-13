@@ -6,59 +6,35 @@ UnitManager::UnitManager() {
     unitList.reserve(1024 * 1024); // preserve lots of unit ptrs
 }
 
-
-std::shared_ptr<Unit> UnitManager::GenerateUnit(const std::string& name, olc::vf2d pos) {
-    Game_Engine& engine = Game_Engine::Current();
-    if(!engine.assetManager->UnitExists(name)) return nullptr;
-    const auto& data = engine.assetManager->GetUnitData(name);
-    // Make Unit
-    std::shared_ptr<Unit> unit;
-    unit.reset(new Unit());
-    unit->vUnitPosition = pos;
-    // Update Internal Values Of New Unit    
-    unit->sUnitName = data.lua_data["Name"]; //This is in top of .lua
-    // Load Parameters
-    unit->Unit_Collision_Radius = data.lua_data["Parameters"]["CollisionRadius"]; //I'm not in stats section of .lua
-    // Load Stats
-    unit->fHealth = data.lua_data["Stats"]["Health"]; unit->fMaxHealth = data.lua_data["Stats"]["MaxHealth"];
-    unit->fMana = data.lua_data["Stats"]["Mana"];     unit->fMaxMana = data.lua_data["Stats"]["MaxMana"];
-    unit->fAmmo = data.lua_data["Stats"]["Ammo"];     unit->fMaxAmmo = data.lua_data["Stats"]["MaxAmmo"];
-    unit->fMoveSpeed = data.lua_data["Stats"]["MoveSpeed"];
-    unit->fAttackRange = data.lua_data["Stats"]["AttackRange"];
-    unit->fAttackDamage = data.lua_data["Stats"]["AttackDamage"];
-    unit->fAttackSpeed = data.lua_data["Stats"]["AttackSpeed"];
-    unit->fSpellCooldown = data.lua_data["Stats"]["SpellCooldown"];
-    unit->fKnockBackResist = data.lua_data["Stats"]["KnockBackResist"];    
-    // make sure to update this when adding new GFXStates - enums don't magically connect to a string
-    static std::map<std::string, Unit::GFXState> States = {
-        {"Walking", Unit::Walking},
-        {"Attacking", Unit::Attacking},
-        {"Dead", Unit::Dead}
-    };
-    // create decals for each texture state
-    for(auto& [ name, meta ] : data.texture_metadata){
-        const Unit::GFXState& state = States[name]; // local state ref
-        // load a decal texture and add to decal map
-        std::unique_ptr<olc::Decal> decal;
-        decal.reset(new olc::Decal(TextureCache::GetCache().GetTexture(meta.tex_id)));
-        unit->decals.insert_or_assign(state, std::move(decal));
-        // copy texture metadata
-        unit->textureMetadata.insert_or_assign(state, meta);
-    }
+void UnitManager::addNewUnit(std::weak_ptr<Unit> unit) {
     unitList.emplace_back(unit);
-    return unit;
+}
+
+void UnitManager::Update() { // meh will work on later to improve :(
+}
+
+void UnitManager::CollectGarbage() {
+    auto it = std::find_if(unitList.begin(), unitList.end(), [](const auto& unit){ return unit.expired(); });
+    if(it++ != unitList.end()){
+        std::vector<std::weak_ptr<Unit>> copyList;
+        for(auto& unit : unitList){
+            if(!unit.expired()) copyList.emplace_back(std::move(unit));
+        }
+        unitList = std::move(copyList);
+    }
 }
 
 size_t UnitManager::GetUnitCount(const std::string& name) {//got it
     return std::accumulate(unitList.begin(), unitList.end(), 0ULL,
         [&](size_t n, const auto& unit) -> size_t {
-            return n + (unit->sUnitName == name);
+            return n + (unit.lock()->sUnitName == name);
         });
 }
 
 std::shared_ptr<Unit> UnitManager::GetUnit(const std::string& name, size_t index) {
     size_t n = 0;
-    for(auto& unit : unitList){
+    for(auto& _unit : unitList){
+        auto unit = _unit.lock();
         if(unit->sUnitName == name && n++ == index){
             return unit;
         }
@@ -67,90 +43,38 @@ std::shared_ptr<Unit> UnitManager::GetUnit(const std::string& name, size_t index
 }
 void UnitManager::SelectUnits(olc::vf2d Initial, olc::vf2d Final) {    
     Game_Engine& engine = Game_Engine::Current();
-    engine.tv.DrawLineDecal(Final,   { Initial.x,Final.y }, olc::RED);//Draw Rect
+    engine.tv.DrawLineDecal(Final,   { Initial.x,Final.y }, olc::RED);//Draw Rectangle
     engine.tv.DrawLineDecal(Initial, { Initial.x,Final.y }, olc::RED);
     engine.tv.DrawLineDecal(Initial, { Final.x,Initial.y }, olc::RED);
     engine.tv.DrawLineDecal(Final,   { Final.x,Initial.y }, olc::RED);
-  //  engine.tv.DrawLineDecal(Initial, Final);
-    for (auto& unit : unitList)
-    {
-        if (unit->vUnitPosition.x  > std::min(Initial.x, Final.x) && 
-            unit->vUnitPosition.y  > std::min(Initial.y, Final.y) &&
-            unit->vUnitPosition.x  < std::max(Final.x, Initial.x) &&
-            unit->vUnitPosition.y  < std::max(Final.y, Initial.y))
+
+    for(auto& _unit : selectedUnits){
+        if(_unit.expired()) continue;
+        auto unit = _unit.lock();
+        unit->bSelected = false;
+    }
+    selectedUnits.clear();
+
+    for (auto& _unit : unitList){
+        auto unit = _unit.lock();
+        if (unit->Position.x > std::min(Initial.x, Final.x) && //Are you the Man in the box?
+            unit->Position.y > std::min(Initial.y, Final.y) &&
+            unit->Position.x < std::max(Final.x, Initial.x) &&
+            unit->Position.y < std::max(Final.y, Initial.y) &&
+            unit->bFriendly) // do not allow the selecting of enemies
         {
            unit->bSelected = true;
-        }
-        else { unit->bSelected = false; };        
-    }
-
-
-}
-void UnitManager::MoveUnits(olc::vf2d Target)
-{
-    for (auto& unit : unitList) {
-        if (unit->bSelected == true)
-        {
-            unit->MarchingtoTarget(Target);
+           selectedUnits.push_back(_unit);
         }
     }
 }
-void UnitManager::Update(float delta) {
-    // units update here
-    for(auto& unit : unitList){
-        if (unit == nullptr) continue;
-        unit->CheckCollision(unitList);
-        unit->UpdateUnit(delta);
+
+void UnitManager::MoveUnits(olc::vf2d Target, bool attackstate){
+    for (auto& _unit : selectedUnits){
+        if(_unit.expired()) continue;
+        auto unit = _unit.lock();
+
+        unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
+        unit->MarchingtoTarget(Target);
     }
-  //  GarbageList.clear();
-}
-
-void UnitManager::Draw() {
-    Game_Engine& engine = Game_Engine::Current();
-
-    for(auto& unit : unitList){
-        unit->DrawUnit(&engine.tv);
-    }
-
-}
-void UnitManager::KillUnit() {
-
-}
-void UnitManager::SharedptrGarbage() {
-    for (auto& unit : unitList)
-    {
-        unit == nullptr;
-    }
-    GarbageList.clear();
-    /*
-    / pre-destruction actions commence here
-    size_t len = garbage.size();
-    if(len){ // if there is garbage, we need to clean the missing links
-        size_t pos = 1;
-
-        auto itr = objects.begin();
-        do {
-            if(!!*itr) continue; // keep valid objects
-            do { // keep swapping until there's no more invalid object here
-                std::swap(*itr, *(objects.end() - pos) ); // move garbage to end of list
-                ++pos; // increase found garbage
-            } while(!*itr);
-
-        } while(pos <= len && ++itr != objects.end() - len); // continue looking for missing link garbage
-
-        for(int i=0; i < len; ++i) objects.pop_back(); // slice off the garbage - resize instead?
-
-        garbage.clear(); // clear the garbage bin
-        grid.Clean(); // cleanup the game grid / auto-remove any references to missing/destroyed game objects
-
-        size_t c = std::count(objects.begin(), objects.end(), nullptr);
-        assert(c == 0); // there cannot be left over garbage!
-    }
-
-    if(periodicGarbageCollection.getSeconds() > 15.f){
-        Particle::GarbageCollectParticles();
-
-        periodicGarbageCollection.restart();
-    }
-    */
 }
