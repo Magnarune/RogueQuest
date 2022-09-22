@@ -63,17 +63,16 @@ public:
 
 	float m_fKnockBackTimer; //KnockBack
 	float fKBPower;			 //How much knockBack This unit will incure	
-
-	enum
-	{
-		SONorth,
-		SOSouth,
-		SOEast,
-		SOWest
-	} SpriteOrder;//Order of sprite facing directions in sprite sheet
-
-	enum UnitLogic
-	{
+	
+	
+	int	SONorth = 0;
+	int	SOWest = 1;
+	int	SOSouth = 2;
+	int	SOEast = 3;
+	
+	std::vector<int> Direction;
+	
+	enum UnitLogic{
 		Attack, //If you say attack a pos Search and Kill anything within agro-range
 		Neutral,//if attacked switch to attack mode
 		Passive //stay
@@ -84,19 +83,16 @@ public:
 
 protected:
 
-	enum GFXState
-	{
+	enum GFXState{
 		Walking,
 		Attacking,
 		Dead
 	} Graphic_State, Last_State;
-	enum
-	{
+	enum{
 		North,
 		West,		
 		South,
-		East
-		
+		East		
 	} FacingDirection;
 
 	float m_fTimer;		//Graphics timer
@@ -114,4 +110,9 @@ private:
 	friend class cAssets;
 	friend class UnitManager;
 	friend class WorldManager;
+};
+
+class Builder : public Unit {
+
+
 };

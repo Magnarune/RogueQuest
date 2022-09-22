@@ -558,6 +558,7 @@ namespace olc
 		virtual olc::rcode CreateGraphics(bool bFullScreen, bool bEnableVSYNC, const olc::vi2d& vViewPos, const olc::vi2d& vViewSize) = 0;
 		virtual olc::rcode CreateWindowPane(const olc::vi2d& vWindowPos, olc::vi2d& vWindowSize, bool bFullScreen) = 0;
 		virtual olc::rcode SetWindowTitle(const std::string& s) = 0;
+		virtual olc::rcode ShowSystemCursor(bool state) = 0;
 		virtual olc::rcode StartSystemEventLoop() = 0;
 		virtual olc::rcode HandleSystemEvent() = 0;
 		static olc::PixelGameEngine* ptrPGE;
@@ -1615,6 +1616,10 @@ namespace olc
 		else
 			return 0;
 	}
+	/*void PixelGameEngine::ShowSystemCursor(bool state)
+	{
+		platform->ShowSystemCursor(state);
+	}*/
 
 	uint32_t PixelGameEngine::GetFPS() const
 	{
@@ -2868,7 +2873,7 @@ namespace olc
 		if (fBlendFactor < 0.0f) fBlendFactor = 0.0f;
 		if (fBlendFactor > 1.0f) fBlendFactor = 1.0f;
 	}
-
+		void ShowSystemCursor(bool state);
 	std::stringstream& PixelGameEngine::ConsoleOut()
 	{
 		return ssConsoleOutput;
@@ -4716,11 +4721,15 @@ namespace olc
 
 namespace olc
 {
+	static HCURSOR olc_CurrentCursor;
+
 	class Platform_Windows : public olc::Platform
 	{
 	private:
 		HWND olc_hWnd = nullptr;
 		std::wstring wsAppName;
+
+		HCURSOR olc_VisibleCursor;
 
 		std::wstring ConvertS2W(std::string s)
 		{
@@ -4763,9 +4772,14 @@ namespace olc
 
 		virtual olc::rcode CreateWindowPane(const olc::vi2d& vWindowPos, olc::vi2d& vWindowSize, bool bFullScreen) override
 		{
+			olc_VisibleCursor = LoadCursor(NULL, IDC_ARROW);
+			olc_CurrentCursor = olc_VisibleCursor;
+
+
 			WNDCLASS wc;
 			wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-			wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+			//wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+			wc.hCursor = olc_CurrentCursor;
 			wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 			wc.hInstance = GetModuleHandle(nullptr);
 			wc.lpfnWndProc = olc_WindowEvent;
@@ -4859,6 +4873,19 @@ namespace olc
 #endif
 			return olc::OK;
 		}
+		virtual olc::rcode ShowSystemCursor(bool state) 
+		{
+			// // show the damn cursor!
+			if (state)
+			{
+				olc_CurrentCursor = olc_VisibleCursor;
+				return olc::OK;
+			}
+
+			// // if we're here, we're hiding the cursor, mwahahahahahaha
+			olc_CurrentCursor = NULL;
+			return olc::OK;
+		}
 
 		virtual olc::rcode StartSystemEventLoop() override
 		{
@@ -4886,6 +4913,7 @@ namespace olc
 				ptrPGE->olc_UpdateMouse(ix, iy);
 				return 0;
 			}
+			case WM_SETCURSOR: SetCursor(olc_CurrentCursor); return 0;
 			case WM_SIZE:       ptrPGE->olc_UpdateWindowSize(lParam & 0xFFFF, (lParam >> 16) & 0xFFFF);	return 0;
 			case WM_MOUSEWHEEL:	ptrPGE->olc_UpdateMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam));           return 0;
 			case WM_MOUSELEAVE: ptrPGE->olc_UpdateMouseFocus(false);                                    return 0;
@@ -4914,6 +4942,8 @@ namespace olc
 // O------------------------------------------------------------------------------O
 #pragma endregion 
 
+
+
 #pragma region platform_linux
 // O------------------------------------------------------------------------------O
 // | START PLATFORM: LINUX                                                        |
@@ -4930,6 +4960,7 @@ namespace olc
 		X11::XVisualInfo* olc_VisualInfo;
 		X11::Colormap                olc_ColourMap;
 		X11::XSetWindowAttributes    olc_SetWindowAttribs;
+		X11::Cursor olc_InvisibleCursor;
 
 	public:
 		virtual olc::rcode ApplicationStartUp() override
@@ -4939,6 +4970,7 @@ namespace olc
 
 		virtual olc::rcode ApplicationCleanUp() override
 		{
+			XFreeCursor(olc_Display, olc_InvisibleCursor);
 			XDestroyWindow(olc_Display, olc_Window);
 			return olc::rcode::OK;
 		}
@@ -5020,6 +5052,19 @@ namespace olc
 				vWindowSize.x = gwa.width;
 				vWindowSize.y = gwa.height;
 			}
+			// Create Invisible Mouse Cursor
+			// Adapted from: https://stackoverflow.com/questions/660613/how-do-you-hide-the-mouse-pointer-under-linux-x11
+			Pixmap bitmapNoData;
+			XColor black;
+
+			static char pixelData[] = { 0,0,0,0,0,0,0,0 };
+			black.red = black.green = black.blue = 0;
+
+			bitmapNoData = XCreateBitmapFromData(olc_Display, olc_Window, pixelData, 8, 8);
+			olc_InvisibleCursor = XCreatePixmapCursor(olc_Display, bitmapNoData, bitmapNoData, &black, &black, 0, 0);
+
+			// give the bitmap data back!
+			XFreePixmap(olc_Display, bitmapNoData);
 
 			// Create Keyboard Mapping
 			mapKeys[0x00] = Key::NONE;
@@ -5071,6 +5116,22 @@ namespace olc
 		virtual olc::rcode SetWindowTitle(const std::string& s) override
 		{
 			X11::XStoreName(olc_Display, olc_Window, s.c_str());
+			return olc::OK;
+		}
+		virtual olc::rcode ShowSystemCursor(bool state) override
+		{
+			using namespace X11;
+
+			// show the damn cursor!
+			if (state)
+			{
+				XUndefineCursor(olc_Display, olc_Window);
+				return olc::OK;
+			}
+
+			// if we're here, we're hiding the cursor, mwahahahahahaha
+			XDefineCursor(olc_Display, olc_Window, olc_InvisibleCursor);
+
 			return olc::OK;
 		}
 
@@ -5423,6 +5484,10 @@ namespace olc {
 		virtual olc::rcode SetWindowTitle(const std::string& s) override
 		{
 			glutSetWindowTitle(s.c_str());
+			return olc::OK;
+		}
+		virtual olc::rcode ShowSystemCursor(bool state) override
+		{
 			return olc::OK;
 		}
 

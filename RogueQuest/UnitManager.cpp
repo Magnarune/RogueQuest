@@ -10,7 +10,7 @@ void UnitManager::addNewUnit(std::weak_ptr<Unit> unit) {
     unitList.emplace_back(unit);
 }
 
-void UnitManager::Update() { // meh will work on later to improve :(
+void UnitManager::Update(float delta) {
 }
 
 void UnitManager::CollectGarbage() {
@@ -24,12 +24,39 @@ void UnitManager::CollectGarbage() {
     }
 }
 
-size_t UnitManager::GetUnitCount(const std::string& name) {//got it
+size_t UnitManager::GetUnitCount(const std::string& name) {
     return std::accumulate(unitList.begin(), unitList.end(), 0ULL,
         [&](size_t n, const auto& unit) -> size_t {
             return n + (unit.lock()->sUnitName == name);
         });
 }
+size_t UnitManager::GetSelectedUnitCount() {
+    return std::accumulate(unitList.begin(), unitList.end(), 0ULL,
+        [&](size_t n, const auto& unit) -> size_t {
+            return n + (unit.lock()->bSelected == true);
+        });
+}
+int UnitManager::TotalUnits(){
+    return int(unitList.size());
+}
+olc::vf2d UnitManager::GetUnitPositions(int size) {   
+    
+    olc::vf2d pos;   
+    std::weak_ptr<Unit> unit;     
+  
+        unit = unitList[size];
+
+       return pos = unit.lock()->Position;
+}
+std::shared_ptr<Unit> UnitManager::UnitData() {
+    for (auto& _unit : unitList) {
+        auto unit = _unit.lock();
+        if (unit->bSelected == true)
+            return unit;
+    }
+}
+
+
 
 std::shared_ptr<Unit> UnitManager::GetUnit(const std::string& name, size_t index) {
     size_t n = 0;
@@ -77,4 +104,14 @@ void UnitManager::MoveUnits(olc::vf2d Target, bool attackstate){
         unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
         unit->MarchingtoTarget(Target);
     }
+}
+
+bool UnitManager::IterateSelectedUnits(std::function<bool(std::shared_ptr<Unit>)> cb) {
+    for(auto& unit : selectedUnits) {
+        if(unit.expired()) continue;
+        if(!cb(unit.lock())){
+            return false; // user abort
+        }
+    }
+    return true; // iterate completed successfully
 }

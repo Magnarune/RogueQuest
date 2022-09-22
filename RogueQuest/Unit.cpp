@@ -54,7 +54,6 @@ void Unit::UnitBehaviour() {
 		execTimeout.restart();
 	}
 }
-
 void Unit::CheckCollision() {
 	auto& engine = Game_Engine::Current();
 	
@@ -62,11 +61,11 @@ void Unit::CheckCollision() {
 		return fabs((pos1.x - pos2.x) * (pos1.x - pos2.x) + (pos1.y - pos2.y) * (pos1.y - pos2.y)) <= (Collision_Radius1 + Collision_Radius2) * (Collision_Radius1 + Collision_Radius2);
 	};
 
-	engine.worldManager->IterateObjects([&](std::shared_ptr<WorldObject> obj){
+	engine.worldManager->IterateObjects([&](std::shared_ptr<WorldObject> obj) {
 		auto other = std::dynamic_pointer_cast<Unit>(obj);
 		if (other == nullptr || other.get() == this || Position == other->Position) return true; // act as a continue
 
-		if (Collisonlymda(Position, Unit_Collision_Radius, other->Position, other->Unit_Collision_Radius)){
+		if (Collisonlymda(Position, Unit_Collision_Radius, other->Position, other->Unit_Collision_Radius)) {
 			float fDistance = sqrtf((Position.x - other->Position.x) * (Position.x - other->Position.x) +
 				(Position.y - other->Position.y) * (Position.y - other->Position.y));
 			float fOverlap = 0.5f * (fDistance - Unit_Collision_Radius - other->Unit_Collision_Radius);
@@ -75,6 +74,7 @@ void Unit::CheckCollision() {
 			other->Velocity.x += fOverlap * (Position.x - other->Position.x) / fDistance;
 			other->Velocity.y += fOverlap * (Position.y - other->Position.y) / fDistance;
 		}
+
 		return true;
 	}); // a for loop wrapper for iterating all objects
 }
@@ -88,7 +88,7 @@ void Unit::PerformAttack() {
 		auto obj = Hunted.lock();
 
 		if(auto unit = std::dynamic_pointer_cast<Unit>(obj)){
-			olc::vf2d vel = (unit->Position - Position).norm() * fAttackDamage * 64.f;
+			olc::vf2d vel = (unit->Position - Position).norm() * fAttackDamage * 0.f;
 			if(std::isnan(vel.x) || std::isnan(vel.y)) vel = {0.f,0.f};
 			unit->KnockBack(fAttackDamage, vel);
 		}
@@ -150,10 +150,11 @@ void Unit::Update(float fElapsedTime) {
 			}
 			if (Distance.mag2() < fAttackRange*fAttackRange && fAttackCD <= 0){
 				PerformAttack();
+				Velocity = { 0.f,0.f };
 			}
 		}
 	}
-
+	
 	Position += (Velocity + HitVelocity) * fElapsedTime;
 
 	HitVelocity *= std::pow(0.05f, fElapsedTime);
@@ -196,27 +197,30 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 	} else {
 		FacingDirection = South;
 	}
+	//Direction[FacingDirection + 1];
 
 	switch (Graphic_State){
 	case Walking:
 		if (sClock.getMilliseconds() > 100.f) {
 			sClock.restart();
 		}
-		if (Velocity.mag2() > 0.f) {
-			SpriteSheetOffset.y = FacingDirection * SpriteSheetTileSize.y;
+		if (Velocity.mag2() > 0.1f) {
+			SpriteSheetOffset.y = Direction[FacingDirection] *SpriteSheetTileSize.y;
 			SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;
 		} else {
-			SpriteSheetOffset.y = FacingDirection * SpriteSheetTileSize.y;
+			SpriteSheetOffset.y = Direction[FacingDirection] * SpriteSheetTileSize.y;
 		}
 		break;
 	case Dead:
 		SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;		
 		break;
 	case Attacking:
-		SpriteSheetOffset.y = FacingDirection * SpriteSheetTileSize.y;
+		SpriteSheetOffset.y = Direction[FacingDirection] * SpriteSheetTileSize.y;
 		SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;
 		break;
 	}
 	gfx->DrawPartialDecal((Position - Origin), decals[Graphic_State].get(),
 		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, bSelected ? olc::WHITE : olc::GREY);
+	gfx->DrawLineDecal(Position - olc::vf2d({ 10.f, 10.f }) * float((fHealth / fMaxHealth)), Position + olc::vf2d({ 5.f , -10.f }) * float((fHealth / fMaxHealth)), olc::RED);
+	//gfx->DrawLineDecal(Position - olc::vf2d({ 10.f, 11.f }), Position + olc::vf2d({ 5.f, -11.f }), olc::RED);
 }

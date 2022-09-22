@@ -1,12 +1,15 @@
 #include "WorldObject.h"
 #include "Engine.h"
-
+#include "WorldObjectManager.h"
 /*
     World Object
 */
 
-WorldObject::WorldObject(): Position({0.f, 0.f}), Velocity({0.f, 0.f}) {
 
+WorldObject::WorldObject(): Position({512.f,480.f }), Velocity({0.f, 0.f}) {
+	
+	
+		
 }
 
 WorldObject::~WorldObject() {

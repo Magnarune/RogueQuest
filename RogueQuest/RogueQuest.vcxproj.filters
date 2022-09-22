@@ -42,6 +42,24 @@
     <ClCompile Include="WorldObjectManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Hud.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Options.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UserInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HudManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Building.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -74,12 +92,54 @@
     <ClInclude Include="WorldObjectManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MapManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hud.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Options.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UserInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HudManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Building.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MapData.lua">
+    <None Include="Assets\Units\Mage\Mage.lua">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="Assets\Units\Mage\Mage.lua">
+    <None Include="Assets\Units\Goblin\goblin.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Units\Spider\Spider.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Units\Imp\imp.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Units\Sara\sara.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Maps\BasicMap.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Maps\TerraProject.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Units\Builder\builder.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Buildings\House\house.lua">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

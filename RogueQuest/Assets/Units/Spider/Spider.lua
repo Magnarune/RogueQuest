@@ -1,25 +1,28 @@
 return 
 {
-	Name = "Mage", -- used for Engine::GenerateUnit()
+	Name = "Spider", -- used for Engine::GenerateUnit()
+	SpriteOrder= { 0 , 1 , 2 , 3 },--1 = North, 2 = South , 3 =East , 4 = West
 	Files = 
 	{
 		{
 			Name = "Walking",
-			SpriteOrder= { 1 , 4 , 2 , 3 },--1 = North, 2 = South , 3 =East , 4 = West
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
-			SpriteSize = {576 , 256 },
-			AnimationLength = math.floor(576 / 64), 
-			FileName = "Assets/Units/Mage/MageWalk.png" 
+			SpriteSize = {384 , 256 },
+			AnimationLength = math.floor(384 / 64), 
+			FileName = "Assets/Units/Spider/Walk.png" ,
+			HeadImage = {
+				tl = {16,136},
+				size = {32,32}
+			}
 		},
 		{
 			Name = "Attacking",
-			SpriteOrder= { 1 , 4 , 2 , 3 },
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
-			SpriteSize = {448, 256 },
-			AnimationLength = math.floor(448 / 64),
-			FileName = "Assets/Units/Mage/MageAttack.png"
+			SpriteSize = {256, 256 },
+			AnimationLength = math.floor(256 / 64),
+			FileName = "Assets/Units/Spider/Attack.png"
 		},
 		{
 			Name = "Dead",
@@ -27,7 +30,7 @@ return
 			TargetSize = { 32, 32 },
 			SpriteSize = { 384 , 64 },
 			AnimationLength = math.floor(384 / 64),
-			FileName = "Assets/Units/Mage/MageDead.png"
+			FileName = "Assets/Units/Spider/Dead.png"
 		}
 	},
 	Parameters =
@@ -36,17 +39,17 @@ return
 	},
 	Stats =
 	{
-		Health = 10,
-		MaxHealth = 10,
+		Health = 20,
+		MaxHealth = 20,
 		Mana = 20,
 		MaxMana = 20,
 		Ammo = 0, 
 		MaxAmmo = 0,
-		MoveSpeed = 80,       
-		AttackRange = 82, --pixels?
+		MoveSpeed = 40,       
+		AttackRange = 42, 
 		AttackDamage = 2,
-		AttackSpeed = 1,
-		SpellCooldown = 1,
+		AttackSpeed = 1.6,
+		SpellCooldown = 1.6,
 		KnockBackResist = 1
 	},
 }

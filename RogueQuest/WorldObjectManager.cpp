@@ -2,30 +2,44 @@
 #include "Engine.h"
 
 WorldManager::WorldManager() {
-	objectList.reserve(1024 * 1024);
-	garbageList.reserve(100);
+    objectList.reserve(1024 * 512);
+    garbageList.reserve(100);
+    mapList.reserve(10);
 }
 
 WorldManager::~WorldManager() {
+    mapList.clear();
 	objectList.clear();
 	garbageList.clear();
 }
 
 
 void WorldManager::Update(float fElapedtime) {//Update last frames
-	for (auto& object : objectList) {
+    currentMap->UpdateMap(fElapedtime);
+    for (auto& object : objectList) {
 		if (object == nullptr) continue;
-		object->Update(fElapedtime);
+		if(objectList.begin() != objectList.end()){
+            // nothing
+        }
+
+        object->Update(fElapedtime);
 	}
 }
 
 void WorldManager::Draw() {//Draw 
-	Game_Engine& engine = Game_Engine::Current();
-	for (auto& object : objectList) {
-		if (object == nullptr) continue;
+    Game_Engine& engine = Game_Engine::Current();
+
+    currentMap->DrawMap(&engine.tv);
+
+    for (auto& object : objectList) {
+        if (object == nullptr) continue;
+
         object->Draw(&engine.tv);
-	}
+    }
+
 }
+
+
 
 void WorldManager::DestroyObject(WorldObject* self) {
     auto me = std::find_if(objectList.begin(), objectList.end(), [&](const auto& obj){ return obj.get() == self; });
@@ -89,10 +103,17 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     // Make Unit
     std::shared_ptr<Unit> unit;
     unit.reset(new Unit());
+    if (pos == olc::vf2d({ 0.f, 0.f }))
+        pos = { engine.worldManager->curMap().layerSize.x * 32 / 2.f, engine.worldManager->curMap().layerSize.y *32 / 2.f };
+
     unit->Position = pos;
 
     // Update Internal Values Of New Unit
     unit->sUnitName = data.lua_data["Name"]; //This is in top of .lua
+    //Load Sprite Order
+    for (int i = 0; i < 4; i++)
+        unit->Direction.push_back(data.lua_data["SpriteOrder"][i+1]);
+    
     // Load Parameters
     unit->Unit_Collision_Radius = data.lua_data["Parameters"]["CollisionRadius"]; //I'm not in stats section of .lua
     // Load Stats
@@ -104,7 +125,8 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     unit->fAttackDamage = data.lua_data["Stats"]["AttackDamage"];
     unit->fAttackSpeed = data.lua_data["Stats"]["AttackSpeed"];
     unit->fSpellCooldown = data.lua_data["Stats"]["SpellCooldown"];
-    unit->fKnockBackResist = data.lua_data["Stats"]["KnockBackResist"];    
+    unit->fKnockBackResist = data.lua_data["Stats"]["KnockBackResist"];   
+    
     // make sure to update this when adding new GFXStates - enums don't magically connect to a string
     static std::map<std::string, Unit::GFXState> States = {
         {"Walking", Unit::Walking},
@@ -134,4 +156,27 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(olc::vf2d start, ol
 
     objectList.emplace_back(proj);
     return proj;
+}
+
+void WorldManager::ImportMapData() {
+    // to do: iterate map folder and find maps
+    const std::vector<std::string> paths = {
+        "TerraProject.lua",
+        "BasicMap.lua",
+        "BasicMap2.lua",
+    };
+
+    for(const auto& path : paths) {
+        mapList.emplace_back(std::make_shared<Map>("Assets/Maps/" + path));
+    }
+}
+
+bool WorldManager::ChangeMap(const std::string& name) {
+    auto it = std::find_if(mapList.begin(), mapList.end(), [&](const auto& map){ return map->name == name; });
+    if(it == mapList.end()){
+        std::cout << "Map " << name << " does not exist\n";
+        return false;
+    }
+    currentMap = *it;
+    return true;
 }

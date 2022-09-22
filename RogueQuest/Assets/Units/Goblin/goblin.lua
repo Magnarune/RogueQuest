@@ -1,45 +1,51 @@
 return 
 {
 	Name = "Goblin", -- used for Engine::GenerateUnit()
+	SpriteOrder= { 2 , 3 , 0 , 1 },--0 = North, 1 = West , 2 =South , 3 = East  
 	Files = 
 	{
 		{
-			Name = "Walking",
-			SpriteOrder= { 1 , 4 , 2 , 3 },--1 = North, 2 = South , 3 =East , 4 = West  
+			Name = "Walking",			
 			TileSize = { 64 , 64},
+			TargetSize = { 32, 32 },
 			SpriteSize = {576 , 256 },
-			AnimationLength = 448/ 64, 
-			FileName = "Assets/Units/Goblin/Walk.png" --in Assets
+			AnimationLength = math.floor(448/ 64), 
+			FileName = "Assets/Units/Goblin/Walk.png", --in Assets
+			HeadImage = {
+				tl = {16,0},
+				size = {32,32}
+			}
 		},
 		{
 			Name = "Attacking",
-			SpriteOrder= { 1 , 4 , 2 , 3 },
 			TileSize = { 64 , 64},
+			TargetSize = { 32, 32 },
 			SpriteSize = {448, 256},
-			AnimationLength = 256 / 64,
+			AnimationLength =  math.floor(256 / 64),
 			FileName = "Assets/Units/Goblin/Attack.png"
 		},
 		{
 			Name = "Dead",
 			TileSize = { 64 , 64 },
 			SpriteSize = { 384 , 64 },
-			AnimationLength = 320 / 64,
+			TargetSize = { 32, 32 },
+			AnimationLength =  math.floor(320 / 64),
 			FileName = "Assets/Units/Goblin/Dead.png"
 		}
 	},
 	Parameters =
 	{
-		CollisionRadius = 10, -- is this really a stat? e.g. something that the player could "upgrade and change" based on power ups in game?
+		CollisionRadius = 10, 
 	},
 	Stats =
 	{
-		Health = 10,
-		MaxHealth = 10,
+		Health = 15,
+		MaxHealth = 20,
 		Mana = 20,
 		MaxMana = 20,
 		Ammo = 0, 
 		MaxAmmo = 0,
-		MoveSpeed = 80,       
+		MoveSpeed = 40,       
 		AttackRange = 40,
 		AttackDamage = 2,
 		AttackSpeed = 1,

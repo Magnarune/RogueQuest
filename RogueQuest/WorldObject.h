@@ -8,6 +8,7 @@
 
 class WorldObject {
 public:
+
 	WorldObject();
 	virtual ~WorldObject();
 	

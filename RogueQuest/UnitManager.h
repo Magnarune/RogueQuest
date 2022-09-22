@@ -320,14 +320,21 @@ public:
     UnitManager();
     ~UnitManager() { unitList.clear(); }
 
-    void Update();
+    void Update(float delta);
     void CollectGarbage();
 
     void MoveUnits(olc::vf2d Target , bool Attackstate);
     void SelectUnits(olc::vf2d Initial, olc::vf2d Final);
+	int TotalUnits();
 
+	olc::vf2d GetUnitPositions(int size);
+	std::shared_ptr<Unit> UnitData();
+
+	size_t GetSelectedUnitCount();
     size_t GetUnitCount(const std::string& name);
     std::shared_ptr<Unit> GetUnit(const std::string& name, size_t index=0);
+
+	bool IterateSelectedUnits(std::function<bool(std::shared_ptr<Unit>)> cb);
 
     friend class WorldManager;
 

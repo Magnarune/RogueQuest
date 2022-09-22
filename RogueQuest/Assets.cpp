@@ -1,4 +1,5 @@
 #include "Assets.h"
+
 cAssets::cAssets(){
 
 }
@@ -19,8 +20,15 @@ void cAssets::LoadUnitAssets(){
     lua_state.open_libraries(sol::lib::math);
     lua_state.open_libraries(sol::lib::package);
     lua_state.open_libraries(sol::lib::string);
-
-    std::vector<std::string> filePaths = {"Assets/Units/Mage/Mage.lua"}; // temporary for now
+    
+    const std::vector<std::string> filePaths = { //
+        "Assets/Units/Spider/Spider.lua",
+        "Assets/Units/Mage/Mage.lua",
+        "Assets/Units/Goblin/goblin.lua",
+        "Assets/Units/Imp/imp.lua",
+        "Assets/Units/Sara/sara.lua",
+        "Assets/Units/Builder/builder.lua"
+    };
 
     /*
         // To Do: Load all files in directory
@@ -29,8 +37,9 @@ void cAssets::LoadUnitAssets(){
 
     fs::directory_iterator dir;
     */
+    
 
-    for(const auto& path : filePaths){
+    for(const auto& path : filePaths) {
         try {
             sol::load_result script = lua_state.load_file(path);
 
@@ -43,7 +52,11 @@ void cAssets::LoadUnitAssets(){
                 UnitData = rcode; 
             }
 
-            std::string name = UnitData["Name"];
+            std::string name =  UnitData["Name"];
+            
+            UnitType::TextureMetaData meta;
+            for (int i = 1; i < 5; i++)
+                meta.Sprite_Order.push_back(UnitData["SpriteOrder"][i]);//Im in danger
 
             UnitType unitType;
             FileSets = UnitData["Files"];
@@ -52,14 +65,21 @@ void cAssets::LoadUnitAssets(){
                 // load the Name : TextureID for the unitType
                 std::string name = fileset["Name"], path = fileset["FileName"];
 
-                UnitType::TextureMetaData meta;
-                meta.tex_id = TextureCache::GetCache().CreateTexture(path);//SUS BACKA
+                meta.tex_id = TextureCache::GetCache().CreateTexture(path);
                 meta.ani_len = sol::object(fileset["AnimationLength"]).as<int>();
                 meta.sprite_size = to_vi2d(fileset["SpriteSize"]);
                 meta.tile_size = to_vi2d(fileset["TileSize"]);
+            
                 meta.target_size = to_vi2d(fileset["TargetSize"]);
 
                 meta.scale = olc::vf2d(meta.target_size) / olc::vf2d(meta.tile_size);
+
+                // load head location data into the texture meta data
+                if(fileset["HeadImage"] != sol::nil){
+                    unitType.head.tl = to_vi2d(fileset["HeadImage"]["tl"]);
+                    unitType.head.sz = to_vi2d(fileset["HeadImage"]["size"]);
+                    unitType.head.tex_id = meta.tex_id;
+                }
 
                 unitType.texture_metadata.insert_or_assign(name, std::move(meta));
             }
@@ -73,7 +93,6 @@ void cAssets::LoadUnitAssets(){
     }
     
 }
-
 
 
 TextureCache* TextureCache::self = nullptr;
@@ -94,7 +113,6 @@ void TextureCache::InitCache() {
 void TextureCache::FreeCache() {
     delete self;
 }
-
 
 
 size_t TextureCache::CreateTexture(const std::string& path) {
