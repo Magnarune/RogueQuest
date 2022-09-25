@@ -221,6 +221,6 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 	}
 	gfx->DrawPartialDecal((Position - Origin), decals[Graphic_State].get(),
 		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, bSelected ? olc::WHITE : olc::GREY);
-	gfx->DrawLineDecal(Position - olc::vf2d({ 10.f, 10.f }) * float((fHealth / fMaxHealth)), Position + olc::vf2d({ 5.f , -10.f }) * float((fHealth / fMaxHealth)), olc::RED);
+
 	//gfx->DrawLineDecal(Position - olc::vf2d({ 10.f, 11.f }), Position + olc::vf2d({ 5.f, -11.f }), olc::RED);
 }

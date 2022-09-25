@@ -30,6 +30,9 @@ public:
 	Game_Engine(const Game_Engine&) = delete;
 	Game_Engine& operator=(const Game_Engine&) = delete;
 
+	
+	cAssets::Cursor* curCursor;
+
 	float StandardTime= 0.0f;
 
 	static inline Game_Engine& Current() { assert(self != nullptr); return *self; }
@@ -37,32 +40,25 @@ public:
 
 	//Cursor BS
 	RECT my_rect;
-	static HCURSOR olc_CurrentCursor;
-	HCURSOR olc_VisibleCursor;
-	HWND olc_hWnd = nullptr;
-	
+
     //Selection click
 	olc::vi2d Initial;
 	bool Clicked = false;
 
-    
-
     enum MapModes
     {
-        MODE_LOCAL_MAP,
-		Options_Menu
+		MODE_LOCAL_MAP,
+		MODE_OPTIONS_MENU
     };
     int m_nGameMode = MODE_LOCAL_MAP;
-	
-
-
 protected:
-    bool OnUserCreate() override;
-    bool OnUserUpdate(float fElapsedTime) override;   
-    bool UpdateLocalMap(float fElapsedTime);
-	bool UpdateOptions(float fElapsedTime);
+    virtual bool OnUserCreate() override;
+    virtual bool OnUserUpdate(float fElapsedTime) override;   
+	virtual bool OnUserDestroy() override;
 
-	bool OnUserDestroy() override;
+    virtual bool UpdateLocalMap(float fElapsedTime);
+	virtual bool UpdateOptions(float fElapsedTime);
+	virtual void DrawCursor();
 public:
 	std::unique_ptr<WorldManager> worldManager;
 	std::unique_ptr<UnitManager> unitManager;
@@ -70,21 +66,16 @@ public:
 	std::unique_ptr<Hud> hudManager;
 	std::unique_ptr<Options> optionsManager;
 	std::unique_ptr<UserInput> userinputs;
-	//Time of Day code
-	float TimeofDay= 101;
-	float FTIME = 0;
-	bool DayTime = true;
-	bool NightTime = false;
-	bool bevil= true;
-	
+
 	struct Player{
-			olc::vf2d vPOS;
-			olc::vf2d vVel;
-			
+		olc::vf2d vPOS;
+		olc::vf2d vVel;		
 	};
 	Player Camera;
 	std::weak_ptr<Unit> followUnit;
 
+	inline void ChangeCursor(const std::string& name) { auto c = assetManager->GetCursor(name); curCursor = c == nullptr ? curCursor : c; }
+	
 	bool OnConsoleCommand(const std::string& stext) override;
 	bool bIsLocked = true;
 	friend class Hud;

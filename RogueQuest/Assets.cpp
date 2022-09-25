@@ -1,7 +1,10 @@
 #include "Assets.h"
 
 cAssets::cAssets(){
-
+    lua_state.open_libraries(sol::lib::base);
+    lua_state.open_libraries(sol::lib::math);
+    lua_state.open_libraries(sol::lib::package);
+    lua_state.open_libraries(sol::lib::string);
 }
 cAssets::~cAssets(){
     
@@ -15,12 +18,6 @@ void cAssets::LoadUnitAssets(){
                 y = obj[2];
         return {x, y};
     };
-
-    lua_state.open_libraries(sol::lib::base);
-    lua_state.open_libraries(sol::lib::math);
-    lua_state.open_libraries(sol::lib::package);
-    lua_state.open_libraries(sol::lib::string);
-    
     const std::vector<std::string> filePaths = { //
         "Assets/Units/Spider/Spider.lua",
         "Assets/Units/Mage/Mage.lua",
@@ -94,6 +91,54 @@ void cAssets::LoadUnitAssets(){
     
 }
 
+bool cAssets::ImportCursor(const std::string& name, const std::string& path, const olc::vf2d& size) {
+    Cursor cursor;
+    olc::Sprite* spr = TextureCache::GetCache().GetTexture(
+        TextureCache::GetCache().CreateTexture(path)
+    );
+    if(spr == nullptr) return false;
+
+    cursor.decal.reset(new olc::Decal(spr));
+    cursor.scale = size / olc::vf2d(float(spr->width), float(spr->height));
+
+    assetCursorCache.insert_or_assign(name, std::move(cursor));
+    return true;
+}
+
+void cAssets::LoadCursorAssets() {
+
+    auto to_vf2d = [](sol::table obj) -> olc::vf2d {
+        float x = obj[1],
+              y = obj[2];
+        return {x, y};
+    };
+
+    sol::table FilePaths;
+    try {
+            sol::load_result script = lua_state.load_file("Assets/Gui/cursors.lua");
+
+            sol::protected_function_result rcode = script();
+
+            if (!rcode.valid()) { 
+                sol::error e = rcode;
+                std::cout << "error: " << e.what() << "\n"; 
+            } else {
+                FilePaths = rcode;
+            }
+
+            for(int i=0; i < FilePaths.size(); ++i){
+                sol::table Cursor = FilePaths[i + 1];
+                std::string name = Cursor["Name"], path = Cursor["Path"];
+                olc::vf2d size {16.f, 16.f};
+                if(Cursor["Size"] != sol::nil){
+                    size = to_vf2d(Cursor["Size"]);
+                }
+                ImportCursor(name, path, size);
+            }
+    } catch(std::exception e) {
+        std::cerr << e.what() << "\n";
+    }
+}
 
 TextureCache* TextureCache::self = nullptr;
 

@@ -49,7 +49,7 @@ std::string StringifyObject(sol::object val) {
 }
 
 Game_Engine* Game_Engine::self = nullptr;
-Game_Engine::Game_Engine() {
+Game_Engine::Game_Engine(): curCursor(nullptr) {
     sAppName = "Simple RTS GAME";
     self = this;
 }
@@ -57,12 +57,6 @@ Game_Engine::~Game_Engine() {
     self = nullptr;
 }
 bool Game_Engine::OnUserCreate() {
-    HWND mHwnd = GetForegroundWindow();
-    GetWindowRect(mHwnd, &my_rect);
-    my_rect.top += 40L;
-    my_rect.left += 2L;
-    my_rect.bottom -= 2L;
-    my_rect.right -= 2L;
 
     // Setup Controllers    
     TextureCache::InitCache(); // initialize texture cache
@@ -75,48 +69,56 @@ bool Game_Engine::OnUserCreate() {
     
     // Configure Controllers
     assetManager->LoadUnitAssets();     // Load all the Lua files
+    assetManager->LoadCursorAssets();     // Load all the Cursors
     worldManager->ImportMapData();      // Load all the Lua Map files
     hudManager->ImportHudAssets();      // Load all the Hud assets
 
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
-    
+
     worldManager->ChangeMap("Basic");
     SetPixelMode(olc::Pixel::ALPHA);
     ConsoleCaptureStdOut(true);     
     Clear(olc::Pixel(100,164,44,255));
 
+    ShowSystemCursor(false); // will this work? let's try and fine out
+
+    // init default cursor
+    curCursor = assetManager->GetCursor("default");
+
     return true;
 }
 
 bool Game_Engine::OnUserUpdate(float fElapsedTime) {
-
-
+    bool rval = true;
     fElapsedTime = std::fmin(1.f, fElapsedTime);
 
     if (GetKey(olc::Key::F1).bPressed) ConsoleShow(olc::Key::ESCAPE);
 
     switch (m_nGameMode){
         case MODE_LOCAL_MAP:
-            return UpdateLocalMap(fElapsedTime);
-        case Options_Menu:
-            return UpdateOptions(fElapsedTime);
+            rval = UpdateLocalMap(fElapsedTime);
+            break;
+        case MODE_OPTIONS_MENU:
+            rval = UpdateOptions(fElapsedTime);
+            break;
     }
 
-    return true;
+    DrawCursor();
+    return rval;
 }
 
 bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     userinputs->GetUserInput();
+
     if(!IsConsoleShowing()){
-       
         unitManager->Update(fElapsedTime);
         hudManager->Update(fElapsedTime);
         worldManager->Update(fElapsedTime);
     }
 
     worldManager->CollectGarbage();
-    worldManager->Draw(); 
+    worldManager->Draw();
     userinputs->DrawUserInput();
     hudManager->DrawHud();
     hudManager->DrawMiniMap();
@@ -127,6 +129,12 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
 bool Game_Engine::UpdateOptions(float fElapsedTime) {
     optionsManager->MenuSelect();
     return true;
+}
+
+void Game_Engine::DrawCursor() {//Assets\Gui\Cursors\cursor.png
+    if(curCursor == nullptr) return;
+
+    DrawDecal(GetMousePos(), curCursor->decal.get(), curCursor->scale);
 }
 
 bool Game_Engine::OnUserDestroy(){
@@ -157,7 +165,7 @@ const std::map<std::string, CommandFunction> commands = {
                 if (unit) {
                     unit->bFriendly = true;
                     if ( unit->sUnitName == "Goblin" || unit->sUnitName == "Imp")
-                        if(engine.bevil == true)unit->bFriendly = false;
+                        if(engine.optionsManager->evil == true)unit->bFriendly = false;
                     std::cout << name << " created at " << x << ", " << y << "\n";
                 }
             }

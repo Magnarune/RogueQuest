@@ -1,5 +1,6 @@
 #include "UserInput.h"
 #include "Engine.h"
+
 UserInput::UserInput() {
 }
 UserInput::~UserInput() {
@@ -38,22 +39,23 @@ void UserInput::GetUserInput() {
 
     if (!engine.bIsLocked) {
 
+        /*
         { // lock cursor
-            HWND mHwnd = GetForegroundWindow();
+            HWND mHwnd = *(HWND*)olc::platform->GetWindowHandle();
             GetWindowRect(mHwnd, &engine.my_rect);
-            engine.my_rect.top += 40L;
+            engine.my_rect.top += 38L;
             engine.my_rect.left += 2L;
             engine.my_rect.bottom -= 2L;
-            engine.my_rect.right -= 2L;
+            engine.my_rect.right += 2L;
             ClipCursor(&engine.my_rect);
         }
+        */
 
         if (engine.GetMousePos().x <= 2) { engine.Camera.vVel.x -= 1.0f / engine.tv.GetWorldScale().x; }
         if (engine.GetMousePos().y <= 2) { engine.Camera.vVel.y -= 1.0f / engine.tv.GetWorldScale().x; }
         if (engine.GetMousePos().x >= engine.ScreenWidth() - 3) { engine.Camera.vVel.x += 1.0f / engine.tv.GetWorldScale().x; }
         if (engine.GetMousePos().y >= engine.ScreenHeight() - 3) { engine.Camera.vVel.y += 1.0f / engine.tv.GetWorldScale().x; }
         engine.Camera.vPOS += engine.Camera.vVel * 2.0f;
-
 
         engine.tv.SetWorldOffset(engine.Camera.vPOS - engine.tv.ScaleToWorld(olc::vf2d(float(engine.ScreenWidth()) / 2.0f, float(engine.ScreenHeight()) / 2.0f)));
     }
@@ -116,7 +118,6 @@ void UserInput::DrawUserInput() {
                 olc::vf2d FinalWH = 1.0f / engine.tv.GetWorldScale() * engine.GetMousePos() + engine.tv.GetWorldTL();
                 engine.unitManager->MoveUnits(FinalWH, engine.GetKey(olc::Key::A).bHeld);
             }
-
             if (engine.GetKey(olc::Key::P).bPressed) {
                 float X = (float)engine.GetMousePos().x / 57.f;
                 engine.tv.GetWorldScale().x;

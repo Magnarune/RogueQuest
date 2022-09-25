@@ -13,14 +13,15 @@ public:
 
 	enum Options_Menu
 	{
-		Main_Options,
-		Sound_Options,
-		Game_Options
+		MAIN_OPTIONS,
+		SOUND_OPTIONS,
+		GAME_OPTIONS
 	};
-	int Button = Main_Options;
+	int Button = MAIN_OPTIONS;
 
 
 
 	//All My Booleans Go here?
+	bool evil = false;
 };
 

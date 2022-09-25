@@ -561,6 +561,7 @@ namespace olc
 		virtual olc::rcode ShowSystemCursor(bool state) = 0;
 		virtual olc::rcode StartSystemEventLoop() = 0;
 		virtual olc::rcode HandleSystemEvent() = 0;
+		virtual void* GetWindowHandle() = 0;
 		static olc::PixelGameEngine* ptrPGE;
 	};
 
@@ -643,6 +644,8 @@ namespace olc
 		const olc::vi2d& GetPixelSize() const;
 		// Gets actual pixel scale
 		const olc::vi2d& GetScreenPixelSize() const;
+		// Display / Hide the mouse cursor
+		void ShowSystemCursor(bool state);
 
 	public: // CONFIGURATION ROUTINES
 		// Layer targeting functions
@@ -1616,10 +1619,11 @@ namespace olc
 		else
 			return 0;
 	}
-	/*void PixelGameEngine::ShowSystemCursor(bool state)
+
+	void PixelGameEngine::ShowSystemCursor(bool state)
 	{
 		platform->ShowSystemCursor(state);
-	}*/
+	}
 
 	uint32_t PixelGameEngine::GetFPS() const
 	{
@@ -2873,7 +2877,7 @@ namespace olc
 		if (fBlendFactor < 0.0f) fBlendFactor = 0.0f;
 		if (fBlendFactor > 1.0f) fBlendFactor = 1.0f;
 	}
-		void ShowSystemCursor(bool state);
+	
 	std::stringstream& PixelGameEngine::ConsoleOut()
 	{
 		return ssConsoleOutput;
@@ -4752,6 +4756,8 @@ namespace olc
 		virtual olc::rcode ApplicationCleanUp() override { return olc::rcode::OK; }
 		virtual olc::rcode ThreadStartUp() override { return olc::rcode::OK; }
 
+		virtual void* GetWindowHandle() override { return (void*)&olc_hWnd; }
+
 		virtual olc::rcode ThreadCleanUp() override
 		{
 			renderer->DestroyDevice();
@@ -4873,17 +4879,10 @@ namespace olc
 #endif
 			return olc::OK;
 		}
+
 		virtual olc::rcode ShowSystemCursor(bool state) 
 		{
-			// // show the damn cursor!
-			if (state)
-			{
-				olc_CurrentCursor = olc_VisibleCursor;
-				return olc::OK;
-			}
-
-			// // if we're here, we're hiding the cursor, mwahahahahahaha
-			olc_CurrentCursor = NULL;
+			olc_CurrentCursor = state ? olc_VisibleCursor : NULL;
 			return olc::OK;
 		}
 
@@ -4905,6 +4904,13 @@ namespace olc
 		{
 			switch (uMsg)
 			{
+			case WM_SETCURSOR:
+			{
+				if (LOWORD(lParam) == HTCLIENT) {
+					SetCursor(olc_CurrentCursor);
+					return 1;
+				}
+			}
 			case WM_MOUSEMOVE:
 			{
 				// Thanks @ForAbby (Discord)
@@ -4913,7 +4919,6 @@ namespace olc
 				ptrPGE->olc_UpdateMouse(ix, iy);
 				return 0;
 			}
-			case WM_SETCURSOR: SetCursor(olc_CurrentCursor); return 0;
 			case WM_SIZE:       ptrPGE->olc_UpdateWindowSize(lParam & 0xFFFF, (lParam >> 16) & 0xFFFF);	return 0;
 			case WM_MOUSEWHEEL:	ptrPGE->olc_UpdateMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam));           return 0;
 			case WM_MOUSELEAVE: ptrPGE->olc_UpdateMouseFocus(false);                                    return 0;
@@ -5118,6 +5123,7 @@ namespace olc
 			X11::XStoreName(olc_Display, olc_Window, s.c_str());
 			return olc::OK;
 		}
+
 		virtual olc::rcode ShowSystemCursor(bool state) override
 		{
 			using namespace X11;

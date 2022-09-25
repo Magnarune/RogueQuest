@@ -196,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Buildings\House\house.lua" />
+    <None Include="Assets\Gui\cursors.lua" />
     <None Include="Assets\Maps\BasicMap.lua" />
     <None Include="Assets\Maps\TerraProject.lua" />
     <None Include="Assets\Units\Builder\builder.lua" />

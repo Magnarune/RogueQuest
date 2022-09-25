@@ -33,9 +33,17 @@ public:
         } head;
     };
 
+    struct Cursor {
+		std::unique_ptr<olc::Decal> decal;
+		olc::vf2d scale;
+	};
+
+
 private:
     //Unit name, Unit data
     std::map<std::string, UnitType> assetCache;
+	std::map<std::string, Cursor> assetCursorCache;
+
 public:
 	cAssets();
 	~cAssets();
@@ -44,9 +52,12 @@ public:
     int Animation;
 
     inline bool UnitExists(const std::string& name) { return !!assetCache.count(name); }
-    inline const UnitType& GetUnitData(const std::string& name) { return assetCache[name]; }    
-  
+    inline const UnitType& GetUnitData(const std::string& name) { return assetCache[name]; }
     void LoadUnitAssets();
+  
+    inline Cursor* GetCursor(const std::string& name) { return assetCursorCache.count(name) ? &(assetCursorCache[name]) : nullptr; }
+	bool ImportCursor(const std::string& name, const std::string& path, const olc::vf2d& size = {16.f, 16.f});
+    void LoadCursorAssets();
 };
 
 class TextureCache {

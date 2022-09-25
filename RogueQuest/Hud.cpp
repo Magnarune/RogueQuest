@@ -43,6 +43,15 @@ void Hud::ImportHudAssets() {
 	loadImage("Backround", "Assets/Gui/Options_Backround.png");
     loadImage("Icon", "Assets/Gui/Icon_backround.png");
     loadImage("mBox", "Assets/Gui/MiniBox.png");
+
+    loadImage("Attack", "Assets/Gui/PowerUp_04.png");
+    loadImage("Move", "Assets/Gui/Move.png");
+    loadImage("AtkSpeed", "Assets/Gui/sword_icon.png");
+
+    loadImage("Health", "Assets/Gui/Red.png");
+    loadImage("HealthBox","Assets/Gui/EmptyBar.png");
+    loadImage("HealthBoxBackround", "Assets/Gui/BackRoundBar.png");
+
 }
 
 void Hud::Update(float delta) {
@@ -57,8 +66,8 @@ void Hud::Update(float delta) {
 
 void Hud::RefreshMiniMap() {
     auto& engine = Game_Engine::Current();
-    MiniMap = new olc::Sprite(engine.worldManager->curMap().layerSize.x, engine.worldManager->curMap().layerSize.y);
-    engine.SetDrawTarget(MiniMap);
+  //  MiniMap = new olc::Sprite(engine.worldManager->curMap().layerSize.x, engine.worldManager->curMap().layerSize.y);
+    //engine.SetDrawTarget(MiniMap);
     for (int x = 0; x < engine.worldManager->curMap().layerSize.x; x++) {
         for (int y = 0; y < engine.worldManager->curMap().layerSize.y; y++) {
             CalculateMiniMap(x, y, engine.worldManager->curMap());
@@ -121,7 +130,7 @@ void Hud::DrawHud(){
     if (engine.GetMousePos().x < 79.5 && engine.GetMousePos().y < 13) {
         engine.DrawPartialDecal({ 1.f,0.f }, { 79.5,13 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
         if (engine.GetMouse(0).bPressed)
-            engine.m_nGameMode = engine.Options_Menu;
+            engine.m_nGameMode = engine.MODE_OPTIONS_MENU;
     } else {
         engine.DrawPartialDecal({ 1.f,0.f }, { 79.5,13 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
     }
@@ -131,28 +140,35 @@ void Hud::DrawHud(){
 
 
     
-    if (ucount == 1) {
+    if (ucount == 1) {//If you select one unit
         std::shared_ptr<Unit> unitinfo;
         unitinfo = engine.unitManager->UnitData();
         const auto& data = engine.assetManager->GetUnitData(unitinfo->sUnitName);
-
         std::string _refname = unitinfo->sUnitName + "__tex";
         if (!decals.count(_refname)) {
             loadImage(_refname, data.head.tex_id);
         }
+        float healthMod = unitinfo->fHealth / unitinfo->fMaxHealth;
         olc::Decal* decal = decals[_refname].get();
        
+        engine.DrawPartialDecal({90.f, (float)engine.ScreenHeight() * 0.825f - 8.f }, { 8.f,8.f }, decals["Attack"].get(), { 0,0 }, { 190,190 });
+        engine.DrawStringDecal({99.f,  (float)engine.ScreenHeight() * 0.825f - 4.f }, std::to_string((int)unitinfo->fAttackDamage), olc::WHITE, { 0.4f,0.4f });
 
-        engine.DrawStringDecal({ 88.f,  (float)engine.ScreenHeight() * 0.825f -6.f },"Attack Damage: "+ std::to_string((int)unitinfo->fAttackDamage), olc::WHITE, {0.4f,0.4f});
-        engine.DrawStringDecal({ 88.f,  (float)engine.ScreenHeight() * 0.825f + 0.f }, "Health: " + std::to_string((int)unitinfo->fHealth), olc::WHITE, { 0.4f,0.4f });
-        engine.DrawStringDecal({ 88.f,  (float)engine.ScreenHeight() * 0.825f + 6.f }, "MoveSpeed: " + std::to_string((int)unitinfo->fMoveSpeed), olc::WHITE, { 0.4f,0.4f });
-        engine.DrawStringDecal({ 88.f,  (float)engine.ScreenHeight() * 0.825f + 12.f }, "Atk Speed: " + std::to_string((int)unitinfo->fAttackSpeed), olc::WHITE, { 0.4f,0.4f });
-        engine.DrawStringDecal({ 88.f,  (float)engine.ScreenHeight() * 0.825f + 18.f }, "Attack Logic: " + std::to_string((int)unitinfo->ULogic), olc::WHITE, { 0.4f,0.4f });
-        engine.DrawStringDecal({ 68.f,  (float)engine.ScreenHeight() * 0.825f - 6.f}, unitinfo->sUnitName, olc::BLUE, {0.4f,0.4f});
+        engine.DrawPartialDecal({ 90.f, (float)engine.ScreenHeight() * 0.825f + 2.f }, { 8.f,8.f }, decals["Move"].get(), { 0,0 }, { 32,32 });
+        engine.DrawStringDecal({ 99.f,  (float)engine.ScreenHeight() * 0.825f + 6.f }, std::to_string((int)unitinfo->fMoveSpeed), olc::WHITE, { 0.4f,0.4f });
+
+        engine.DrawPartialDecal({ 90.f, (float)engine.ScreenHeight() * 0.825f + 12.f }, { 8.f,8.f }, decals["AtkSpeed"].get(), { 0,0 }, { 512,512 });
+        engine.DrawStringDecal({ 99.f,  (float)engine.ScreenHeight() * 0.825f + 16.f }, std::to_string((int)unitinfo->fAttackSpeed), olc::WHITE, { 0.4f,0.4f });
+               
+        engine.DrawStringDecal({ 66.f,  (float)engine.ScreenHeight() * 0.825f - 6.f}, unitinfo->sUnitName, olc::BLUE, {0.4f,0.4f});
+
         engine.DrawPartialDecal({ 68.f  ,(float)engine.ScreenHeight() * 0.825f }, { 16.f,16.f }, decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
         engine.DrawPartialDecal({ 68.f  ,(float)engine.ScreenHeight() * 0.825f  }, { 16.f,16.f }, decal, data.head.tl, data.head.sz);
         engine.DrawPartialDecal({ 66.5f, (float)engine.ScreenHeight() * 0.825f - 1.5f }, { 18.5f,18.5f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
 
+        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBoxBackround"].get(), { 0,0 }, { 128,32 });
+        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f * healthMod,4.f}, decals["Health"].get(), {0,0}, {128,32});
+        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBox"].get(), { 0,0 }, { 128,32 });
 
     }
 
@@ -216,11 +232,8 @@ void Hud::DrawHud(){
 
 }
 
-void Hud::CalculateMiniMap(int x, int y, const Map &curent_map) {
+void Hud::CalculateMiniMap(int x, int y, const Map &cur_map) {
     auto& engine = Game_Engine::Current();
     
-
-   
-
 
 }
