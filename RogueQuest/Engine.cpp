@@ -76,7 +76,7 @@ bool Game_Engine::OnUserCreate() {
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
 
-    worldManager->ChangeMap("Basic");
+    worldManager->ChangeMap("Terra");
     SetPixelMode(olc::Pixel::ALPHA);
     ConsoleCaptureStdOut(true);     
     Clear(olc::Pixel(100,164,44,255));
