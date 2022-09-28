@@ -25,38 +25,19 @@ void UnitManager::CollectGarbage() {
 }
 
 size_t UnitManager::GetUnitCount(const std::string& name) {
-    return std::accumulate(unitList.begin(), unitList.end(), 0ULL,
-        [&](size_t n, const auto& unit) -> size_t {
-            return n + (unit.lock()->sUnitName == name);
-        });
+    return name == "" ? unitList.size() :
+        std::accumulate(unitList.begin(), unitList.end(), 0ULL,
+            [&](size_t n, const auto& unit) -> size_t {
+                return n + (unit.lock()->sUnitName == name);
+            });
 }
+
 size_t UnitManager::GetSelectedUnitCount() {
     return std::accumulate(unitList.begin(), unitList.end(), 0ULL,
         [&](size_t n, const auto& unit) -> size_t {
             return n + (unit.lock()->bSelected == true);
         });
 }
-int UnitManager::TotalUnits(){
-    return int(unitList.size());
-}
-olc::vf2d UnitManager::GetUnitPositions(int size) {   
-    
-    olc::vf2d pos;   
-    std::weak_ptr<Unit> unit;     
-  
-        unit = unitList[size];
-
-       return pos = unit.lock()->Position;
-}
-std::shared_ptr<Unit> UnitManager::UnitData() {
-    for (auto& _unit : unitList) {
-        auto unit = _unit.lock();
-        if (unit->bSelected == true)
-            return unit;
-    }
-}
-
-
 
 std::shared_ptr<Unit> UnitManager::GetUnit(const std::string& name, size_t index) {
     size_t n = 0;
@@ -68,22 +49,40 @@ std::shared_ptr<Unit> UnitManager::GetUnit(const std::string& name, size_t index
     }
     return nullptr; // couldn't find unit
 }
-void UnitManager::SelectUnits(olc::vf2d Initial, olc::vf2d Final) {    
-    Game_Engine& engine = Game_Engine::Current();
-    engine.tv.DrawLineDecal(Final,   { Initial.x,Final.y }, olc::RED);//Draw Rectangle
-    engine.tv.DrawLineDecal(Initial, { Initial.x,Final.y }, olc::RED);
-    engine.tv.DrawLineDecal(Initial, { Final.x,Initial.y }, olc::RED);
-    engine.tv.DrawLineDecal(Final,   { Final.x,Initial.y }, olc::RED);
 
-    for(auto& _unit : selectedUnits){
-        if(_unit.expired()) continue;
+std::shared_ptr<Unit> UnitManager::GetUnit(size_t index) {
+    size_t n = 0;
+    for(auto& _unit : unitList){
         auto unit = _unit.lock();
-        unit->bSelected = false;
+        if(n++ == index){
+            return unit;
+        }
     }
-    selectedUnits.clear();
+    return nullptr; // couldn't find unit
+}
 
+void UnitManager::SelectUnit(olc::vf2d mousePos) {
+    for (auto& _unit : unitList) {
+        auto unit = _unit.lock();
+        if(unit->bSelected) continue;
+
+        const float &r = unit->Unit_Collision_Radius;
+        const float r2 = 0; // extra collision distance
+
+        if( (unit->Position - mousePos).mag2() < (r*r + r2*r2)){
+            unit->bSelected = true;
+            selectedUnits.push_back(_unit);
+            break;
+        }
+    }
+
+}
+
+void UnitManager::SelectUnits(olc::vf2d Initial, olc::vf2d Final) {    
     for (auto& _unit : unitList){
         auto unit = _unit.lock();
+        if(unit->bSelected) continue;
+
         if (unit->Position.x > std::min(Initial.x, Final.x) && //Are you the Man in the box?
             unit->Position.y > std::min(Initial.y, Final.y) &&
             unit->Position.x < std::max(Final.x, Initial.x) &&
@@ -93,6 +92,23 @@ void UnitManager::SelectUnits(olc::vf2d Initial, olc::vf2d Final) {
            unit->bSelected = true;
            selectedUnits.push_back(_unit);
         }
+    }
+}
+
+void UnitManager::DeselectUnits() {
+    for(auto& _unit : selectedUnits){
+        if(_unit.expired()) continue;
+        auto unit = _unit.lock();
+        unit->bSelected = false;
+    }
+    selectedUnits.clear();
+}
+
+void UnitManager::StopUnits() {
+    for (auto& _unit : selectedUnits) {
+        if (_unit.expired()) continue;
+        auto unit = _unit.lock();
+        unit->Stop();
     }
 }
 
@@ -108,6 +124,16 @@ void UnitManager::MoveUnits(olc::vf2d Target, bool attackstate){
 
 bool UnitManager::IterateSelectedUnits(std::function<bool(std::shared_ptr<Unit>)> cb) {
     for(auto& unit : selectedUnits) {
+        if(unit.expired()) continue;
+        if(!cb(unit.lock())){
+            return false; // user abort
+        }
+    }
+    return true; // iterate completed successfully
+}
+
+bool UnitManager::IterateAllUnits(std::function<bool(std::shared_ptr<Unit>)> cb) {
+    for(auto& unit : unitList) {
         if(unit.expired()) continue;
         if(!cb(unit.lock())){
             return false; // user abort

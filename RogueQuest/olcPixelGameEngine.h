@@ -141,6 +141,7 @@
 #endif
 
 #include <windows.h>
+#include <windowsx.h>
 #undef _WINSOCKAPI_
 #endif
 
@@ -568,9 +569,9 @@ namespace olc
 	class PGEX;
 
 	// The Static Twins (plus one)
-	static std::unique_ptr<Renderer> renderer;
-	static std::unique_ptr<Platform> platform;
-	static std::map<size_t, uint8_t> mapKeys;
+	extern std::unique_ptr<Renderer> renderer;
+	extern std::unique_ptr<Platform> platform;
+	extern std::map<size_t, uint8_t> mapKeys;
 
 	// O------------------------------------------------------------------------------O
 	// | olc::PixelGameEngine - The main BASE class for your application              |
@@ -963,6 +964,13 @@ namespace olc
 #pragma region pge_implementation
 namespace olc
 {
+	// O------------------------------------------------------------------------------O
+	// | Static Twins IMPLEMENTATION                                                    |
+	// O------------------------------------------------------------------------------O
+	std::unique_ptr<Renderer> renderer;
+	std::unique_ptr<Platform> platform;
+	std::map<size_t, uint8_t> mapKeys;
+	
 	// O------------------------------------------------------------------------------O
 	// | olc::Pixel IMPLEMENTATION                                                    |
 	// O------------------------------------------------------------------------------O
@@ -4908,8 +4916,9 @@ namespace olc
 			{
 				if (LOWORD(lParam) == HTCLIENT) {
 					SetCursor(olc_CurrentCursor);
-					return 1;
+					return 0;
 				}
+				break;
 			}
 			case WM_MOUSEMOVE:
 			{

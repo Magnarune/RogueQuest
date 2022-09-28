@@ -1,15 +1,18 @@
 #pragma once
 
 #include "olcPixelGameEngine.h"
+#include "clock.h"
 
 class UserInput{
+	Clock clipTimer;
 public:
 void GetUserInput();
 void DrawUserInput();
 	UserInput();
 	virtual ~UserInput();
 
-	olc::vf2d Initial_Click;
-	olc::vf2d Final_Click;
+	//Selection click
+	olc::vf2d Initial, Final;
+	bool Clicked = false;
 };
 

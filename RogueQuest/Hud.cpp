@@ -4,10 +4,8 @@ Hud::Hud() {
  
 }
 
-Hud::~Hud() {
-    
+Hud::~Hud() {   
     decals.clear();
-    minimappos.clear();
 }
 
 void Hud::loadImage(const std::string& name, const std::string& path) {
@@ -66,6 +64,7 @@ void Hud::Update(float delta) {
 
 void Hud::RefreshMiniMap() {
     auto& engine = Game_Engine::Current();
+    // * what in the * //
   //  MiniMap = new olc::Sprite(engine.worldManager->curMap().layerSize.x, engine.worldManager->curMap().layerSize.y);
     //engine.SetDrawTarget(MiniMap);
     for (int x = 0; x < engine.worldManager->curMap().layerSize.x; x++) {
@@ -75,13 +74,12 @@ void Hud::RefreshMiniMap() {
         }
     }
     engine.SetDrawTarget(nullptr);
-    
 }
 
 void Hud::DrawMiniMap() {
     //MiniMap Border
     auto& engine = Game_Engine::Current();//46x46 Rect
- engine.DrawPartialDecal({ 6.9f ,(float)engine.ScreenHeight() * 0.825f -15.1f }, { 54.8f,55.3f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+    engine.DrawPartialDecal({ 6.9f ,(float)engine.ScreenHeight() * 0.825f -15.1f }, { 54.8f,55.3f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
  /*engine.DrawLineDecal({ 11,(float)engine.ScreenHeight() * 0.823f - 10 }, { 57,(float)engine.ScreenHeight() * 0.823f - 10 });
  engine.DrawLineDecal({ 11,(float)engine.ScreenHeight() * 0.823f - 10 }, { 11,(float)engine.ScreenHeight() * 0.823f + 36 });
  engine.DrawLineDecal({ 11,(float)engine.ScreenHeight() * 0.823f + 36 }, { 57,(float)engine.ScreenHeight() * 0.823f + 36 });
@@ -92,30 +90,32 @@ void Hud::DrawMiniMap() {
      { 11.f + 1.4375f * (float)engine.worldManager->curMap().topleftTile.x - 11.f + 1.4375f * (float)engine.worldManager->curMap().topleftTile.x ,
      (float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) - (float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * 1.5333f }, decals["mBox"].get(), { 0,0 }, { 104,104 });*/
 
- float CalculateX = 46.f / engine.worldManager->curMap().layerSize.x;
- float CalculateY = 46.f / engine.worldManager->curMap().layerSize.y;
+    float CalculateX = 46.f / engine.worldManager->curMap().layerSize.x;
+    float CalculateY = 46.f / engine.worldManager->curMap().layerSize.y;
 
- engine.DrawLineDecal({ 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * CalculateY },
-         { 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY });
-     engine.DrawLineDecal({ 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * CalculateY },
-         { 11.f + CalculateX * float(engine.worldManager->curMap().bottomRightTile.x) ,(float)engine.ScreenHeight() * 0.823f - 10.0f + (float)engine.worldManager->curMap().topleftTile.y * CalculateY });
+    engine.DrawLineDecal({ 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * CalculateY },
+        { 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY });
+    engine.DrawLineDecal({ 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * CalculateY },
+        { 11.f + CalculateX * float(engine.worldManager->curMap().bottomRightTile.x) ,(float)engine.ScreenHeight() * 0.823f - 10.0f + (float)engine.worldManager->curMap().topleftTile.y * CalculateY });
 
-     engine.DrawLineDecal({ 11.f + CalculateX * float(engine.worldManager->curMap().bottomRightTile.x),(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY },
+    engine.DrawLineDecal({ 11.f + CalculateX * float(engine.worldManager->curMap().bottomRightTile.x),(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY },
         { 11.f + CalculateX * float(engine.worldManager->curMap().bottomRightTile.x),(float)engine.ScreenHeight() * 0.823f - 10.0f + (float)engine.worldManager->curMap().topleftTile.y * CalculateY });
     engine.DrawLineDecal({ 11.f + CalculateX * float(engine.worldManager->curMap().bottomRightTile.x),(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY },
         { 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x ,    (float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY });
-                  //Camera position in minimap
+                //Camera position in minimap
 
-    totalunits = engine.unitManager->TotalUnits();
-    minimappos.resize(totalunits);
-    for(int i=0; i< totalunits;i++)
-        minimappos[i]= engine.unitManager->GetUnitPositions(i);
-    for (int i = 0; i < totalunits; i++) {
-        engine.DrawPartialDecal({ 11.f + 1.4375f * minimappos[i].x / 32.f ,((float)engine.ScreenHeight() * 0.823f - 10.0f + minimappos[i].y / 32.f * 1.5333f)}, {1.4375f,1.5333f}, decals["Pixel"].get(), {0.f,0.f}, {1.f,1.f}, olc::GREY);
-    }
+    // TO DO: This is really bad - even still (was worse)
+    //      Fix by pre-rendering to canvas then using that canvas as the minimap
+    //   < Don't worry about this until later >
 
-   // engine.DrawPartialDecal({ 11.f + 1.4375f * engine.Camera.vPOS.x / 32.f ,((float)engine.ScreenHeight() * 0.823f - 10.0f + engine.Camera.vPOS.y / 32.f * 1.5333f) }, { 1.4375f,1.5333f }, decals["Pixel"].get(), { 0.f,0.f }, { 1.f,1.f }, olc::RED);
-    
+    engine.unitManager->IterateAllUnits([&](auto unit){
+        const auto& pos = unit->Position;
+        engine.DrawPartialDecal({ 11.f + CalculateX * pos.x / 32.f ,((float)engine.ScreenHeight() * 0.823f - 10.0f + pos.y / 32.f * CalculateY)}, { CalculateX ,CalculateY },
+                                    decals["Pixel"].get(), {0.f,0.f}, {1.f,1.f}, olc::GREY);
+        return true;
+    });
+
+    // engine.DrawPartialDecal({ 11.f + 1.4375f * engine.Camera.vPOS.x / 32.f ,((float)engine.ScreenHeight() * 0.823f - 10.0f + engine.Camera.vPOS.y / 32.f * 1.5333f) }, { 1.4375f,1.5333f }, decals["Pixel"].get(), { 0.f,0.f }, { 1.f,1.f }, olc::RED);
 
 }
 
@@ -138,13 +138,12 @@ void Hud::DrawHud(){
     }
 
     engine.DrawStringDecal({ 13.f,4.f }, "Options Menu", olc::WHITE, { 0.5,0.5 });
-    engine.DrawPartialDecal({ 0.f,0.f }, { 5.f,5.f }, decals["Gui"].get(), engine.bIsLocked ? olc::vf2d(21.f,53.f) : olc::vf2d(21.f,17.f), { 17.f, 17.f });
+    engine.DrawPartialDecal({ 0.f,0.f }, { 5.f,5.f }, decals["Gui"].get(), engine.GetLocked() ? olc::vf2d(21.f,53.f) : olc::vf2d(21.f,17.f), { 17.f, 17.f });
 
 
     
     if (ucount == 1) {//If you select one unit
-        std::shared_ptr<Unit> unitinfo;
-        unitinfo = engine.unitManager->UnitData();
+        std::shared_ptr<Unit> unitinfo = engine.unitManager->GetUnit();
         const auto& data = engine.assetManager->GetUnitData(unitinfo->sUnitName);
         std::string _refname = unitinfo->sUnitName + "__tex";
         if (!decals.count(_refname)) {
@@ -175,9 +174,6 @@ void Hud::DrawHud(){
     }
 
 
-
-
-
     //Draws Box to fit all units
     if(ucount > 1){
         
@@ -185,9 +181,7 @@ void Hud::DrawHud(){
 
         olc::vf2d sz = ucount <= 10 ? olc::vf2d(96,16) : (ucount <= 20 ? olc::vf2d(96,24) : olc::vf2d(96,32));
 
-        if(ucount <= 30) {
-            engine.DrawPartialDecal({ 58.f,(float)engine.ScreenHeight() * 0.825f - 3 }, sz, decals["Hud"].get(), { 0,64 }, { 96,32 });
-        }
+        engine.DrawPartialDecal({ 58.f,(float)engine.ScreenHeight() * 0.825f - 3 }, sz, decals["Hud"].get(), { 0,64 }, { 96,32 });
     }
 
     std::map<std::string, int> _types;
@@ -200,6 +194,7 @@ void Hud::DrawHud(){
     ////Draw The number of units on hud
     if (ucount > 1) {
         int i = 0;
+        const size_t max_units = 30;
         for (const auto& [name, count] : _types) {
             const auto& data = engine.assetManager->GetUnitData(name);
 
@@ -214,11 +209,10 @@ void Hud::DrawHud(){
                 engine.DrawPartialDecal({ 63.f + 8 * (i % 10) ,(float)engine.ScreenHeight() * 0.825f + yoffset }, { 8.f,8.f }, decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
                 engine.DrawPartialDecal({ 63.f + 8 * (i % 10),(float)engine.ScreenHeight() * 0.825f + yoffset }, { 8.f,8.f }, decal, data.head.tl, data.head.sz);
                 engine.DrawPartialDecal({ 63.f + 8 * (i % 10),(float)engine.ScreenHeight() * 0.825f + yoffset }, { 8.f,8.f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
-                if (i >= 30) {
-                    engine.DrawDecal({ 63.f + 80,(float)engine.ScreenHeight() * 0.825f + 18.f }, decals["Plus"].get(), { 0.025f,0.025f });
-                }
-
-                ++i;
+                if (++i == max_units) break;
+            }
+            if(ucount > max_units){
+                engine.DrawDecal({ 63.f + 80,(float)engine.ScreenHeight() * 0.825f + 18.f }, decals["Plus"].get(), { 0.025f,0.025f });
             }
         }
     }

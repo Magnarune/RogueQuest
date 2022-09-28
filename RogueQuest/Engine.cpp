@@ -49,7 +49,7 @@ std::string StringifyObject(sol::object val) {
 }
 
 Game_Engine* Game_Engine::self = nullptr;
-Game_Engine::Game_Engine(): curCursor(nullptr) {
+Game_Engine::Game_Engine() {
     sAppName = "Simple RTS GAME";
     self = this;
 }
@@ -85,6 +85,7 @@ bool Game_Engine::OnUserCreate() {
 
     // init default cursor
     curCursor = assetManager->GetCursor("default");
+    SetLocked(true);
 
     return true;
 }
@@ -92,6 +93,11 @@ bool Game_Engine::OnUserCreate() {
 bool Game_Engine::OnUserUpdate(float fElapsedTime) {
     bool rval = true;
     fElapsedTime = std::fmin(1.f, fElapsedTime);
+
+    if(_lastfocus != IsFocused()){
+        _lastfocus = IsFocused();
+        OnFocusUpdated(_lastfocus);
+    }
 
     if (GetKey(olc::Key::F1).bPressed) ConsoleShow(olc::Key::ESCAPE);
 
@@ -135,6 +141,26 @@ void Game_Engine::DrawCursor() {//Assets\Gui\Cursors\cursor.png
     if(curCursor == nullptr) return;
 
     DrawDecal(GetMousePos(), curCursor->decal.get(), curCursor->scale);
+}
+
+void Game_Engine::OnFocusUpdated(bool focus){
+    SetLocked(focus ? bWasLocked : false, false);
+}
+
+void Game_Engine::SetLocked(bool locked, bool permanent) {
+    bIsLocked = locked;
+    if(permanent) bWasLocked = locked;
+    if(bIsLocked && olc::platform){ // lock cursor
+        HWND mHwnd = *(HWND*)olc::platform->GetWindowHandle();
+        GetWindowRect(mHwnd, &my_rect);
+        my_rect.top += 48L;
+        my_rect.left += 16L;
+        my_rect.bottom -= 16L;
+        my_rect.right -= 16L;
+        ClipCursor(&my_rect);
+    } else {
+        ClipCursor(nullptr);
+    }
 }
 
 bool Game_Engine::OnUserDestroy(){

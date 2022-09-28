@@ -46,7 +46,7 @@ return
 		Ammo = 0, 
 		MaxAmmo = 0,
 		MoveSpeed = 40,       
-		AttackRange = 40,
+		AttackRange = 21,
 		AttackDamage = 2,
 		AttackSpeed = 1,
 		SpellCooldown = 1,

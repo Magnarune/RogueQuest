@@ -35,32 +35,18 @@ void UserInput::GetUserInput() {
         engine.Camera.vPOS.y -= engine.tv.GetWorldBR().y - engine.worldManager->curMap().layerSize.y * 32;
     }
 
-    if (engine.GetKey(olc::ESCAPE).bPressed) { engine.bIsLocked = !engine.bIsLocked; }
+    if (engine.GetKey(olc::ESCAPE).bPressed) {
+        engine.SetLocked(!engine.GetLocked());
+    }
 
-    if (!engine.bIsLocked) {
-
-        /*
-        { // lock cursor
-            HWND mHwnd = *(HWND*)olc::platform->GetWindowHandle();
-            GetWindowRect(mHwnd, &engine.my_rect);
-            engine.my_rect.top += 38L;
-            engine.my_rect.left += 2L;
-            engine.my_rect.bottom -= 2L;
-            engine.my_rect.right += 2L;
-            ClipCursor(&engine.my_rect);
-        }
-        */
-
+    if (engine.GetLocked()) {
         if (engine.GetMousePos().x <= 2) { engine.Camera.vVel.x -= 1.0f / engine.tv.GetWorldScale().x; }
         if (engine.GetMousePos().y <= 2) { engine.Camera.vVel.y -= 1.0f / engine.tv.GetWorldScale().x; }
         if (engine.GetMousePos().x >= engine.ScreenWidth() - 3) { engine.Camera.vVel.x += 1.0f / engine.tv.GetWorldScale().x; }
         if (engine.GetMousePos().y >= engine.ScreenHeight() - 3) { engine.Camera.vVel.y += 1.0f / engine.tv.GetWorldScale().x; }
-        engine.Camera.vPOS += engine.Camera.vVel * 2.0f;
+        engine.Camera.vPOS += engine.Camera.vVel * 4.0f;
 
         engine.tv.SetWorldOffset(engine.Camera.vPOS - engine.tv.ScaleToWorld(olc::vf2d(float(engine.ScreenWidth()) / 2.0f, float(engine.ScreenHeight()) / 2.0f)));
-    }
-    else {
-        ClipCursor(nullptr);
     }
 
     engine.tv.SetWorldOffset(engine.Camera.vPOS - engine.tv.ScaleToWorld(olc::vf2d(float(engine.ScreenWidth()) / 2.0f, float(engine.ScreenHeight()) / 2.0f)));
@@ -72,28 +58,28 @@ void UserInput::GetUserInput() {
     }
     if (!engine.IsConsoleShowing()) {
         if (engine.IsFocused()) {
-            if (engine.Clicked == false) {
-                engine.Initial.x = int(1.0f / engine.tv.GetWorldScale().x * engine.GetMouseX() + engine.tv.GetWorldTL().x);
-                engine.Initial.y = int(1.0f / engine.tv.GetWorldScale().y * engine.GetMouseY() + engine.tv.GetWorldTL().y);
+            if (engine.GetMouse(0).bPressed){
+                Clicked = true;
+                Initial = engine.tv.ScreenToWorld(engine.GetMousePos()); // summarizing - haha im tired
             }
-            if (engine.GetMouse(0).bHeld) {
-                engine.Clicked = true;
-                olc::vf2d FinalWH = 1.0f / engine.tv.GetWorldScale() * engine.GetMousePos() + engine.tv.GetWorldTL();
-                engine.unitManager->SelectUnits(engine.Initial, FinalWH);
+            if (engine.GetMouse(0).bHeld){
+                Final = engine.tv.ScreenToWorld(engine.GetMousePos());
+            } else {
+                Clicked = false;
             }
-            else {
-                engine.Clicked = false;
+            if (engine.GetMouse(0).bReleased){
+                if(!engine.GetKey(olc::SHIFT).bHeld) // if not holding shift key (otherwise add to selection)
+                    engine.unitManager->DeselectUnits(); // deselect units before new selection
+                (Initial - Final).mag2() > 16 ? // if larger than 4 px is selected
+                    engine.unitManager->SelectUnits(Initial, Final) : engine.unitManager->SelectUnit(Final);
             }
-            if (engine.GetMouse(1).bPressed) {
-                olc::vf2d FinalWH = 1.0f / engine.tv.GetWorldScale() * engine.GetMousePos() + engine.tv.GetWorldTL();
-                engine.unitManager->MoveUnits(FinalWH, engine.GetKey(olc::Key::A).bHeld);
+            if (engine.GetMouse(1).bPressed){
+                if(!engine.GetKey(olc::SHIFT).bHeld)
+                    engine.unitManager->StopUnits();
+                engine.unitManager->MoveUnits(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld);
             }
-
-            if (engine.GetKey(olc::Key::P).bPressed) {
-                float X = (float)engine.GetMousePos().x / 57.f;
-                engine.tv.GetWorldScale().x;
-                engine.tv.GetWorldScale().y;
-            }
+            if (engine.GetKey(olc::S).bPressed)
+                engine.unitManager->StopUnits();
         }
     }
 }
@@ -101,28 +87,12 @@ void UserInput::GetUserInput() {
 void UserInput::DrawUserInput() {
     auto& engine = Game_Engine::Current();
     if (!engine.IsConsoleShowing()) {
-        if (engine.IsFocused()) {
-            if (engine.Clicked == false) {
-                engine.Initial.x = int(1.0f / engine.tv.GetWorldScale().x * engine.GetMouseX() + engine.tv.GetWorldTL().x);
-                engine.Initial.y = int(1.0f / engine.tv.GetWorldScale().y * engine.GetMouseY() + engine.tv.GetWorldTL().y);
-            }
-            if (engine.GetMouse(0).bHeld) {
-                engine.Clicked = true;
-                olc::vf2d FinalWH = 1.0f / engine.tv.GetWorldScale() * engine.GetMousePos() + engine.tv.GetWorldTL();
-                engine.unitManager->SelectUnits(engine.Initial, FinalWH);
-            }
-            else {
-                engine.Clicked = false;
-            }
-            if (engine.GetMouse(1).bPressed) {
-                olc::vf2d FinalWH = 1.0f / engine.tv.GetWorldScale() * engine.GetMousePos() + engine.tv.GetWorldTL();
-                engine.unitManager->MoveUnits(FinalWH, engine.GetKey(olc::Key::A).bHeld);
-            }
-            if (engine.GetKey(olc::Key::P).bPressed) {
-                float X = (float)engine.GetMousePos().x / 57.f;
-                engine.tv.GetWorldScale().x;
-                engine.tv.GetWorldScale().y;
-            }
+        if (Clicked){
+            olc::Pixel color = olc::RED;
+            engine.tv.DrawLineDecal(Final,   { Initial.x,Final.y }, color);//Draw Rectangle
+            engine.tv.DrawLineDecal(Initial, { Initial.x,Final.y }, color);
+            engine.tv.DrawLineDecal(Initial, { Final.x,Initial.y }, color);
+            engine.tv.DrawLineDecal(Final,   { Final.x,Initial.y }, color);
         }
     }
 }

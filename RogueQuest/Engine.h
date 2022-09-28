@@ -23,6 +23,8 @@ extern std::string StringifyObject(sol::object val);
 class Game_Engine : public olc::PixelGameEngine {
 	static Game_Engine* self;
 
+	bool bIsLocked = false;
+	bool bWasLocked = false;
 public:
     Game_Engine();
     virtual ~Game_Engine();
@@ -30,8 +32,7 @@ public:
 	Game_Engine(const Game_Engine&) = delete;
 	Game_Engine& operator=(const Game_Engine&) = delete;
 
-	
-	cAssets::Cursor* curCursor;
+	cAssets::Cursor* curCursor = nullptr;
 
 	float StandardTime= 0.0f;
 
@@ -40,10 +41,6 @@ public:
 
 	//Cursor BS
 	RECT my_rect;
-
-    //Selection click
-	olc::vi2d Initial;
-	bool Clicked = false;
 
     enum MapModes
     {
@@ -55,6 +52,9 @@ protected:
     virtual bool OnUserCreate() override;
     virtual bool OnUserUpdate(float fElapsedTime) override;   
 	virtual bool OnUserDestroy() override;
+	
+	bool _lastfocus = true;
+	void OnFocusUpdated(bool focus);
 
     virtual bool UpdateLocalMap(float fElapsedTime);
 	virtual bool UpdateOptions(float fElapsedTime);
@@ -76,8 +76,10 @@ public:
 
 	inline void ChangeCursor(const std::string& name) { auto c = assetManager->GetCursor(name); curCursor = c == nullptr ? curCursor : c; }
 	
+	inline bool GetLocked() { return bIsLocked; }
+	void SetLocked(bool locked, bool permanent=true);
+
 	bool OnConsoleCommand(const std::string& stext) override;
-	bool bIsLocked = true;
 	friend class Hud;
 	
 	

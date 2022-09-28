@@ -7,10 +7,18 @@ Unit::Unit() : WorldObject(),
 
 }
 
-Unit::~Unit() {}
+Unit::~Unit() {
+}
 
-void Unit::MarchingtoTarget(olc::vf2d Target){
+void Unit::MarchingtoTarget(const olc::vf2d& Target){
+	MoveQue.push(Target);
 	vTarget = Target;
+}
+void Unit::Stop() {
+	std::queue<olc::vf2d> cq;
+	std::swap(MoveQue, cq);
+	ULogic = Passive;
+	vTarget = { 0.f,0.f };
 }
 
 void Unit::UnitBehaviour() {
@@ -54,6 +62,7 @@ void Unit::UnitBehaviour() {
 		execTimeout.restart();
 	}
 }
+
 void Unit::CheckCollision() {
 	auto& engine = Game_Engine::Current();
 	
@@ -113,66 +122,124 @@ void Unit::Destroy() {
 	WorldObject::Destroy(); // inherit
 }
 
-void Unit::Update(float fElapsedTime) {
-	WorldObject::Update(fElapsedTime); // inherit
-	
-	CheckCollision();
+void Unit::UnitGraphicUpdate() {
 
+	if (fHealth <= 0)
+		Graphic_State = Dead;
+
+	if (Last_State != Graphic_State) {
+		curFrame = 0;
+		Last_State = Graphic_State;
+	}
+}
+
+void Unit::Update(float fElapsedTime) {
+	WorldObject::Update(fElapsedTime);
+
+	CheckCollision();
+	
 	if(fAttackCD > 0)
 		fAttackCD -= fElapsedTime;
 
 	m_fTimer += fElapsedTime;
 	if (m_fTimer >= 0.1f){
 		m_fTimer -= 0.1f;
-		++curFrame %= textureMetadata[Graphic_State].ani_len; // if AnimationLength = 9 this gives {0,1,2,3,4,5,6,7,8}
+		++curFrame %= textureMetadata[Graphic_State].ani_len;
 	}
 
-	if(Graphic_State != Dead){
+
+	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1)
+		Destroy();	
+
+	UpdatePosition(fElapsedTime);
+
+	UnitGraphicUpdate();
+
+}
+
+
+
+void Unit::UpdatePosition(float fElapsedTime) {
+
+	if (Graphic_State != Dead) {
 		UnitBehaviour();
-		if (Hunted.expired()){ // not hunting anything
+		if (MoveQue.size() > 0)
+			vTarget = MoveQue.front();
+
+		if (Hunted.expired()) { 
 			olc::vf2d Distance = vTarget - Position;
-			if(Graphic_State != Walking) Graphic_State = Walking;
-			if (vTarget != olc::vf2d({ 0.f, 0.f })){
+			if (Graphic_State != Walking) Graphic_State = Walking;
+			if (vTarget != olc::vf2d({ 0.f, 0.f })) {
 				olc::vf2d Direction = (vTarget - Position).norm();
 				Velocity = Direction * fMoveSpeed;
-				if (Distance.mag2() < 64) // 8px
-					vTarget = olc::vf2d({ 0.f,0.f });
-			} else {
-				Velocity = {0.f, 0.f};
+				if (Distance.mag2() < 64) {
+					vTarget = { 0.f,0.f };
+					if (!MoveQue.empty()) MoveQue.pop();
+				}
 			}
-		} else { // hunting some world object
+			else {
+				Velocity = { 0.f, 0.f };
+			}
+		}
+		else {
 			olc::vf2d Distance = AttackTarget - Position;
-			if(Distance.mag2() > 32*32){
+			if (Distance.mag2() > 32 * 32) {
 				olc::vf2d Direction = (AttackTarget - Position).norm();
-				Velocity = Direction * fMoveSpeed; //Go to Target
-			} else {
-				Velocity = {0.f, 0.f};
+				Velocity = Direction * fMoveSpeed;
 			}
-			if (Distance.mag2() < fAttackRange*fAttackRange && fAttackCD <= 0){
+			else {
+			
+			}
+			if (Distance.mag2() < fAttackRange * fAttackRange && fAttackCD <= 0) {
 				PerformAttack();
 				Velocity = { 0.f,0.f };
 			}
 		}
 	}
-	
+
 	Position += (Velocity + HitVelocity) * fElapsedTime;
 
 	HitVelocity *= std::pow(0.05f, fElapsedTime);
 
-	if(HitVelocity.mag2() < 4.f)
-		HitVelocity = {0.f, 0.f};
+	if (HitVelocity.mag2() < 4.f)
+		HitVelocity = { 0.f, 0.f };
 
-	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1)
-		Destroy();
-
-	if (fHealth <= 0)
-		Graphic_State = Dead;
-
-	if(Last_State != Graphic_State){
-		curFrame = 0;
-		Last_State = Graphic_State;
-	}
 }
+
+/*
+UpdateUnit(delta){
+CheckCollision();
+
+m_fTimer += fElapsedTime;
+if (m_fTimer >= 0.1f){
+	m_fTimer -= 0.1f;
+	++curFrame %= textureMetadata[Graphic_State].ani_len;
+}
+
+UnitBehaviour(); 
+
+PerformAttack();
+
+GraphicUpdate();
+Destroy();
+
+
+
+
+
+
+
+
+}
+*/
+
+
+
+
+
+
+
+
 
 void Unit::Draw(olc::TileTransformedView* gfx){
 	WorldObject::Draw(gfx); // inherit
@@ -221,6 +288,37 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 	}
 	gfx->DrawPartialDecal((Position - Origin), decals[Graphic_State].get(),
 		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, bSelected ? olc::WHITE : olc::GREY);
+	if (bSelected == true) {
 
+		gfx->DrawLineDecal((Position)+olc::vf2d(-AgroRange, 0), (Position)+olc::vf2d(AgroRange, 0), olc::RED);//AggroRange
+		gfx->DrawLineDecal((Position)+olc::vf2d(0, -AgroRange), (Position)+olc::vf2d(0, AgroRange), olc::RED);
+		gfx->DrawLineDecal((Position)+olc::vf2d(AgroRange, -AgroRange) * sqrtf(2) / 2, (Position)+olc::vf2d(-AgroRange, AgroRange) * sqrtf(2) / 2, olc::RED);
+		gfx->DrawLineDecal((Position)+olc::vf2d(-AgroRange, -AgroRange) * sqrtf(2) / 2, (Position)+olc::vf2d(AgroRange, AgroRange) * sqrtf(2) / 2, olc::RED);
+
+		gfx->DrawLineDecal((Position)+olc::vf2d(-fAttackRange, 0), (Position)+olc::vf2d(fAttackRange, 0), olc::BLUE);//Attack Range
+		gfx->DrawLineDecal((Position)+olc::vf2d(0, -fAttackRange), (Position)+olc::vf2d(0, fAttackRange), olc::BLUE);
+		gfx->DrawLineDecal((Position)+olc::vf2d(fAttackRange, -fAttackRange) * sqrtf(2) / 2, (Position)+olc::vf2d(-fAttackRange, fAttackRange) * sqrtf(2) / 2, olc::BLUE);
+		gfx->DrawLineDecal((Position)+olc::vf2d(-fAttackRange, -fAttackRange) * sqrtf(2) / 2, (Position)+olc::vf2d(fAttackRange, fAttackRange) * sqrtf(2) / 2, olc::BLUE);
+
+		gfx->DrawLineDecal((Position)+olc::vf2d(-Unit_Collision_Radius, 0), (Position)+olc::vf2d(Unit_Collision_Radius, 0), olc::GREY);//Collision Radius
+		gfx->DrawLineDecal((Position)+olc::vf2d(0, -Unit_Collision_Radius), (Position)+olc::vf2d(0, Unit_Collision_Radius), olc::GREY);
+		gfx->DrawLineDecal((Position)+olc::vf2d(Unit_Collision_Radius, -Unit_Collision_Radius) * sqrtf(2) / 2, (Position)+olc::vf2d(-Unit_Collision_Radius, Unit_Collision_Radius) * sqrtf(2) / 2, olc::GREY);
+		gfx->DrawLineDecal((Position)+olc::vf2d(-Unit_Collision_Radius, -Unit_Collision_Radius) * sqrtf(2) / 2, (Position)+olc::vf2d(Unit_Collision_Radius, Unit_Collision_Radius) * sqrtf(2) / 2, olc::GREY);
+
+
+
+		if (vTarget != olc::vf2d(0, 0)) {
+			std::queue<olc::vf2d> ShowQue = MoveQue;
+			while (!ShowQue.empty()) {
+				if (ULogic == Attack) {
+					gfx->DrawLineDecal((Position), ShowQue.front(), olc::RED);
+				}
+				else
+					gfx->DrawLineDecal((Position), ShowQue.front(), olc::WHITE);
+				ShowQue.pop();
+			}
+			
+		}
+	}
 	//gfx->DrawLineDecal(Position - olc::vf2d({ 10.f, 11.f }), Position + olc::vf2d({ 5.f, -11.f }), olc::RED);
 }

@@ -7,16 +7,21 @@
 #include "WorldObject.h"
 #include "clock.h"
 #include <map>
-
+#include <vector>
+#include <queue>
+#include <iostream>
 
 class Unit : public WorldObject {
 	Unit();
 
-	void CheckCollision(); // change eventually
+	void CheckCollision(); 
 	void UnitBehaviour();
+	void UnitGraphicUpdate();
+	void UpdatePosition(float felapstedtime);
 
 	void PerformAttack(); //Kill this fool
-	void MarchingtoTarget(olc::vf2d Target);
+	void MarchingtoTarget(const olc::vf2d& Target);
+	void Stop();
 	
 	void Update(float fElapsedTime) override;
 	void Draw(olc::TileTransformedView* gfx) override;
@@ -33,12 +38,14 @@ public:
 	bool bDead;			// Am I dead?
 	bool bLoot;			//If dead then drop some loot?
 	bool bAttacked;    //Was I attacked
+	
 
+	std::queue<olc::vf2d> MoveQue; //Move to this location
 	olc::vf2d vRubberBand;   // X , Y, Position to go back to
 	olc::vf2d vTarget;       //Where to move after the player clicked on screen
 	olc::vf2d AttackTarget;  // Target you are chasing
 	olc::vf2d HitVelocity;	// velocity for getting kicked
-	float AgroRange = 100; //How far will you look to kill somthing
+	float AgroRange = 80.f; //How far will you look to kill somthing
 	std::weak_ptr<WorldObject> Hunted; // currently attacking a world object
 	// bool bHunting;				//I am hunting prey stop walking to your clicked location
 	float fUnitAngle;        // Angle of the player 0->2pi Radians
@@ -77,9 +84,19 @@ public:
 		Neutral,//if attacked switch to attack mode
 		Passive //stay
 	} ULogic;
+
+	enum Unit_is_Doing {//What is this Unit Doing RIGHT NOW AT THE MOMENT
+		Building,	//if close enough and in build state
+		Repairing,//if close enough to repair
+		Minning, //if close gather material 
+		Hunting,// Move toward enemy target | What if I tell unit to attack a specific target?
+		Petroling, //Going back and forth
+		Moving	// Move toward move target
+	}UWork;
+
 public:
 	void Destroy() override;
-	void KnockBack(float damage, olc::vf2d velocity); //I have benn hit!
+	void KnockBack(float damage, olc::vf2d velocity);
 
 protected:
 
@@ -88,6 +105,7 @@ protected:
 		Attacking,
 		Dead
 	} Graphic_State, Last_State;
+
 	enum{
 		North,
 		West,		
@@ -113,6 +131,5 @@ private:
 };
 
 class Builder : public Unit {
-
 
 };

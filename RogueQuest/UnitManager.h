@@ -311,30 +311,31 @@ public:
 */
 
 class UnitManager {
-    std::vector<std::weak_ptr<Unit>> unitList; // fixed size for optimization
+    std::vector<std::weak_ptr<Unit>> unitList; // copy of just units
 
     void addNewUnit(std::weak_ptr<Unit> unit); // world manager use only
 
-    std::vector<std::weak_ptr<Unit>> selectedUnits;
+    std::vector<std::weak_ptr<Unit>> selectedUnits; // units currently selected - DO NOT USE EXTERNALY
 public:
     UnitManager();
     ~UnitManager() { unitList.clear(); }
 
     void Update(float delta);
     void CollectGarbage();
-
+	
+	void StopUnits();
     void MoveUnits(olc::vf2d Target , bool Attackstate);
+	void SelectUnit(olc::vf2d Mouse);
     void SelectUnits(olc::vf2d Initial, olc::vf2d Final);
-	int TotalUnits();
-
-	olc::vf2d GetUnitPositions(int size);
-	std::shared_ptr<Unit> UnitData();
+	void DeselectUnits();
 
 	size_t GetSelectedUnitCount();
-    size_t GetUnitCount(const std::string& name);
+    size_t GetUnitCount(const std::string& name="");
     std::shared_ptr<Unit> GetUnit(const std::string& name, size_t index=0);
+    std::shared_ptr<Unit> GetUnit(size_t index=0);
 
 	bool IterateSelectedUnits(std::function<bool(std::shared_ptr<Unit>)> cb);
+	bool IterateAllUnits(std::function<bool(std::shared_ptr<Unit>)> cb);
 
     friend class WorldManager;
 

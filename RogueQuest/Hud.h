@@ -27,8 +27,6 @@ public:
 
 	//olc::vf2d cp_MMap{ 11.f + 1.4375f * Camera.vPOS.x / 32.f , ((float)gfx.ScreenHeight() * 0.823f - 10.0f + Camera.vPOS.y / 32.f * 1.5333f) };	olc::Sprite* MiniMap;
 
-	std::vector<olc::vf2d> minimappos;
-	int totalunits;
 	olc::vf2d Pixscale { 1.4375f,1.5333f };
 	
 	friend class Game_Engine;
