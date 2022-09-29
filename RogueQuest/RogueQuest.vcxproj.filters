@@ -60,6 +60,9 @@
     <ClCompile Include="Building.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -113,6 +116,9 @@
     <ClInclude Include="Building.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Units\Mage\Mage.lua">
@@ -145,5 +151,6 @@
     <None Include="Assets\Gui\cursors.lua">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="Config.lua" />
   </ItemGroup>
 </Project>

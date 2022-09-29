@@ -162,6 +162,7 @@
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Building.cpp" />
     <ClCompile Include="clock.cpp" />
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Hud.cpp" />
     <ClCompile Include="HudManager.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="Assets.h" />
     <ClInclude Include="Building.h" />
     <ClInclude Include="clock.h" />
+    <ClInclude Include="Config.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Hud.h" />
     <ClInclude Include="HudManager.h" />
@@ -205,6 +207,7 @@
     <None Include="Assets\Units\Mage\Mage.lua" />
     <None Include="Assets\Units\Sara\sara.lua" />
     <None Include="Assets\Units\Spider\Spider.lua" />
+    <None Include="Config.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

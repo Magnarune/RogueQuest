@@ -13,6 +13,7 @@
 #include "Map.h"
 #include "Hud.h"
 #include "Options.h"
+#include "Config.h"
 #include "UnitManager.h"
 #include "WorldObject.h"
 #include "WorldObjectManager.h"
@@ -38,6 +39,8 @@ public:
 
 	static inline Game_Engine& Current() { assert(self != nullptr); return *self; }
 	olc::TileTransformedView tv;
+
+	std::unique_ptr<Config> config;
 
 	//Cursor BS
 	RECT my_rect;

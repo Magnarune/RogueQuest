@@ -17,6 +17,7 @@ void Unit::MarchingtoTarget(const olc::vf2d& Target){
 void Unit::Stop() {
 	std::queue<olc::vf2d> cq;
 	std::swap(MoveQue, cq);
+	Hunted.reset();
 	ULogic = Passive;
 	vTarget = { 0.f,0.f };
 }
@@ -126,7 +127,6 @@ void Unit::UnitGraphicUpdate() {
 
 	if (fHealth <= 0)
 		Graphic_State = Dead;
-
 	if (Last_State != Graphic_State) {
 		curFrame = 0;
 		Last_State = Graphic_State;
@@ -135,19 +135,14 @@ void Unit::UnitGraphicUpdate() {
 
 void Unit::Update(float fElapsedTime) {
 	WorldObject::Update(fElapsedTime);
-
-	CheckCollision();
-	
+	CheckCollision();	
 	if(fAttackCD > 0)
 		fAttackCD -= fElapsedTime;
-
 	m_fTimer += fElapsedTime;
 	if (m_fTimer >= 0.1f){
 		m_fTimer -= 0.1f;
 		++curFrame %= textureMetadata[Graphic_State].ani_len;
 	}
-
-
 	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1)
 		Destroy();	
 
@@ -183,15 +178,18 @@ void Unit::UpdatePosition(float fElapsedTime) {
 		}
 		else {
 			olc::vf2d Distance = AttackTarget - Position;
+			fUnitAngle = std::fmod(2.0f * PI + (Distance).polar().y, 2.0f * PI);
 			if (Distance.mag2() > 32 * 32) {
 				olc::vf2d Direction = (AttackTarget - Position).norm();
 				Velocity = Direction * fMoveSpeed;
 			}
-			else {
-			
-			}
-			if (Distance.mag2() < fAttackRange * fAttackRange && fAttackCD <= 0) {
-				PerformAttack();
+			else if (Distance.mag2() < fAttackRange * fAttackRange && fAttackCD <= 0) {
+				Graphic_State = Attacking;
+				if (curFrame == textureMetadata[Graphic_State].ani_len - 1) {
+					
+					PerformAttack();
+					Graphic_State = Walking;
+				}
 				Velocity = { 0.f,0.f };
 			}
 		}

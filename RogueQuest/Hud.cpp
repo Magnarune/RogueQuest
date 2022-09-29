@@ -38,7 +38,7 @@ void Hud::ImportHudAssets() {
 	loadImage("Gui",  "Assets/Gui/RPG_GUI.png");
     loadImage("Box", "Assets/Gui/BoxGui.png");
     loadImage("HudBox", "Assets/Gui/Gui_boxboxs.png");
-	loadImage("Backround", "Assets/Gui/Options_Backround.png");
+	loadImage("Background", "Assets/Gui/Options_Backround.png");
     loadImage("Icon", "Assets/Gui/Icon_backround.png");
     loadImage("mBox", "Assets/Gui/MiniBox.png");
 
@@ -48,7 +48,7 @@ void Hud::ImportHudAssets() {
 
     loadImage("Health", "Assets/Gui/Red.png");
     loadImage("HealthBox","Assets/Gui/EmptyBar.png");
-    loadImage("HealthBoxBackround", "Assets/Gui/BackRoundBar.png");
+    loadImage("HealthBoxBackground", "Assets/Gui/BackRoundBar.png");
 
 }
 
@@ -167,9 +167,11 @@ void Hud::DrawHud(){
         engine.DrawPartialDecal({ 68.f  ,(float)engine.ScreenHeight() * 0.825f  }, { 16.f,16.f }, decal, data.head.tl, data.head.sz);
         engine.DrawPartialDecal({ 66.5f, (float)engine.ScreenHeight() * 0.825f - 1.5f }, { 18.5f,18.5f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
 
-        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBoxBackround"].get(), { 0,0 }, { 128,32 });
+        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBoxBackground"].get(), { 0,0 }, { 128,32 });
         engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f * healthMod,4.f}, decals["Health"].get(), {0,0}, {128,32});
         engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBox"].get(), { 0,0 }, { 128,32 });
+        
+        engine.DrawStringDecal({ 64.f,(float)engine.ScreenHeight() * 0.825f + 22.f }, std::to_string((int)unitinfo->fHealth) + "/" +std::to_string((int)unitinfo->fMaxHealth), olc::RED, {0.4f,0.4f});
 
     }
 

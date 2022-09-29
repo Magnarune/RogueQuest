@@ -60,7 +60,7 @@ void UserInput::GetUserInput() {
         if (engine.IsFocused()) {
             if (engine.GetMouse(0).bPressed){
                 Clicked = true;
-                Initial = engine.tv.ScreenToWorld(engine.GetMousePos()); // summarizing - haha im tired
+                Initial = engine.tv.ScreenToWorld(engine.GetMousePos());
             }
             if (engine.GetMouse(0).bHeld){
                 Final = engine.tv.ScreenToWorld(engine.GetMousePos());

@@ -52,7 +52,7 @@ std::shared_ptr<Unit> UnitManager::GetUnit(const std::string& name, size_t index
 
 std::shared_ptr<Unit> UnitManager::GetUnit(size_t index) {
     size_t n = 0;
-    for(auto& _unit : unitList){
+    for(auto& _unit : selectedUnits){
         auto unit = _unit.lock();
         if(n++ == index){
             return unit;
@@ -113,13 +113,15 @@ void UnitManager::StopUnits() {
 }
 
 void UnitManager::MoveUnits(olc::vf2d Target, bool attackstate){
-    for (auto& _unit : selectedUnits){
-        if(_unit.expired()) continue;
+    for (auto& _unit : selectedUnits) {
+        if (_unit.expired()) continue;
         auto unit = _unit.lock();
-
-        unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
-        unit->MarchingtoTarget(Target);
+        if (unit->bFriendly == true) {
+            unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
+            unit->MarchingtoTarget(Target);
+        }
     }
+
 }
 
 bool UnitManager::IterateSelectedUnits(std::function<bool(std::shared_ptr<Unit>)> cb) {

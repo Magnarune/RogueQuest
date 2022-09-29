@@ -60,6 +60,8 @@ bool Game_Engine::OnUserCreate() {
 
     // Setup Controllers    
     TextureCache::InitCache(); // initialize texture cache
+    config.reset(new Config("Config.lua",true)); // config manager
+    
     worldManager.reset(new WorldManager); // create the world manager
     unitManager.reset(new UnitManager); // create the unit manager
     assetManager.reset(new cAssets); // create the asset manager
@@ -76,7 +78,7 @@ bool Game_Engine::OnUserCreate() {
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
 
-    worldManager->ChangeMap("Terra");
+    worldManager->ChangeMap("Basic");
     SetPixelMode(olc::Pixel::ALPHA);
     ConsoleCaptureStdOut(true);     
     Clear(olc::Pixel(100,164,44,255));
@@ -86,6 +88,15 @@ bool Game_Engine::OnUserCreate() {
     // init default cursor
     curCursor = assetManager->GetCursor("default");
     SetLocked(true);
+    if (config->GetValue<bool>("Intro") == true) {
+        worldManager->GenerateUnit("Goblin", { 14.f,13.f });
+        for(int i = 0; i < config->GetValue<int>("debug"); i++) 
+            worldManager->GenerateUnit("Sara", { 13.f,12.f });
+        worldManager->GenerateUnit("Builder", { 12.f,13.f });
+        worldManager->GenerateUnit("Mage", { 13.f,13.f });
+        worldManager->GenerateUnit("Imp", { 12.f,12.f });
+        worldManager->GenerateUnit("Spider", { 12.f,11.f });
+    }
 
     return true;
 }
@@ -191,7 +202,7 @@ const std::map<std::string, CommandFunction> commands = {
                 if (unit) {
                     unit->bFriendly = true;
                     if ( unit->sUnitName == "Goblin" || unit->sUnitName == "Imp")
-                        if(engine.optionsManager->evil == true)unit->bFriendly = false;
+                        if(engine.config->GetValue<bool>("Evil") == true)unit->bFriendly = false;
                     std::cout << name << " created at " << x << ", " << y << "\n";
                 }
             }
@@ -287,6 +298,7 @@ bool Game_Engine::OnConsoleCommand(const std::string& stext) {
     std::string c1;
     ss >> c1;
     if(commands.count(c1)){
+        std::cout << config->GetValue<std::string>("Squelch") << " ";
         commands.at(c1)(ss);
     } else {
         std::cout << "Command " << c1 << " does not exist\n";
