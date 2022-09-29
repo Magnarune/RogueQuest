@@ -3,6 +3,8 @@
 namespace fs = std::filesystem;
 
 Config::Config(const std::string& path, bool autosave): path(path), autosave(autosave) {
+    lua.set_exception_handler(& __internal_lua_exception_handler);
+
     if(fs::exists(fs::path(path))){
         Import();
     } else {
@@ -22,7 +24,7 @@ bool Config::Import() {
 
     try {
         sol::load_result script = lua.load_file(path);
-        sol::protected_function_result rcode = script();
+        sol::function_result rcode = script();
 
         if(!rcode.valid())
             throw std::runtime_error("invalid config file");
@@ -84,4 +86,16 @@ bool Config::Export() {
     }
 
     return true;
+}
+
+int Config::__internal_lua_exception_handler(lua_State* L, sol::optional<const std::exception&> maybe_exception, sol::string_view description) {
+    std::cerr << "Config::__lua_exception_handler: An exception occurred\n";
+	if (maybe_exception) {
+		const std::exception& ex = *maybe_exception;
+		std::cerr << ex.what() << "\n";
+	}
+	else {
+		std::cout.write(description.data(), static_cast<std::streamsize>(description.size()));
+	}
+	return sol::stack::push(L, description);
 }

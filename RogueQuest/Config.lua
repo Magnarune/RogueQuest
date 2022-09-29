@@ -7,8 +7,9 @@ return
 	Evil = true,
 	Intro = true,
 	ScreenHeight = 940,
+	ScreenLocked = false,
 	ScreenWidth = 1080,
 	Sound = true,
-	Squelch = "Hey!",
+	Squelch = 5000.444300,
 	debug = 4,
 }

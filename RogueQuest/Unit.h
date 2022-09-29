@@ -11,9 +11,10 @@
 #include <queue>
 #include <iostream>
 
-class Unit : public WorldObject {
+class Unit : public Collidable {
 	Unit();
 
+	bool OnCollision(std::shared_ptr<Collidable> other) override;
 	void CheckCollision(); 
 	void UnitBehaviour();
 	void UnitGraphicUpdate();

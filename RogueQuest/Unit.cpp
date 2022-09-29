@@ -2,7 +2,7 @@
 #include "Engine.h"
 
 
-Unit::Unit() : WorldObject(),
+Unit::Unit() : Collidable(),
 	vTarget({ 0.f,0.f }), fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0) {
 
 }
@@ -64,6 +64,25 @@ void Unit::UnitBehaviour() {
 	}
 }
 
+bool Unit::OnCollision(std::shared_ptr<Collidable> other) {
+
+	if (other.get() == this || Position == other->Position) return true; // act as a continue
+
+	if(std::shared_ptr<Unit> unit = std::dynamic_pointer_cast<Unit, Collidable>(other)){
+		// unit vs unit
+		float fDistance = sqrtf((Position.x - unit->Position.x) * (Position.x - unit->Position.x) +
+			(Position.y - unit->Position.y) * (Position.y - unit->Position.y));
+		float fOverlap = 0.5f * (fDistance - Unit_Collision_Radius - unit->Unit_Collision_Radius);
+		Position.x -= fOverlap * (Position.x - unit->Position.x) / fDistance;
+		Position.y -= fOverlap * (Position.y - unit->Position.y) / fDistance;
+		unit->Velocity.x += fOverlap * (Position.x - unit->Position.x) / fDistance;
+		unit->Velocity.y += fOverlap * (Position.y - unit->Position.y) / fDistance;
+	}
+
+
+	return true;
+}
+
 void Unit::CheckCollision() {
 	auto& engine = Game_Engine::Current();
 	
@@ -120,7 +139,7 @@ void Unit::KnockBack(float damage, olc::vf2d velocity) {
 // Override Methods
 
 void Unit::Destroy() {
-	WorldObject::Destroy(); // inherit
+	Collidable::Destroy(); // inherit
 }
 
 void Unit::UnitGraphicUpdate() {
@@ -134,7 +153,7 @@ void Unit::UnitGraphicUpdate() {
 }
 
 void Unit::Update(float fElapsedTime) {
-	WorldObject::Update(fElapsedTime);
+	Collidable::Update(fElapsedTime);
 	CheckCollision();	
 	if(fAttackCD > 0)
 		fAttackCD -= fElapsedTime;
@@ -240,7 +259,7 @@ Destroy();
 
 
 void Unit::Draw(olc::TileTransformedView* gfx){
-	WorldObject::Draw(gfx); // inherit
+	Collidable::Draw(gfx); // inherit
 	const auto& meta = textureMetadata[Graphic_State];
 	olc::vi2d SpriteSheetOffset = { 0, 0 };
 	olc::vi2d SpriteSheetTileSize = meta.tile_size;

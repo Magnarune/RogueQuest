@@ -25,13 +25,18 @@ Options::Options() {
         engine.config->SaveValue("Evil", checked);
     }, olc::vf2d(9.f,30.f), engine.config->GetValue<bool>("Evil"));
 
+    optionsMenu["ScreenLocked"] = Option(Option::Checkbox, "Is screen Locked", [&](Option& opt) {
+        auto& engine = Game_Engine::Current();
+        bool checked = std::get<bool>(opt.value);
+        engine.SetLocked(checked);
+        }, olc::vf2d(9.f, 60.f), engine.config->GetValue<bool>("ScreenLocked"));
 
-    // nice .. goes from 50 lines to 3
+
+
     mainMenu["btnGameOpt"] = Option(Option::Button, "Game Options", [&](Option& opt){
         SetGuiMenu("OptionsMenu");
     }, {90.f,60.f});
 
-    // nice .. goes from 50 lines to 3 (total saving now of 94 lines yay)
     mainMenu["btnSoundOpt"] = Option(Option::Button, "Sound Options", [&](Option& opt){
         SetGuiMenu("SoundMenu");
     }, {90.f,30.f});

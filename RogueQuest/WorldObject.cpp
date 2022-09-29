@@ -1,6 +1,9 @@
 #include "WorldObject.h"
 #include "Engine.h"
 #include "WorldObjectManager.h"
+
+#include <type_traits>
+
 /*
     World Object
 */
@@ -22,7 +25,7 @@ void WorldObject::Destroy() {
 }
 
 void WorldObject::Update(float fElapsedTime) {
-	
+
 }
 
 void WorldObject::Draw(olc::TileTransformedView* gfx) {
@@ -40,4 +43,25 @@ void WorldObject::Draw(olc::TileTransformedView* gfx) {
 	circle->Update();
 	pge.tv.DrawDecal((Position - olc::vf2d(_->width, _->height) / 2.f), circle, { 1.f,1.f }, 0x70FFFFFF);
 	*/
+}
+
+
+// __Collisions__
+Collidable::Collidable(): WorldObject() {
+
+}
+
+Collidable::~Collidable() {
+}
+
+void Collidable::Update(float fElapsedTime) {
+	WorldObject::Update(fElapsedTime); // inherit
+
+	CheckCollision(fElapsedTime);
+}
+
+bool Collidable::CheckCollision(float fElapsedTime) {
+
+
+	return true;
 }

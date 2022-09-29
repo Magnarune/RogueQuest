@@ -35,10 +35,6 @@ void UserInput::GetUserInput() {
         engine.Camera.vPOS.y -= engine.tv.GetWorldBR().y - engine.worldManager->curMap().layerSize.y * 32;
     }
 
-    if (engine.GetKey(olc::ESCAPE).bPressed) {
-        engine.SetLocked(!engine.GetLocked());
-    }
-
     if (engine.GetLocked()) {
         if (engine.GetMousePos().x <= 2) { engine.Camera.vVel.x -= 1.0f / engine.tv.GetWorldScale().x; }
         if (engine.GetMousePos().y <= 2) { engine.Camera.vVel.y -= 1.0f / engine.tv.GetWorldScale().x; }

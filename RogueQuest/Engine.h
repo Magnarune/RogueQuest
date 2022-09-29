@@ -24,7 +24,7 @@ extern std::string StringifyObject(sol::object val);
 class Game_Engine : public olc::PixelGameEngine {
 	static Game_Engine* self;
 
-	bool bIsLocked = false;
+	bool bIsLocked;
 	bool bWasLocked = false;
 public:
     Game_Engine();

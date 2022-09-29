@@ -61,7 +61,7 @@ bool Game_Engine::OnUserCreate() {
     // Setup Controllers    
     TextureCache::InitCache(); // initialize texture cache
     config.reset(new Config("Config.lua",true)); // config manager
-    
+    bIsLocked = config->GetValue<bool>("ScreenLocked");
     worldManager.reset(new WorldManager); // create the world manager
     unitManager.reset(new UnitManager); // create the unit manager
     assetManager.reset(new cAssets); // create the asset manager
@@ -159,9 +159,10 @@ void Game_Engine::OnFocusUpdated(bool focus){
 }
 
 void Game_Engine::SetLocked(bool locked, bool permanent) {
-    bIsLocked = locked;
+    config->SaveValue<bool>("ScreenLocked", locked);
+
     if(permanent) bWasLocked = locked;
-    if(bIsLocked && olc::platform){ // lock cursor
+    if(locked && olc::platform){ // lock cursor
         HWND mHwnd = *(HWND*)olc::platform->GetWindowHandle();
         GetWindowRect(mHwnd, &my_rect);
         my_rect.top += 48L;
