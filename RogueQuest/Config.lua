@@ -7,7 +7,7 @@ return
 	Evil = true,
 	Intro = true,
 	ScreenHeight = 940,
-	ScreenLocked = false,
+	ScreenLocked = true,
 	ScreenWidth = 1080,
 	Sound = true,
 	Squelch = 5000.444300,

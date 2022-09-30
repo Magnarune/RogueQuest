@@ -146,6 +146,8 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     if (unit->sUnitName == "Goblin" || unit->sUnitName == "Imp")
         if (engine.config->GetValue<bool>("Evil") == true) unit->bFriendly = false;
 
+    unit->SetMask(Collidable::Mask(unit->Unit_Collision_Radius));
+
     objectList.emplace_back(unit);
     engine.unitManager->addNewUnit(unit);
     return unit;

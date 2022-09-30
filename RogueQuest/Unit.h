@@ -14,8 +14,8 @@
 class Unit : public Collidable {
 	Unit();
 
-	bool OnCollision(std::shared_ptr<Collidable> other) override;
-	void CheckCollision(); 
+	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
+	//void CheckCollision(); 
 	void UnitBehaviour();
 	void UnitGraphicUpdate();
 	void UpdatePosition(float felapstedtime);
@@ -117,6 +117,7 @@ protected:
 	float m_fTimer;		//Graphics timer
 	float m_fStateTick;// How long unil i can do action tick again
 	float fAttackCD; //simple timer before unit can attack
+	bool bAnimating = false; // is animating
 
 private:
 	int curFrame;//current frame of the animation

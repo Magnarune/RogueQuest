@@ -4,7 +4,6 @@
 
 Unit::Unit() : Collidable(),
 	vTarget({ 0.f,0.f }), fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0) {
-
 }
 
 Unit::~Unit() {
@@ -64,12 +63,12 @@ void Unit::UnitBehaviour() {
 	}
 }
 
-bool Unit::OnCollision(std::shared_ptr<Collidable> other) {
+bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 
 	if (other.get() == this || Position == other->Position) return true; // act as a continue
-
 	if(std::shared_ptr<Unit> unit = std::dynamic_pointer_cast<Unit, Collidable>(other)){
 		// unit vs unit
+		/*
 		float fDistance = sqrtf((Position.x - unit->Position.x) * (Position.x - unit->Position.x) +
 			(Position.y - unit->Position.y) * (Position.y - unit->Position.y));
 		float fOverlap = 0.5f * (fDistance - Unit_Collision_Radius - unit->Unit_Collision_Radius);
@@ -77,40 +76,27 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other) {
 		Position.y -= fOverlap * (Position.y - unit->Position.y) / fDistance;
 		unit->Velocity.x += fOverlap * (Position.x - unit->Position.x) / fDistance;
 		unit->Velocity.y += fOverlap * (Position.y - unit->Position.y) / fDistance;
-	}
+		*/
 
+		// move object via collision overlap compensation
+		if(unit->Velocity.mag2() < 4.f){
+			unit->Velocity += Velocity;
+			unit->bAnimating = true;
+			if(Velocity.mag2() > 16.f && unit->Velocity.mag2() > 16.f){
+				vOverlap /= 1.3f;
+			}
+		}
+		predPosition -= vOverlap;
+		Velocity /= 1.05f;
+	}
 
 	return true;
 }
 
-void Unit::CheckCollision() {
-	auto& engine = Game_Engine::Current();
-	
-	auto Collisonlymda = [](olc::vf2d pos1, float Collision_Radius1, olc::vf2d pos2, float Collision_Radius2){
-		return fabs((pos1.x - pos2.x) * (pos1.x - pos2.x) + (pos1.y - pos2.y) * (pos1.y - pos2.y)) <= (Collision_Radius1 + Collision_Radius2) * (Collision_Radius1 + Collision_Radius2);
-	};
-
-	engine.worldManager->IterateObjects([&](std::shared_ptr<WorldObject> obj) {
-		auto other = std::dynamic_pointer_cast<Unit>(obj);
-		if (other == nullptr || other.get() == this || Position == other->Position) return true; // act as a continue
-
-		if (Collisonlymda(Position, Unit_Collision_Radius, other->Position, other->Unit_Collision_Radius)) {
-			float fDistance = sqrtf((Position.x - other->Position.x) * (Position.x - other->Position.x) +
-				(Position.y - other->Position.y) * (Position.y - other->Position.y));
-			float fOverlap = 0.5f * (fDistance - Unit_Collision_Radius - other->Unit_Collision_Radius);
-			Position.x -= fOverlap * (Position.x - other->Position.x) / fDistance;
-			Position.y -= fOverlap * (Position.y - other->Position.y) / fDistance;
-			other->Velocity.x += fOverlap * (Position.x - other->Position.x) / fDistance;
-			other->Velocity.y += fOverlap * (Position.y - other->Position.y) / fDistance;
-		}
-
-		return true;
-	}); // a for loop wrapper for iterating all objects
-}
 
 void Unit::PerformAttack() {
 	Graphic_State = Attacking;
-
+	bAnimating = true;
 	//Projectilemanager->AddProjectile(Unit, AttackTarget)
 
 	if(!Hunted.expired()){
@@ -142,35 +128,24 @@ void Unit::Destroy() {
 	Collidable::Destroy(); // inherit
 }
 
-void Unit::UnitGraphicUpdate() {
-
-	if (fHealth <= 0)
-		Graphic_State = Dead;
-	if (Last_State != Graphic_State) {
-		curFrame = 0;
-		Last_State = Graphic_State;
-	}
-}
 
 void Unit::Update(float fElapsedTime) {
-	Collidable::Update(fElapsedTime);
-	CheckCollision();	
 	if(fAttackCD > 0)
 		fAttackCD -= fElapsedTime;
-	m_fTimer += fElapsedTime;
+	if(bAnimating) m_fTimer += fElapsedTime;	
 	if (m_fTimer >= 0.1f){
 		m_fTimer -= 0.1f;
 		++curFrame %= textureMetadata[Graphic_State].ani_len;
 	}
+
 	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1)
-		Destroy();	
+		Destroy();
 
 	UpdatePosition(fElapsedTime);
 
 	UnitGraphicUpdate();
-
+	Collidable::Update(fElapsedTime);
 }
-
 
 
 void Unit::UpdatePosition(float fElapsedTime) {
@@ -180,83 +155,60 @@ void Unit::UpdatePosition(float fElapsedTime) {
 		if (MoveQue.size() > 0)
 			vTarget = MoveQue.front();
 
-		if (Hunted.expired()) { 
+		if (Hunted.expired()) {
 			olc::vf2d Distance = vTarget - Position;
 			if (Graphic_State != Walking) Graphic_State = Walking;
 			if (vTarget != olc::vf2d({ 0.f, 0.f })) {
 				olc::vf2d Direction = (vTarget - Position).norm();
 				Velocity = Direction * fMoveSpeed;
+				bAnimating = true;
 				if (Distance.mag2() < 64) {
 					vTarget = { 0.f,0.f };
 					if (!MoveQue.empty()) MoveQue.pop();
 				}
-			}
-			else {
+			} else {
 				Velocity = { 0.f, 0.f };
+				bAnimating = false;
 			}
-		}
-		else {
+		} else {
 			olc::vf2d Distance = AttackTarget - Position;
 			fUnitAngle = std::fmod(2.0f * PI + (Distance).polar().y, 2.0f * PI);
 			if (Distance.mag2() > 32 * 32) {
 				olc::vf2d Direction = (AttackTarget - Position).norm();
 				Velocity = Direction * fMoveSpeed;
-			}
-			else if (Distance.mag2() < fAttackRange * fAttackRange && fAttackCD <= 0) {
+			} else if (Distance.mag2() < fAttackRange * fAttackRange && fAttackCD <= 0) {
 				Graphic_State = Attacking;
+				bAnimating = true; // ugh this is all so spaghetti
 				if (curFrame == textureMetadata[Graphic_State].ani_len - 1) {
-					
 					PerformAttack();
 					Graphic_State = Walking;
 				}
 				Velocity = { 0.f,0.f };
 			}
 		}
+	} else {
+		bAnimating = true;
 	}
 
-	Position += (Velocity + HitVelocity) * fElapsedTime;
 
 	HitVelocity *= std::pow(0.05f, fElapsedTime);
 
 	if (HitVelocity.mag2() < 4.f)
 		HitVelocity = { 0.f, 0.f };
+	else
+		bAnimating = true;
 
+	predPosition += HitVelocity * fElapsedTime; // hitback only
 }
 
-/*
-UpdateUnit(delta){
-CheckCollision();
-
-m_fTimer += fElapsedTime;
-if (m_fTimer >= 0.1f){
-	m_fTimer -= 0.1f;
-	++curFrame %= textureMetadata[Graphic_State].ani_len;
+void Unit::UnitGraphicUpdate() {
+	if (fHealth <= 0)
+		Graphic_State = Dead;
+	if (Last_State != Graphic_State) {
+		curFrame = 0;
+		Last_State = Graphic_State;
+	}
 }
-
-UnitBehaviour(); 
-
-PerformAttack();
-
-GraphicUpdate();
-Destroy();
-
-
-
-
-
-
-
-
-}
-*/
-
-
-
-
-
-
-
-
 
 void Unit::Draw(olc::TileTransformedView* gfx){
 	Collidable::Draw(gfx); // inherit
@@ -281,46 +233,37 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 	} else {
 		FacingDirection = South;
 	}
-	//Direction[FacingDirection + 1];
-
 	switch (Graphic_State){
-	case Walking:
-		if (sClock.getMilliseconds() > 100.f) {
-			sClock.restart();
-		}
-		if (Velocity.mag2() > 0.1f) {
+		case Walking:
 			SpriteSheetOffset.y = Direction[FacingDirection] *SpriteSheetTileSize.y;
 			SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;
-		} else {
+			break;
+		case Dead:
+			SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;		
+			break;
+		case Attacking:
 			SpriteSheetOffset.y = Direction[FacingDirection] * SpriteSheetTileSize.y;
-		}
-		break;
-	case Dead:
-		SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;		
-		break;
-	case Attacking:
-		SpriteSheetOffset.y = Direction[FacingDirection] * SpriteSheetTileSize.y;
-		SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;
-		break;
+			SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;
+			break;
 	}
 	gfx->DrawPartialDecal((Position - Origin), decals[Graphic_State].get(),
 		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, bSelected ? olc::WHITE : olc::GREY);
 	if (bSelected == true) {
 
-		gfx->DrawLineDecal((Position)+olc::vf2d(-AgroRange, 0), (Position)+olc::vf2d(AgroRange, 0), olc::RED);//AggroRange
-		gfx->DrawLineDecal((Position)+olc::vf2d(0, -AgroRange), (Position)+olc::vf2d(0, AgroRange), olc::RED);
-		gfx->DrawLineDecal((Position)+olc::vf2d(AgroRange, -AgroRange) * sqrtf(2) / 2, (Position)+olc::vf2d(-AgroRange, AgroRange) * sqrtf(2) / 2, olc::RED);
-		gfx->DrawLineDecal((Position)+olc::vf2d(-AgroRange, -AgroRange) * sqrtf(2) / 2, (Position)+olc::vf2d(AgroRange, AgroRange) * sqrtf(2) / 2, olc::RED);
+		//gfx->DrawLineDecal((Position)+olc::vf2d(-AgroRange, 0), (Position)+olc::vf2d(AgroRange, 0), olc::RED);//AggroRange
+		//gfx->DrawLineDecal((Position)+olc::vf2d(0, -AgroRange), (Position)+olc::vf2d(0, AgroRange), olc::RED);
+		//gfx->DrawLineDecal((Position)+olc::vf2d(AgroRange, -AgroRange) * sqrtf(2) / 2, (Position)+olc::vf2d(-AgroRange, AgroRange) * sqrtf(2) / 2, olc::RED);
+		//gfx->DrawLineDecal((Position)+olc::vf2d(-AgroRange, -AgroRange) * sqrtf(2) / 2, (Position)+olc::vf2d(AgroRange, AgroRange) * sqrtf(2) / 2, olc::RED);
 
-		gfx->DrawLineDecal((Position)+olc::vf2d(-fAttackRange, 0), (Position)+olc::vf2d(fAttackRange, 0), olc::BLUE);//Attack Range
-		gfx->DrawLineDecal((Position)+olc::vf2d(0, -fAttackRange), (Position)+olc::vf2d(0, fAttackRange), olc::BLUE);
-		gfx->DrawLineDecal((Position)+olc::vf2d(fAttackRange, -fAttackRange) * sqrtf(2) / 2, (Position)+olc::vf2d(-fAttackRange, fAttackRange) * sqrtf(2) / 2, olc::BLUE);
-		gfx->DrawLineDecal((Position)+olc::vf2d(-fAttackRange, -fAttackRange) * sqrtf(2) / 2, (Position)+olc::vf2d(fAttackRange, fAttackRange) * sqrtf(2) / 2, olc::BLUE);
+		//gfx->DrawLineDecal((Position)+olc::vf2d(-fAttackRange, 0), (Position)+olc::vf2d(fAttackRange, 0), olc::BLUE);//Attack Range
+		//gfx->DrawLineDecal((Position)+olc::vf2d(0, -fAttackRange), (Position)+olc::vf2d(0, fAttackRange), olc::BLUE);
+		//gfx->DrawLineDecal((Position)+olc::vf2d(fAttackRange, -fAttackRange) * sqrtf(2) / 2, (Position)+olc::vf2d(-fAttackRange, fAttackRange) * sqrtf(2) / 2, olc::BLUE);
+		//gfx->DrawLineDecal((Position)+olc::vf2d(-fAttackRange, -fAttackRange) * sqrtf(2) / 2, (Position)+olc::vf2d(fAttackRange, fAttackRange) * sqrtf(2) / 2, olc::BLUE);
 
-		gfx->DrawLineDecal((Position)+olc::vf2d(-Unit_Collision_Radius, 0), (Position)+olc::vf2d(Unit_Collision_Radius, 0), olc::GREY);//Collision Radius
-		gfx->DrawLineDecal((Position)+olc::vf2d(0, -Unit_Collision_Radius), (Position)+olc::vf2d(0, Unit_Collision_Radius), olc::GREY);
-		gfx->DrawLineDecal((Position)+olc::vf2d(Unit_Collision_Radius, -Unit_Collision_Radius) * sqrtf(2) / 2, (Position)+olc::vf2d(-Unit_Collision_Radius, Unit_Collision_Radius) * sqrtf(2) / 2, olc::GREY);
-		gfx->DrawLineDecal((Position)+olc::vf2d(-Unit_Collision_Radius, -Unit_Collision_Radius) * sqrtf(2) / 2, (Position)+olc::vf2d(Unit_Collision_Radius, Unit_Collision_Radius) * sqrtf(2) / 2, olc::GREY);
+		//gfx->DrawLineDecal((Position)+olc::vf2d(-Unit_Collision_Radius, 0), (Position)+olc::vf2d(Unit_Collision_Radius, 0), olc::GREY);//Collision Radius
+		//gfx->DrawLineDecal((Position)+olc::vf2d(0, -Unit_Collision_Radius), (Position)+olc::vf2d(0, Unit_Collision_Radius), olc::GREY);
+		//gfx->DrawLineDecal((Position)+olc::vf2d(Unit_Collision_Radius, -Unit_Collision_Radius) * sqrtf(2) / 2, (Position)+olc::vf2d(-Unit_Collision_Radius, Unit_Collision_Radius) * sqrtf(2) / 2, olc::GREY);
+		//gfx->DrawLineDecal((Position)+olc::vf2d(-Unit_Collision_Radius, -Unit_Collision_Radius) * sqrtf(2) / 2, (Position)+olc::vf2d(Unit_Collision_Radius, Unit_Collision_Radius) * sqrtf(2) / 2, olc::GREY);
 
 
 
@@ -337,5 +280,4 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 			
 		}
 	}
-	//gfx->DrawLineDecal(Position - olc::vf2d({ 10.f, 11.f }), Position + olc::vf2d({ 5.f, -11.f }), olc::RED);
 }

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <exception>
 #include <string>
+#include <cmath>
 #include <functional>
 #include <cassert>
 
