@@ -7,6 +7,8 @@
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_TransformedView.h"
 #include "sol/sol.hpp"
+#include "Building.h"
+#include "BuildingManager.h"
 #include "UserInput.h"
 #include "Unit.h"
 #include "Assets.h"
@@ -65,6 +67,7 @@ protected:
 public:
 	std::unique_ptr<WorldManager> worldManager;
 	std::unique_ptr<UnitManager> unitManager;
+	std::unique_ptr<BuildingManager> buildingManager;
 	std::unique_ptr<cAssets> assetManager;
 	std::unique_ptr<Hud> hudManager;
 	std::unique_ptr<Options> optionsManager;

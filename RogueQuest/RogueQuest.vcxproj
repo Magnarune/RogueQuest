@@ -163,6 +163,7 @@
   <ItemGroup>
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Building.cpp" />
+    <ClCompile Include="BuildingManager.cpp" />
     <ClCompile Include="clock.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -181,6 +182,7 @@
   <ItemGroup>
     <ClInclude Include="Assets.h" />
     <ClInclude Include="Building.h" />
+    <ClInclude Include="BuildingManager.h" />
     <ClInclude Include="clock.h" />
     <ClInclude Include="Collisions.h" />
     <ClInclude Include="Config.h" />

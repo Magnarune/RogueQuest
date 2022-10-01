@@ -131,8 +131,10 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     static std::map<std::string, Unit::GFXState> States = {
         {"Walking", Unit::Walking},
         {"Attacking", Unit::Attacking},
-        {"Dead", Unit::Dead}
+        {"Dead", Unit::Dead},
+        {"Build", Unit::Build}
     };
+    
     // create decals for each texture state
     for(auto& [ name, meta ] : data.texture_metadata){
         const Unit::GFXState& state = States[name]; // local state ref
@@ -152,6 +154,51 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     engine.unitManager->addNewUnit(unit);
     return unit;
 }
+
+std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name, olc::vf2d pos) {
+    Game_Engine& engine = Game_Engine::Current();
+    auto to_vi2d = [](sol::table obj) -> olc::vi2d {
+        int32_t x = obj[1],
+            y = obj[2];
+        return { x, y };
+    };
+    if (!engine.assetManager->BuildingExists(name)) return nullptr;
+    const auto& data = engine.assetManager->GetBuildingData(name);
+    // make building
+    std::shared_ptr<Building> build;
+    build.reset(new Building());
+
+    if (pos == olc::vf2d(0.f, 0.f))
+        pos = { 10.f,10.f };
+    
+    build->pos = pos;
+    build->name = data.lua_data["Name"];
+    build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
+    build->buildtime = data.lua_data["Parameters"]["BuildTime"];
+    build->health = data.lua_data["Stats"]["Health"];
+    build->maxHealth = data.lua_data["Stats"]["MaxHealth"];
+
+    // make sure to update this when adding new GFXStates - enums don't magically connect to a string
+    static std::map<std::string, Building::GFXState> States = {
+        {"Normal", Building::Normal},
+    };
+
+    // create decals for each texture state
+    for(auto& [ name, meta ] : data.texture_metadata){
+        const Building::GFXState& state = States[name]; // local state ref
+        // load a decal texture and add to decal map
+        std::unique_ptr<olc::Decal> decal;
+        decal.reset(new olc::Decal(TextureCache::GetCache().GetTexture(meta.tex_id)));
+        build->decals.insert_or_assign(state, std::move(decal));
+        // copy texture metadata
+        build->textureMetadata.insert_or_assign(state, meta);
+    }
+    build->SetMask(Collidable::Mask(olc::vf2d(build->Size)));
+    objectList.emplace_back(build);
+    engine.buildingManager->addNewBuilding(build);
+    return build;    
+}
+
 
 std::shared_ptr<Projectile> WorldManager::GenerateProjectile(olc::vf2d start, olc::vf2d Target) {
     std::shared_ptr<Projectile> proj;

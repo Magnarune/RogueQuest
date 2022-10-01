@@ -68,15 +68,7 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 	if (other.get() == this || Position == other->Position) return true; // act as a continue
 	if(std::shared_ptr<Unit> unit = std::dynamic_pointer_cast<Unit, Collidable>(other)){
 		// unit vs unit
-		/*
-		float fDistance = sqrtf((Position.x - unit->Position.x) * (Position.x - unit->Position.x) +
-			(Position.y - unit->Position.y) * (Position.y - unit->Position.y));
-		float fOverlap = 0.5f * (fDistance - Unit_Collision_Radius - unit->Unit_Collision_Radius);
-		Position.x -= fOverlap * (Position.x - unit->Position.x) / fDistance;
-		Position.y -= fOverlap * (Position.y - unit->Position.y) / fDistance;
-		unit->Velocity.x += fOverlap * (Position.x - unit->Position.x) / fDistance;
-		unit->Velocity.y += fOverlap * (Position.y - unit->Position.y) / fDistance;
-		*/
+
 
 		// move object via collision overlap compensation
 		if(unit->Velocity.mag2() < 4.f){

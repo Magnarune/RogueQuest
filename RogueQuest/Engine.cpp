@@ -64,6 +64,7 @@ bool Game_Engine::OnUserCreate() {
     bIsLocked = config->GetValue<bool>("ScreenLocked");
     worldManager.reset(new WorldManager); // create the world manager
     unitManager.reset(new UnitManager); // create the unit manager
+    buildingManager.reset(new BuildingManager); //create the build manager
     assetManager.reset(new cAssets); // create the asset manager
     hudManager.reset(new Hud); // create the Hud
     optionsManager.reset(new Options);//Create options menu
@@ -71,9 +72,10 @@ bool Game_Engine::OnUserCreate() {
     
     // Configure Controllers
     assetManager->LoadUnitAssets();     // Load all the Lua files
-    assetManager->LoadCursorAssets();     // Load all the Cursors
+    assetManager->LoadBuildingAssets(); // Load all the Buildings files
+    assetManager->LoadCursorAssets();   // Load all the Cursors files
     worldManager->ImportMapData();      // Load all the Lua Map files
-    hudManager->ImportHudAssets();      // Load all the Hud assets
+    hudManager->ImportHudAssets();      // Load all the Hud files
 
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
@@ -83,21 +85,10 @@ bool Game_Engine::OnUserCreate() {
     ConsoleCaptureStdOut(true);     
     Clear(olc::Pixel(100,164,44,255));
 
-    ShowSystemCursor(false); // will this work? let's try and fine out
+    ShowSystemCursor(false); // will this work? let's try and fine out????????
 
-    // init default cursor
     curCursor = assetManager->GetCursor("default");
     SetLocked(true);
-    if (config->GetValue<bool>("Intro") == true) {
-        worldManager->GenerateUnit("Goblin", { 14.f,13.f });
-        for(int i = 0; i < config->GetValue<int>("debug"); i++) 
-            worldManager->GenerateUnit("Sara", { 13.f,12.f });
-        worldManager->GenerateUnit("Builder", { 12.f,13.f });
-        worldManager->GenerateUnit("Mage", { 13.f,13.f });
-        worldManager->GenerateUnit("Imp", { 12.f,12.f });
-        worldManager->GenerateUnit("Spider", { 12.f,11.f });
-    }
-
     return true;
 }
 
@@ -169,7 +160,7 @@ void Game_Engine::SetLocked(bool locked, bool permanent) {
         my_rect.left += 16L;
         my_rect.bottom -= 16L;
         my_rect.right -= 16L;
-        ClipCursor(&my_rect);
+      //  ClipCursor(&my_rect);
     } else {
         ClipCursor(nullptr);
     }
@@ -178,6 +169,7 @@ void Game_Engine::SetLocked(bool locked, bool permanent) {
 bool Game_Engine::OnUserDestroy(){
     worldManager.reset();
     unitManager.reset();
+    buildingManager.reset();
     assetManager.reset();
     hudManager.reset();
     optionsManager.reset();
@@ -284,6 +276,18 @@ const std::map<std::string, CommandFunction> commands = {
             std::cout << "Map Changed\n";
         }
     }},
+    {"build", [](std::stringstream& ss) {
+        auto& engine = Game_Engine::Current();
+        std::string name;
+        float x{}, y{};
+        ss >> name;
+        if (!ss.eof()) ss >> x;
+        if (!ss.eof()) ss >> y;
+
+        if (engine.worldManager->GenerateBuilding(name, {x*32.f,y*32.f})) {
+            std::cout << "Building Made\n";
+        }
+        }},
 
     /*
     {"", [](std::stringstream& ss){

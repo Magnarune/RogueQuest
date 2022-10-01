@@ -5,6 +5,7 @@
 #include "WorldObject.h"
 #include "Unit.h"
 #include "Map.h"
+#include "Building.h"
 #include "Projectiles.h"
 #include <vector>
 #include <memory>
@@ -44,6 +45,10 @@ public:
 	inline const Map& curMap() { assert(currentMap.get() != nullptr); return *currentMap; } // do not store
 
 	std::shared_ptr<Unit> GenerateUnit(const std::string& name, olc::vf2d pos={0.f, 0.f});
+
+	std::shared_ptr<Building> GenerateBuilding(const std::string& name, olc::vf2d pos = { 0.f,0.f });
+
     std::shared_ptr<Projectile> GenerateProjectile(olc::vf2d pos, olc::vf2d trgt);
+	
 	friend class WorldObject;
 };

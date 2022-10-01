@@ -31,6 +31,14 @@ return
 			SpriteSize = { 384 , 64 },
 			AnimationLength = math.floor(384 / 64),
 			FileName = "Assets/Units/Builder/Dead.png"
+		},
+		{
+		Name = "Build",
+			TileSize = { 64 , 64 },
+			TargetSize = { 32, 32 },
+			SpriteSize = {448, 256 },
+			AnimationLength = math.floor(384 / 64),
+			FileName = "Assets/Units/Builder/Build.png"
 		}
 	},
 	Parameters = {

@@ -91,6 +91,79 @@ void cAssets::LoadUnitAssets(){
     
 }
 
+void cAssets::LoadBuildingAssets() {
+    sol::table BuildingData, FileSets, BuildingStats, Offsets;
+
+    auto to_vi2d = [](sol::table obj) -> olc::vi2d {
+        int32_t x = obj[1],
+            y = obj[2];
+        return { x, y };
+    };
+    const std::vector<std::string> filePaths = { //
+        "Assets/Buildings/House/house.lua"
+    };
+
+    for (const auto& path : filePaths) {
+        try {
+            sol::load_result script = lua_state.load_file(path);
+
+            sol::protected_function_result rcode = script();
+
+            if (!rcode.valid()) {
+                sol::error e = rcode;
+                std::cout << "error: " << e.what() << "\n";
+            }
+            else {
+                BuildingData = rcode;
+            }
+
+            std::string name = BuildingData["Name"];
+           
+            BuildingType::TextureMetaData meta;
+
+            BuildingType buildingType;
+
+            if (BuildingData["Icon"] != sol::nil) {
+                buildingType.icon.sz = to_vi2d(BuildingData["Icon"]["size"]);
+                buildingType.icon.tex_id = TextureCache::GetCache().CreateTexture(BuildingData["Icon"]["FileName"]);
+            }
+
+            FileSets = BuildingData["Files"];
+            for (int i = 0; i < FileSets.size(); ++i) {
+                sol::table fileset = FileSets[i + 1];
+                // load the Name : TextureID for the Building
+                std::string name = fileset["Name"];
+
+                std::string path = fileset["FileName"];
+                meta.tex_id = TextureCache::GetCache().CreateTexture(path);
+                meta.target_size = to_vi2d(fileset["TargetSize"]);
+                meta.scale = olc::vf2d(meta.target_size);
+                
+                BuildingType::LevelOffset lvlo;
+                Offsets = fileset["LevelOffsets"];
+                for(int i = 0; i < Offsets.size(); ++i){
+                    sol::table level = Offsets[i+1];
+                    std::string name = level["Name"];
+                    lvlo.offset = to_vi2d(level["Offset"]);
+                    lvlo.tile_size = to_vi2d(level["TileSize"]);
+                    meta.level_offsets.insert_or_assign(name, std::move(lvlo));
+                }
+
+                buildingType.texture_metadata.insert_or_assign(name, std::move(meta));
+            }
+
+
+            buildingType.lua_data = std::move(BuildingData);
+
+            buildCache.insert_or_assign(name, std::move(buildingType));
+        }
+        catch (std::exception e) {
+            std::cerr << e.what() << "\n";
+        }
+    }
+
+}
+
 bool cAssets::ImportCursor(const std::string& name, const std::string& path, const olc::vf2d& size) {
     Cursor cursor;
     olc::Sprite* spr = TextureCache::GetCache().GetTexture(

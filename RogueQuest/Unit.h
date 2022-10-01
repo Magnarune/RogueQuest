@@ -80,7 +80,7 @@ public:
 	
 	std::vector<int> Direction;
 	
-	enum UnitLogic{
+	enum UnitLogic {
 		Attack, //If you say attack a pos Search and Kill anything within agro-range
 		Neutral,//if attacked switch to attack mode
 		Passive //stay
@@ -93,7 +93,7 @@ public:
 		Hunting,// Move toward enemy target | What if I tell unit to attack a specific target?
 		Petroling, //Going back and forth
 		Moving	// Move toward move target
-	}UWork;
+	} UWork;
 
 public:
 	void Destroy() override;
@@ -101,13 +101,14 @@ public:
 
 protected:
 
-	enum GFXState{
+	enum GFXState {
 		Walking,
 		Attacking,
-		Dead
+		Dead,
+		Build
 	} Graphic_State, Last_State;
 
-	enum{
+	enum {
 		North,
 		West,		
 		South,
@@ -130,8 +131,4 @@ private:
 	friend class cAssets;
 	friend class UnitManager;
 	friend class WorldManager;
-};
-
-class Builder : public Unit {
-
 };

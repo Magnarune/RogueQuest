@@ -1,55 +1,51 @@
 return 
 {
 	Name = "House", -- used for Engine::GenerateUnit()
-	SpriteOrder= { 0 , 1 , 2 , 3 },--1 = North, 2 = South , 3 =East , 4 = West
+	Icon = {
+		FileName = "Assets/Buildings/House/House_Icon.png",
+		size = {32,32}
+	},
 	Files = 
 	{
 		{
-			Name = "Construction",			
-			TileSize = { 64 , 64 },
-			TargetSize = { 32, 32 },
-			SpriteSize = {576 , 256 },
-			AnimationLength = math.floor(576 / 64), 
-			FileName = "Assets/Building/House.png" ,
-			HeadImage = {
-				tl = {16,136},
-				size = {32,32}
-			}
+			Name = "Normal",
+			TargetSize = { 64, 64 },--Size of Building
+			FileName = "Assets/Buildings/House/House.png",
+			LevelOffsets = {
+				{
+					Name = "Level one",
+					Offset = {171, 64},
+					TileSize = {144, 132}
+				},
+				{
+					Name = "Level two",
+					Offset = {349, 54},
+					TileSize = {167, 140}
+				},
+				{
+					Name = "Level Three",
+					Offset = {515, 47},
+					TileSize = {139, 138}
+				},
+				{
+					Name = "Level Four",
+					Offset = {671, 0},
+					TileSize = {140, 185}
+				}
+			},
 		},
-		{
-			Name = "Level one",
-			TileSize = { 64 , 64 },
-			TargetSize = { 32, 32 },
-			SpriteSize = {448, 256 },
-			AnimationLength = math.floor(448 / 64),
-			FileName = "Assets/Units/Sara/Attack.png"
-		},
-		{
-			Name = "Level two",
-			TileSize = { 64 , 64 },
-			TargetSize = { 32, 32 },
-			SpriteSize = { 384 , 64 },
-			AnimationLength = math.floor(384 / 64),
-			FileName = "Assets/Units/Sara/Dead.png"
-		}
 	},
 	Parameters =
 	{
-		CollisionRadius = 10,
+		CollisionSize = {64,64},
+		BuildTime = 10
 	},
 	Stats =
 	{
-		Health = 10,
-		MaxHealth = 10,
-		Mana = 20,
-		MaxMana = 20,
-		Ammo = 0, 
-		MaxAmmo = 0,
-		MoveSpeed = 40,       
-		AttackRange = 82, 
-		AttackDamage = 2,
-		AttackSpeed = 1,
-		SpellCooldown = 1,
-		KnockBackResist = 1
+		Health = 150,
+		MaxHealth = 150,      
+		AttackRange = 0, 
+		AttackDamage = 0,
+		AttackSpeed = 1
 	},
 }

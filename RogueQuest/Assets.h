@@ -32,6 +32,26 @@ public:
             size_t tex_id;
         } head;
     };
+    struct BuildingType {
+        struct LevelOffset {
+            olc::vi2d offset;
+            olc::vi2d tile_size;
+        };
+        struct TextureMetaData {
+            size_t tex_id;
+            olc::vi2d target_size;
+            olc::vf2d scale;
+            std::map<std::string, LevelOffset> level_offsets;
+        };
+        std::map<std::string, TextureMetaData> texture_metadata;
+        sol::table lua_data;
+
+        struct {
+            olc::vi2d sz;
+            size_t tex_id;
+        } icon;
+    };
+
 
     struct Cursor {
 		std::unique_ptr<olc::Decal> decal;
@@ -42,7 +62,9 @@ public:
 private:
     //Unit name, Unit data
     std::map<std::string, UnitType> assetCache;
-	std::map<std::string, Cursor> assetCursorCache;
+    std::map<std::string, BuildingType> buildCache;
+	
+    std::map<std::string, Cursor> assetCursorCache;
 
 public:
 	cAssets();
@@ -50,10 +72,13 @@ public:
 
 	olc::vi2d vTileSize;
     int Animation;
+    inline bool BuildingExists(const std::string& name) { return !!buildCache.count(name); }
+    inline const BuildingType& GetBuildingData(const std::string& name) { return buildCache[name]; }
 
     inline bool UnitExists(const std::string& name) { return !!assetCache.count(name); }
     inline const UnitType& GetUnitData(const std::string& name) { return assetCache[name]; }
     void LoadUnitAssets();
+    void LoadBuildingAssets();
   
     inline Cursor* GetCursor(const std::string& name) { return assetCursorCache.count(name) ? &(assetCursorCache[name]) : nullptr; }
 	bool ImportCursor(const std::string& name, const std::string& path, const olc::vf2d& size = {16.f, 16.f});
