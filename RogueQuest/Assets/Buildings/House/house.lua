@@ -3,7 +3,8 @@ return
 	Name = "House", -- used for Engine::GenerateUnit()
 	Icon = {
 		FileName = "Assets/Buildings/House/House_Icon.png",
-		size = {32,32}
+		size = {32,32},
+		FileSize = {169,140}
 	},
 	Files = 
 	{
@@ -47,5 +48,10 @@ return
 		AttackRange = 0, 
 		AttackDamage = 0,
 		AttackSpeed = 1
+	},
+	Production = 
+	{
+		Units = {"Mage", "Sara", "Builder"},
+		Research = {"Armor", "Weapon", "Boots"}
 	},
 }

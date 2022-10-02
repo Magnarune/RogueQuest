@@ -129,7 +129,7 @@ void Hud::DrawHud(){
     engine.DrawPartialDecal({ 59.f,(float)engine.ScreenHeight() * 0.75f }, { 96,60.f }, decals["Hud"].get(), { 224,223 }, { 96,97 });
    // engine.DrawPartialDecal({ 185.5f,185.5f }, { 16,16 }, decals["Gui"].get(), { 775,168 }, { 32,32 });
 
-    
+    //Options Icon top left
     if (engine.GetMousePos().x < 79.5 && engine.GetMousePos().y < 13) {
         engine.DrawPartialDecal({ 1.f,0.f }, { 79.5,13 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
         if (engine.GetMouse(0).bPressed)
@@ -137,75 +137,16 @@ void Hud::DrawHud(){
     } else {
         engine.DrawPartialDecal({ 1.f,0.f }, { 79.5,13 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
     }
-
     engine.DrawStringDecal({ 13.f,4.f }, "Options Menu", olc::WHITE, { 0.5,0.5 });
     engine.DrawPartialDecal({ 0.f,0.f }, { 5.f,5.f }, decals["Gui"].get(), engine.GetLocked() ? olc::vf2d(21.f,53.f) : olc::vf2d(21.f,17.f), { 17.f, 17.f });
-
+    //
 
     
     if (ucount == 1) {//If you select one unit
-        std::shared_ptr<Unit> unitinfo = engine.unitManager->GetUnit();
-        const auto& data = engine.assetManager->GetUnitData(unitinfo->sUnitName);
-        std::string _refname = unitinfo->sUnitName + "__tex";
-        if (!decals.count(_refname)) {
-            loadImage(_refname, data.head.tex_id);
-        }
-        float healthMod = unitinfo->fHealth / unitinfo->fMaxHealth;
-        olc::Decal* decal = decals[_refname].get();
-       
-        engine.DrawPartialDecal({90.f, (float)engine.ScreenHeight() * 0.825f - 8.f }, { 8.f,8.f }, decals["Attack"].get(), { 0,0 }, { 190,190 });
-        engine.DrawStringDecal({99.f,  (float)engine.ScreenHeight() * 0.825f - 4.f }, std::to_string((int)unitinfo->fAttackDamage), olc::WHITE, { 0.4f,0.4f });
-
-        engine.DrawPartialDecal({ 90.f, (float)engine.ScreenHeight() * 0.825f + 2.f }, { 8.f,8.f }, decals["Move"].get(), { 0,0 }, { 32,32 });
-        engine.DrawStringDecal({ 99.f,  (float)engine.ScreenHeight() * 0.825f + 6.f }, std::to_string((int)unitinfo->fMoveSpeed), olc::WHITE, { 0.4f,0.4f });
-
-        engine.DrawPartialDecal({ 90.f, (float)engine.ScreenHeight() * 0.825f + 12.f }, { 8.f,8.f }, decals["AtkSpeed"].get(), { 0,0 }, { 512,512 });
-        engine.DrawStringDecal({ 99.f,  (float)engine.ScreenHeight() * 0.825f + 16.f }, std::to_string((int)unitinfo->fAttackSpeed), olc::WHITE, { 0.4f,0.4f });
-               
-        engine.DrawStringDecal({ 66.f,  (float)engine.ScreenHeight() * 0.825f - 6.f}, unitinfo->sUnitName, olc::BLUE, {0.4f,0.4f});
-
-        engine.DrawPartialDecal({ 68.f  ,(float)engine.ScreenHeight() * 0.825f }, { 16.f,16.f }, decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
-        engine.DrawPartialDecal({ 68.f  ,(float)engine.ScreenHeight() * 0.825f  }, { 16.f,16.f }, decal, data.head.tl, data.head.sz);
-        engine.DrawPartialDecal({ 66.5f, (float)engine.ScreenHeight() * 0.825f - 1.5f }, { 18.5f,18.5f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
-
-        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBoxBackground"].get(), { 0,0 }, { 128,32 });
-        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f * healthMod,4.f}, decals["Health"].get(), {0,0}, {128,32});
-        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBox"].get(), { 0,0 }, { 128,32 });
-        
-        engine.DrawStringDecal({ 64.f,(float)engine.ScreenHeight() * 0.825f + 22.f }, std::to_string((int)unitinfo->fHealth) + "/" +std::to_string((int)unitinfo->fMaxHealth), olc::RED, {0.4f,0.4f});
-
+        engine.hudManager->UnitSelected();
     }
    if (bcount == 1) {
-        std::shared_ptr<Building> buildinginfo = engine.buildingManager->GetBuilding();
-         const auto& data = engine.assetManager->GetBuildingData(buildinginfo->name);
-        std::string _refname = buildinginfo->name + "__tex";
-        if (!decals.count(_refname)) {
-            loadImage(_refname, data.icon.tex_id);
-        }
-        //
-        const auto& udata = engine.assetManager->GetUnitData("Mage");
-        if (!decals.count("Mage__tex"))
-            loadImage("Mage__tex", udata.head.tex_id);
-        ////
-        olc::Decal* decalu = decals["Mage__tex"].get();
-
-        float healthMod = buildinginfo->health / buildinginfo->maxHealth;
-        olc::Decal* decal = decals[_refname].get();
-        engine.DrawStringDecal({ 66.f,  (float)engine.ScreenHeight() * 0.825f - 6.f }, buildinginfo->name, olc::BLUE, { 0.4f,0.4f });
-        engine.DrawPartialDecal({ 68.f  ,(float)engine.ScreenHeight() * 0.825f }, { 16.f,16.f }, decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
-        engine.DrawPartialDecal({ 68.f  ,(float)engine.ScreenHeight() * 0.825f }, data.icon.sz / 2.f, decal, { 0,0 }, { 169.f,140.f });
-        engine.DrawPartialDecal({ 66.5f, (float)engine.ScreenHeight() * 0.825f - 1.5f }, { 18.5f,18.5f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
-        
-        engine.DrawPartialDecal({ 186.f  ,(float)engine.ScreenHeight() * 0.825f -12.f }, { 16.f,16.f }, decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
-        engine.DrawPartialDecal({ 186.f  ,(float)engine.ScreenHeight() * 0.825f -12.f }, { 16.f,16.f }, decalu, udata.head.tl, udata.head.sz);
-        engine.DrawPartialDecal({ 186.f, (float)engine.ScreenHeight() * 0.825f - 12.f }, { 16.5f,16.5f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
-
-        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBoxBackground"].get(), { 0,0 }, { 128,32 });
-        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f * healthMod,4.f }, decals["Health"].get(), { 0,0 }, { 128,32 });
-        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBox"].get(), { 0,0 }, { 128,32 });
-        if (engine.GetMouse(0).bPressed && engine.GetMousePos().x > 186 && engine.GetMousePos().y > (float)engine.ScreenHeight() * 0.825f - 12.f) {
-            engine.worldManager->GenerateUnit("Mage", buildinginfo->pos + olc::vf2d(  rand() % 5 + 0.f, 32.f));
-        }
+       engine.hudManager->BuildingSelected();
     }
 
     //Draws Box to fit all units

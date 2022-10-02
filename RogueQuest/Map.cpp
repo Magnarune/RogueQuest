@@ -31,7 +31,7 @@ void Map::UpdateRain(float fElapsedtime) {
         if (Raindrops.Position.y > engine.tv.GetWorldBR().y) {
             Raindrops.Position.y = engine.tv.GetWorldTL().y;
         }
-        engine.tv.DrawDecal(Raindrops.Position, engine.hudManager->decals["Pixel"].get());
+        engine.tv.DrawDecal(Raindrops.Position, engine.hud->decals["Pixel"].get());
        // engine.tv.DrawRotatedDecal(Raindrops.Position, RainDcl, 7 * 3.14159f / 4, { 0,0 }, { 0.01f, 0.01f }, olc::Pixel((int)TimeofDay, (int)TimeofDay, (int)TimeofDay, 255));
     }
 }

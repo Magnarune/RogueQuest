@@ -16,6 +16,7 @@ class Unit : public Collidable {
 
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
 	//void CheckCollision(); 
+	void UnitBuild(std::string Buildingname);
 	void UnitBehaviour();
 	void UnitGraphicUpdate();
 	void UpdatePosition(float felapstedtime);
@@ -39,8 +40,12 @@ public:
 	bool bDead;			// Am I dead?
 	bool bLoot;			//If dead then drop some loot?
 	bool bAttacked;    //Was I attacked
-	
 
+	float buildtime;
+	float progress;
+	bool isconstucting;
+	std::string curbuild;
+	std::vector<std::string> Constructables;
 	std::queue<olc::vf2d> MoveQue; //Move to this location
 	olc::vf2d vRubberBand;   // X , Y, Position to go back to
 	olc::vf2d vTarget;       //Where to move after the player clicked on screen
@@ -131,4 +136,5 @@ private:
 	friend class cAssets;
 	friend class UnitManager;
 	friend class WorldManager;
+	friend class HudManager;
 };

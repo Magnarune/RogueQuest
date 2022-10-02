@@ -13,7 +13,7 @@ Options::Options() {
 
 
     auto& engine = Game_Engine::Current();
-    engine.hudManager->ImportHudAssets();
+    engine.hud->ImportHudAssets();
 
     mainMenu["btnExit"] = Option(Option::Button, "Exit", [&](Option& opt){
         // exit game
@@ -51,15 +51,15 @@ Options::~Options(){
 void Options::MenuSelect() {
     auto& engine = Game_Engine::Current();
     if (engine.GetKey(olc::Key::ESCAPE).bPressed) { engine.m_nGameMode = engine.MODE_LOCAL_MAP; SetGuiMenu("MainMenu"); }
-    engine.DrawDecal({ 0,0 }, engine.hudManager->decals["Background"].get());//Background
+    engine.DrawDecal({ 0,0 }, engine.hud->decals["Background"].get());//Background
 
     if (engine.GetMousePos().x < 169.5f && engine.GetMousePos().y < 13.f && engine.GetMousePos().x > 90.f) {
-        engine.DrawPartialDecal({ 90.f,0.f }, { 79.5,13 }, engine.hudManager->decals["Gui"].get(), { 15,206 }, { 300,52 });
+        engine.DrawPartialDecal({ 90.f,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,206 }, { 300,52 });
         engine.DrawStringDecal({ 102.f,4.f }, "Back to Game", olc::WHITE, { 0.5,0.5 });
         if (engine.GetMouse(0).bPressed) { engine.m_nGameMode = engine.MODE_LOCAL_MAP; SetGuiMenu("MainMenu"); }//Back to game Button This should be a function
     }
     else {
-        engine.DrawPartialDecal({ 90.f,0.f }, { 79.5,13 }, engine.hudManager->decals["Gui"].get(), { 15,128 }, { 300,52 });
+        engine.DrawPartialDecal({ 90.f,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,128 }, { 300,52 });
         engine.DrawStringDecal({ 102.f,4.f }, "Back to Game", olc::WHITE, { 0.5,0.5 });
     }
 
@@ -88,15 +88,15 @@ void Options::DrawGui(OptionsList& options){
 
         switch(option.type){
             case Option::Checkbox:{
-                engine.DrawPartialDecal(option.position, { 5,5 }, engine.hudManager->decals["Gui"].get(), { 152.f,17.f }, { 17.f,17.f });
+                engine.DrawPartialDecal(option.position, { 5,5 }, engine.hud->decals["Gui"].get(), { 152.f,17.f }, { 17.f,17.f });
                 if(std::get<bool>(option.value))
-                    engine.DrawPartialDecal(option.position, { 5,5 }, engine.hudManager->decals["Gui"].get(), { 152.f,61.f }, { 17.f,17.f });
+                    engine.DrawPartialDecal(option.position, { 5,5 }, engine.hud->decals["Gui"].get(), { 152.f,61.f }, { 17.f,17.f });
                 engine.DrawStringDecal(option.position - olc::vf2d({ 16.f, 12.f }), option.label, olc::WHITE, {0.4f,0.4f});
                 localchange = [&](){ option.value = !std::get<bool>(option.value); };
             break;}
             case Option::Button:{
                 olc::vf2d src = hover ? olc::vf2d(15.f,206.f) : olc::vf2d(15.f,128.f);
-                engine.DrawPartialDecal(option.position, size, engine.hudManager->decals["Gui"].get(), src, { 300,52 });
+                engine.DrawPartialDecal(option.position, size, engine.hud->decals["Gui"].get(), src, { 300,52 });
                 engine.DrawStringDecal(option.position + olc::vf2d(12.f, 4.f), option.label, olc::WHITE, { 0.5,0.5 });
             break;}
             case Option::Label:{

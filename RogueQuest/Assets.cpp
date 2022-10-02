@@ -124,6 +124,7 @@ void cAssets::LoadBuildingAssets() {
             BuildingType buildingType;
 
             if (BuildingData["Icon"] != sol::nil) {
+                buildingType.icon.fsz = to_vi2d(BuildingData["Icon"]["FileSize"]);
                 buildingType.icon.sz = to_vi2d(BuildingData["Icon"]["size"]);
                 buildingType.icon.tex_id = TextureCache::GetCache().CreateTexture(BuildingData["Icon"]["FileName"]);
             }

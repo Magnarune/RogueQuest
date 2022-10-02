@@ -4,13 +4,14 @@
 #include "olcPGEX_TransformedView.h"
 #include "WorldObject.h"
 #include "Assets.h"
+#include "Unit.h"
 
 
 class Building: public Collidable {
 	Building();
 public:
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
-	void ProduceUnit();
+	void ProduceUnit(std::string unit);
 	void BuildingBehaviour();
 	void Draw(olc::TileTransformedView* gfx) override;
 	void Update(float delta) override;
@@ -21,6 +22,10 @@ public:
 	olc::vf2d pos;
 	olc::vi2d Size; //Width and height
 	//       stage  offset
+	bool building;
+	float productiontime;
+	std::string unitproduced;
+	std::vector<std::string> unitproduction;
 	std::string curStage = "Level Four"; // current stage - oof good luck with this
 	bool bSelected;
 	int buildtime;

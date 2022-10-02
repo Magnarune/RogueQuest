@@ -26,9 +26,13 @@ void BuildingManager::SelectBuilding(olc::vf2d Mouse) {
         if (build->bSelected) continue;
 
         const float& r = (build->Size.x /2.f);
-        const float r2 = 0; // extra collision distance
-        
-        if ((build->pos + build->Size /2.f - Mouse).mag2() < (r*r + r2 * r2)) {
+        const float r2 = 0.25; // less Grab distance
+
+     
+
+        if (Mouse.x > build->pos.x + r2 && Mouse.y > build->pos.y + r2 &&
+            Mouse.x < build->pos.x + build->Size.x - r2 &&
+            Mouse.y < build->pos.y + build->Size.y - r2) {
             build->bSelected = true;
             selectedBuildings.push_back(_build);
             break;

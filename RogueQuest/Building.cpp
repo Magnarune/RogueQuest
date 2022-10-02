@@ -3,6 +3,7 @@
 
 
 Building::Building(): Collidable() {
+	
 }
 
 Building::~Building() {
@@ -19,12 +20,35 @@ void Building::BuildingBehaviour(){
 	//Defend if can?
 	//Somthing to think about
 }
+void Building::ProduceUnit(std::string unit) {
+	auto& engine = Game_Engine::Current();
+	
+	if (!building) {
+		unitproduced = unit;
+		auto& data = engine.assetManager->GetUnitData(unit);
+		productiontime = data.lua_data["Stats"]["Health"];
+		building = true;
+	}
+	if (m_fTimer > productiontime) {
+		engine.worldManager->GenerateUnit(unit, pos + olc::vf2d({ 0.f, float(rand() % Size.y) }));
+		building = false;		
+	}
+}
+
+
 
 void Building::Update(float delta){
+	
+	Collidable::Update(delta); // Do this better
+	if (!building)
+		m_fTimer = 0.f;
+	else
+		ProduceUnit(unitproduced);
+	    m_fTimer += delta * 2.f;
 
-	Collidable::Update(delta); // inherit
 	if(health < 0)
 		Collidable::Destroy();
+	
 }
 
 void Building::Draw(olc::TileTransformedView* gfx){

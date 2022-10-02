@@ -90,7 +90,6 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 	return true;
 }
 
-
 void Unit::PerformAttack() {
 	Graphic_State = Attacking;
 	bAnimating = true;
@@ -125,15 +124,41 @@ void Unit::Destroy() {
 	Collidable::Destroy(); // inherit
 }
 
+void Unit::UnitBuild(std::string Buildingname) {
+	auto& engine = Game_Engine::Current();
+
+	if (!isconstucting) {
+		
+		curbuild = Buildingname;
+		isconstucting = true;
+		const auto& data = engine.assetManager->GetBuildingData(Buildingname);
+		buildtime = data.lua_data["Parameters"]["BuildTime"];
+	}
+	if (progress > buildtime) {
+		isconstucting = false;
+		progress = 0.f;
+		engine.worldManager->GenerateBuilding(Buildingname, Position);
+		Graphic_State = Walking;
+	}
+}
 
 void Unit::Update(float fElapsedTime) {
 	if(fAttackCD > 0)
 		fAttackCD -= fElapsedTime;
+
+	if (isconstucting) {
+		
+		UnitBuild(curbuild);
+		progress += fElapsedTime * 4.f;
+		bAnimating = true;
+	}
+
 	if(bAnimating) m_fTimer += fElapsedTime;	
 	if (m_fTimer >= 0.1f){
 		m_fTimer -= 0.1f;
 		++curFrame %= textureMetadata[Graphic_State].ani_len;
 	}
+	
 
 	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1)
 		Destroy();
@@ -209,6 +234,8 @@ void Unit::UnitGraphicUpdate() {
 
 void Unit::Draw(olc::TileTransformedView* gfx){
 	Collidable::Draw(gfx); // inherit
+	if(isconstucting)
+		Graphic_State = Build;
 	const auto& meta = textureMetadata[Graphic_State];
 	olc::vi2d SpriteSheetOffset = { 0, 0 };
 	olc::vi2d SpriteSheetTileSize = meta.tile_size;

@@ -14,6 +14,7 @@
 #include "Assets.h"
 #include "Map.h"
 #include "Hud.h"
+#include "HudManager.h"
 #include "Options.h"
 #include "Config.h"
 #include "UnitManager.h"
@@ -58,6 +59,7 @@ protected:
     virtual bool OnUserUpdate(float fElapsedTime) override;   
 	virtual bool OnUserDestroy() override;
 	
+	
 	bool _lastfocus = true;
 	void OnFocusUpdated(bool focus);
 
@@ -69,10 +71,12 @@ public:
 	std::unique_ptr<UnitManager> unitManager;
 	std::unique_ptr<BuildingManager> buildingManager;
 	std::unique_ptr<cAssets> assetManager;
-	std::unique_ptr<Hud> hudManager;
+	std::unique_ptr<Hud> hud;
+	std::unique_ptr<HudManager> hudManager;
+
 	std::unique_ptr<Options> optionsManager;
 	std::unique_ptr<UserInput> userinputs;
-
+	bool ActivityDone;
 	struct Player{
 		olc::vf2d vPOS;
 		olc::vf2d vVel;		

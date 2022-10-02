@@ -105,7 +105,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     unit.reset(new Unit());
     if (pos == olc::vf2d({ 0.f, 0.f }))
         pos = { engine.worldManager->curMap().layerSize.x * 32 / 2.f, engine.worldManager->curMap().layerSize.y *32 / 2.f };
-
+    CheckandFixUnit(pos);
     unit->Position = pos;
 
     // Update Internal Values Of New Unit
@@ -135,6 +135,16 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
         {"Build", Unit::Build}
     };
     
+    if (data.lua_data["Abilities"] != sol::nil) {
+        if (data.lua_data["Abilities"]["Buildables"] != sol::nil) {
+            sol::table Buildables = data.lua_data["Abilities"]["Buildables"];
+            for (int i = 0; i < Buildables.size(); i++) {
+                unit->Constructables.push_back(Buildables[i + 1]);
+            }            
+        }
+
+    }
+
     // create decals for each texture state
     for(auto& [ name, meta ] : data.texture_metadata){
         const Unit::GFXState& state = States[name]; // local state ref
@@ -173,13 +183,18 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
 
     if (pos == olc::vf2d(0.f, 0.f))
         pos = { 10.f,10.f };
-    
+
     build->pos = pos;
     build->name = data.lua_data["Name"];
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];
     build->health = data.lua_data["Stats"]["Health"];
     build->maxHealth = data.lua_data["Stats"]["MaxHealth"];
+
+    sol::table UnitProduction = data.lua_data["Production"]["Units"];
+    for (int i = 0; i < UnitProduction.size(); i++) {
+        build->unitproduction.push_back(UnitProduction[i + 1]);
+    }
 
     // make sure to update this when adding new GFXStates - enums don't magically connect to a string
     static std::map<std::string, Building::GFXState> States = {
@@ -234,4 +249,15 @@ bool WorldManager::ChangeMap(const std::string& name) {
     }
     currentMap = *it;
     return true;
+}
+
+void WorldManager::CheckandFixUnit(olc::vf2d pos) {
+    for (auto& object : objectList) {
+        if (object == nullptr) continue;
+        if (object->Position == pos)
+        {
+            pos += olc::vf2d(-0.5f, 0.5f);
+
+        }
+    }
 }

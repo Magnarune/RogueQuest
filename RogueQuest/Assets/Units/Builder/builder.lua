@@ -59,4 +59,9 @@ return
 		SpellCooldown = 1,
 		KnockBackResist = 1
 	},
+	Abilities = 
+	{
+	Buildables = {"House"},
+	Gathering = true	
+	}
 }

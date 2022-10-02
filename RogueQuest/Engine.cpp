@@ -66,7 +66,8 @@ bool Game_Engine::OnUserCreate() {
     unitManager.reset(new UnitManager); // create the unit manager
     buildingManager.reset(new BuildingManager); //create the build manager
     assetManager.reset(new cAssets); // create the asset manager
-    hudManager.reset(new Hud); // create the Hud
+    hud.reset(new Hud); // create the Hud
+    hudManager.reset(new HudManager);//Creates HudManager
     optionsManager.reset(new Options);//Create options menu
     userinputs.reset(new UserInput); //Create user options    
     
@@ -75,7 +76,7 @@ bool Game_Engine::OnUserCreate() {
     assetManager->LoadBuildingAssets(); // Load all the Buildings files
     assetManager->LoadCursorAssets();   // Load all the Cursors files
     worldManager->ImportMapData();      // Load all the Lua Map files
-    hudManager->ImportHudAssets();      // Load all the Hud files
+    hud->ImportHudAssets();      // Load all the Hud files
 
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
@@ -121,15 +122,15 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
 
     if(!IsConsoleShowing()){
         unitManager->Update(fElapsedTime);
-        hudManager->Update(fElapsedTime);
+        hud->Update(fElapsedTime);
         worldManager->Update(fElapsedTime);
     }
 
     worldManager->CollectGarbage();
     worldManager->Draw();
     userinputs->DrawUserInput();
-    hudManager->DrawHud();
-    hudManager->DrawMiniMap();
+    hud->DrawHud();
+    hud->DrawMiniMap();
 
     return true;
 };
@@ -171,7 +172,7 @@ bool Game_Engine::OnUserDestroy(){
     unitManager.reset();
     buildingManager.reset();
     assetManager.reset();
-    hudManager.reset();
+    hud.reset();
     optionsManager.reset();
     userinputs.reset();
     TextureCache::FreeCache();

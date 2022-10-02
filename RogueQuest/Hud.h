@@ -31,4 +31,5 @@ public:
 	olc::vf2d Pixscale { 1.4375f,1.5333f };
 	
 	friend class Game_Engine;
+	friend class HudManager;
 };
