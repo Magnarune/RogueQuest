@@ -36,14 +36,19 @@ void Unit::UnitBehaviour() {
 				if(Hunted.expired()){
 					engine.worldManager->IterateObjects([&](std::shared_ptr<WorldObject> obj) {
 						auto other = std::dynamic_pointer_cast<Unit>(obj);
+						
 						if (other == nullptr || other.get() == this || Position == other->Position) return true; // act as a continue
 						float distance = (other->Position - Position).mag2();
+						
 						if (bFriendly != other->bFriendly && distance < AgroRange*AgroRange) {
 							Hunted = other;
 							return false;
 						}
+						
 						return true;
+						
 					});
+
 				} else {
 					auto other = Hunted.lock();
 					float distance = (other->Position - Position).mag2();
@@ -99,11 +104,11 @@ void Unit::PerformAttack() {
 			if(std::isnan(vel.x) || std::isnan(vel.y)) vel = {0.f,0.f};
 			unit->KnockBack(fAttackDamage, vel);
 		}
-		/*
+		
 		if(auto building = std::dynamic_pointer_cast<Building>(obj)){
 
 		}
-		*/
+		
 	}
 	
 	fAttackCD = fSpellCooldown; // reset time for next attack

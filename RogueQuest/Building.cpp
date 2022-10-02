@@ -9,7 +9,8 @@ Building::~Building() {
 }
 
 bool Building::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
-
+	if (other.get() == this || Position == other->Position) return true;
+	predPosition -= vOverlap;
 		return false;
 }
 void Building::BuildingBehaviour(){
@@ -22,6 +23,8 @@ void Building::BuildingBehaviour(){
 void Building::Update(float delta){
 
 	Collidable::Update(delta); // inherit
+	if(health < 0)
+		Collidable::Destroy();
 }
 
 void Building::Draw(olc::TileTransformedView* gfx){
@@ -30,5 +33,5 @@ void Building::Draw(olc::TileTransformedView* gfx){
 
 	Collidable::Draw(gfx); // inherit
 
-	gfx->DrawPartialDecal(pos, Size, decals[Graphic_State].get(), stage.offset, stage.tile_size, olc::WHITE);
+	gfx->DrawPartialDecal(pos, Size, decals[Graphic_State].get(), stage.offset, stage.tile_size, bSelected ? olc::WHITE : olc::GREY);
 }

@@ -52,6 +52,7 @@ void UserInput::GetUserInput() {
         engine.Camera.vPOS = { (MouseNorm.x * (float)engine.worldManager->curMap().layerSize.x * 32.f) - float(engine.ScreenWidth() / 2.f),(MouseNorm.y * (float)engine.worldManager->curMap().layerSize.y * 32.f) - float(engine.ScreenHeight() / 2.f) };
         engine.tv.SetWorldOffset(engine.Camera.vPOS - engine.tv.ScaleToWorld(olc::vf2d(float(engine.ScreenWidth()) / 2.0f, float(engine.ScreenHeight()) / 2.0f)));
     }
+    
     if (!engine.IsConsoleShowing()) {
         if (engine.IsFocused()) {
             if (engine.GetMouse(0).bPressed){
@@ -68,6 +69,8 @@ void UserInput::GetUserInput() {
                     engine.unitManager->DeselectUnits(); // deselect units before new selection
                 (Initial - Final).mag2() > 16 ? // if larger than 4 px is selected
                     engine.unitManager->SelectUnits(Initial, Final) : engine.unitManager->SelectUnit(Final);
+                engine.buildingManager->DeselectBuildings();
+                engine.buildingManager->SelectBuilding(Final);
             }
             if (engine.GetMouse(1).bPressed){
                 if(!engine.GetKey(olc::SHIFT).bHeld)

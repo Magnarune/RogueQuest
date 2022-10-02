@@ -87,12 +87,12 @@ public:
 	} ULogic;
 
 	enum Unit_is_Doing {//What is this Unit Doing RIGHT NOW AT THE MOMENT
-		Building,	//if close enough and in build state
-		Repairing,//if close enough to repair
-		Minning, //if close gather material 
-		Hunting,// Move toward enemy target | What if I tell unit to attack a specific target?
-		Petroling, //Going back and forth
-		Moving	// Move toward move target
+		isBuilding,	//if close enough and in build state
+		isRepairing,//if close enough to repair
+		isMinning, //if close gather material 
+		isHunting,// Move toward enemy target | What if I tell unit to attack a specific target?
+		isPetroling, //Going back and forth
+		isMoving	// Move toward move target
 	} UWork;
 
 public:

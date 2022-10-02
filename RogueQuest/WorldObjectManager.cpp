@@ -145,8 +145,11 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
         // copy texture metadata
         unit->textureMetadata.insert_or_assign(state, meta);
     }
+    unit->bFriendly = true;
     if (unit->sUnitName == "Goblin" || unit->sUnitName == "Imp")
         if (engine.config->GetValue<bool>("Evil") == true) unit->bFriendly = false;
+        
+    
 
     unit->SetMask(Collidable::Mask(unit->Unit_Collision_Radius));
 

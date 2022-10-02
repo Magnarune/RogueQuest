@@ -1,13 +1,18 @@
+#pragma once
+#include <numeric>
+#include <algorithm>
+#include <functional>
+#include <memory>
 #include "Building.h"
 #include "WorldObjectManager.h"
 
 class BuildingManager {
 
-    std::vector<std::weak_ptr<Building>> BuildingList; // copy of just units
+    std::vector<std::weak_ptr<Building>> BuildingList; 
 
-    void addNewBuilding(std::weak_ptr<Building> Building); // world manager use only
+    void addNewBuilding(std::weak_ptr<Building> Building); 
 
-    std::vector<std::weak_ptr<Unit>> selectedBuildings; // units currently selected - DO NOT USE EXTERNALY
+    std::vector<std::weak_ptr<Building>> selectedBuildings;
 public:
     BuildingManager();
     ~BuildingManager() { BuildingList.clear(); }
@@ -23,11 +28,11 @@ public:
 
     size_t GetSelectedBuildingCount();
     size_t GetBuildingCount(const std::string& name = "");
-    std::shared_ptr<Unit> GetBuilding(const std::string& name, size_t index = 0);
-    std::shared_ptr<Unit> GetBuilding(size_t index = 0);
+    std::shared_ptr<Building> GetBuilding(const std::string& name, size_t index = 0);
+    std::shared_ptr<Building> GetBuilding(size_t index = 0);
 
-    bool IterateSelectetBuildings(std::function<bool(std::shared_ptr<Unit>)> cb);
-    bool IterateAllBuildings(std::function<bool(std::shared_ptr<Unit>)> cb);
+    bool IterateSelectetBuildings(std::function<bool(std::shared_ptr<Building>)> cb);
+    bool IterateAllBuildings(std::function<bool(std::shared_ptr<Building>)> cb);
 
     friend class WorldManager;
 

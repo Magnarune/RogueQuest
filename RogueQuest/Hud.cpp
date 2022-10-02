@@ -122,6 +122,7 @@ void Hud::DrawMiniMap() {
 void Hud::DrawHud(){
     auto& engine = Game_Engine::Current();
     const auto& ucount = engine.unitManager->GetSelectedUnitCount();
+    const auto& bcount = engine.buildingManager->GetSelectedBuildingCount();
     //Draw Bottom of screen    
     engine.DrawPartialDecal({ 1.f,(float)engine.ScreenHeight() * 0.75f }, { (float)engine.ScreenWidth(),(float)engine.ScreenHeight() * 0.75f }, decals["Hud"].get(), { 0,96 }, { 96,96 });
     engine.DrawDecal({ 152.f,177.f }, decals["HudBox"].get(),{0.66f,0.63f});
@@ -174,7 +175,38 @@ void Hud::DrawHud(){
         engine.DrawStringDecal({ 64.f,(float)engine.ScreenHeight() * 0.825f + 22.f }, std::to_string((int)unitinfo->fHealth) + "/" +std::to_string((int)unitinfo->fMaxHealth), olc::RED, {0.4f,0.4f});
 
     }
+   if (bcount == 1) {
+        std::shared_ptr<Building> buildinginfo = engine.buildingManager->GetBuilding();
+         const auto& data = engine.assetManager->GetBuildingData(buildinginfo->name);
+        std::string _refname = buildinginfo->name + "__tex";
+        if (!decals.count(_refname)) {
+            loadImage(_refname, data.icon.tex_id);
+        }
+        //
+        const auto& udata = engine.assetManager->GetUnitData("Mage");
+        if (!decals.count("Mage__tex"))
+            loadImage("Mage__tex", udata.head.tex_id);
+        ////
+        olc::Decal* decalu = decals["Mage__tex"].get();
 
+        float healthMod = buildinginfo->health / buildinginfo->maxHealth;
+        olc::Decal* decal = decals[_refname].get();
+        engine.DrawStringDecal({ 66.f,  (float)engine.ScreenHeight() * 0.825f - 6.f }, buildinginfo->name, olc::BLUE, { 0.4f,0.4f });
+        engine.DrawPartialDecal({ 68.f  ,(float)engine.ScreenHeight() * 0.825f }, { 16.f,16.f }, decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+        engine.DrawPartialDecal({ 68.f  ,(float)engine.ScreenHeight() * 0.825f }, data.icon.sz / 2.f, decal, { 0,0 }, { 169.f,140.f });
+        engine.DrawPartialDecal({ 66.5f, (float)engine.ScreenHeight() * 0.825f - 1.5f }, { 18.5f,18.5f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+        
+        engine.DrawPartialDecal({ 186.f  ,(float)engine.ScreenHeight() * 0.825f -12.f }, { 16.f,16.f }, decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+        engine.DrawPartialDecal({ 186.f  ,(float)engine.ScreenHeight() * 0.825f -12.f }, { 16.f,16.f }, decalu, udata.head.tl, udata.head.sz);
+        engine.DrawPartialDecal({ 186.f, (float)engine.ScreenHeight() * 0.825f - 12.f }, { 16.5f,16.5f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+
+        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBoxBackground"].get(), { 0,0 }, { 128,32 });
+        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f * healthMod,4.f }, decals["Health"].get(), { 0,0 }, { 128,32 });
+        engine.DrawPartialDecal({ 64.f, (float)engine.ScreenHeight() * 0.825f + 17.f }, { 22.f,4.f }, decals["HealthBox"].get(), { 0,0 }, { 128,32 });
+        if (engine.GetMouse(0).bPressed && engine.GetMousePos().x > 186 && engine.GetMousePos().y > (float)engine.ScreenHeight() * 0.825f - 12.f) {
+            engine.worldManager->GenerateUnit("Mage", buildinginfo->pos + olc::vf2d(  rand() % 5 + 0.f, 32.f));
+        }
+    }
 
     //Draws Box to fit all units
     if(ucount > 1){
@@ -199,7 +231,8 @@ void Hud::DrawHud(){
         const size_t max_units = 30;
         for (const auto& [name, count] : _types) {
             const auto& data = engine.assetManager->GetUnitData(name);
-
+            
+            
             std::string _refname = name + "__tex";
             if (!decals.count(_refname)) {
                 loadImage(_refname, data.head.tex_id);
