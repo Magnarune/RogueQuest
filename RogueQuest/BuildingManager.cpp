@@ -20,6 +20,7 @@ void  BuildingManager::CollectGarbage() {
     }
 }
 
+
 void BuildingManager::SelectBuilding(olc::vf2d Mouse) {
     for (auto& _build : BuildingList) {
         auto build = _build.lock();
@@ -30,15 +31,26 @@ void BuildingManager::SelectBuilding(olc::vf2d Mouse) {
 
      
 
-        if (Mouse.x > build->pos.x + r2 && Mouse.y > build->pos.y + r2 &&
-            Mouse.x < build->pos.x + build->Size.x - r2 &&
-            Mouse.y < build->pos.y + build->Size.y - r2) {
+        if (Mouse.x > build->Position.x + r2 && Mouse.y > build->Position.y + r2 &&
+            Mouse.x < build->Position.x + build->Size.x - r2 &&
+            Mouse.y < build->Position.y + build->Size.y - r2) {
             build->bSelected = true;
             selectedBuildings.push_back(_build);
             break;
         }
     }
 }
+
+void BuildingManager::SentUnitslocation(olc::vf2d Mouse) {
+
+    for (auto& _build : selectedBuildings) {
+        if (_build.expired()) continue;
+        auto build = _build.lock();
+        build->sentUnitPos = Mouse;
+    }
+}
+
+
 void BuildingManager::DeselectBuildings() {
     for (auto& _build : selectedBuildings) {
         if (_build.expired()) continue;

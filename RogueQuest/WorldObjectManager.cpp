@@ -85,9 +85,7 @@ std::shared_ptr<WorldObject> WorldManager::FindObject(size_t index) {
 bool WorldManager::IterateObjects(std::function<bool(std::shared_ptr<WorldObject>)> cb) {
     for(auto& object : objectList) {
         if(object == nullptr) continue;
-        if(!cb(object)){
-            return false; // user abort
-        }
+        cb(object);
     }
     return true; // iterate completed successfully
 }
@@ -162,6 +160,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     
 
     unit->SetMask(Collidable::Mask(unit->Unit_Collision_Radius));
+    
 
     objectList.emplace_back(unit);
     engine.unitManager->addNewUnit(unit);
@@ -183,8 +182,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
 
     if (pos == olc::vf2d(0.f, 0.f))
         pos = { 10.f,10.f };
-
-    build->pos = pos;
+    build->Position = pos;
     build->name = data.lua_data["Name"];
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];
@@ -260,4 +258,8 @@ void WorldManager::CheckandFixUnit(olc::vf2d pos) {
 
         }
     }
+}
+
+void WorldManager::AssignUnitLocation(std::shared_ptr<Unit> unit) {
+    //if()
 }

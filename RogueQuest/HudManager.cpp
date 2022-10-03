@@ -104,21 +104,37 @@ void HudManager::BuildingSelected() {
     engine.DrawPartialDecal({ 64.f, IconY + 17.f }, { 22.f,4.f }, engine.hud->decals["HealthBoxBackground"].get(), { 0,0 }, { 128,32 });
     engine.DrawPartialDecal({ 64.f, IconY + 17.f }, { 22.f * healthMod,4.f }, engine.hud->decals["Health"].get(), { 0,0 }, { 128,32 });
     engine.DrawPartialDecal({ 64.f, IconY + 17.f }, { 22.f,4.f }, engine.hud->decals["HealthBox"].get(), { 0,0 }, { 128,32 });
+
+    if (buildinginfo->sentUnitPos != olc::vf2d(0.f, 0.f))
+        engine.tv.DrawPartialDecal(buildinginfo->sentUnitPos - olc::vf2d(0.f,14.f), olc::vf2d(8.f, 14.f), engine.hud->decals["flag"].get(), {0.f,0.f}, {113.f,218.f});
+
     if (buildinginfo->building) {
-        const auto& data = engine.assetManager->GetUnitData(buildinginfo->unitproduced);
-        std::string _refname = buildinginfo->unitproduced + "__tex";
+        const auto& data = engine.assetManager->GetUnitData(buildinginfo->productionQue.front());
+        std::string _refname = buildinginfo->productionQue.front() + "__tex";
         if (!engine.hud->decals.count(_refname)) {
             engine.hud->loadImage(_refname, data.head.tex_id);
         }
         olc::Decal* decal = engine.hud->decals[_refname].get();
         engine.DrawStringDecal({ 92.f,   IconY - 13.f },"Producing: " + buildinginfo->unitproduced, olc::BLUE, {0.4f,0.4f});
-        engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBoxBackground"].get(), { 0,0 }, { 128,32 });
-        engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f * productionMod,4.f }, engine.hud->decals["Health"].get(), { 0,0 }, { 128,32 },olc::YELLOW);
+        engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBoxBackground"].get(), { 0,0.f }, { 128,32 });
+        engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f * productionMod,4.f }, engine.hud->decals["Health"].get(), { 0.f,0.f }, { 128,32 },olc::YELLOW);
         engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBox"].get(), { 0,0 }, { 128,32 });
 
         engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
         engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.f,16.f }, decal, data.head.tl, data.head.sz);
         engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+        if (buildinginfo->productionQue.size() < 10) {
+            engine.DrawPartialDecal({ 104.f , IconY + 15.f }, { 8.f,8.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+            engine.DrawStringDecal({ 106.f, IconY + 17.f }, std::to_string(buildinginfo->productionQue.size()), olc::GREEN, { 0.8f,0.8f });
+            engine.DrawPartialDecal({ 104.f , IconY + 15.f }, { 8.5f,8.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+        }
+        else
+        {
+            engine.DrawPartialDecal({ 104.f , IconY + 15.f }, { 16.f,8.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+            engine.DrawStringDecal({ 106.f, IconY + 17.f }, std::to_string(buildinginfo->productionQue.size()), olc::GREEN, { 0.8f,0.8f });
+            engine.DrawPartialDecal({ 104.f , IconY + 15.f }, { 16.5f,8.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+
+        }
 
     }
     BuildingAbilities(buildinginfo);
@@ -141,7 +157,8 @@ void HudManager::BuildingAbilities(std::shared_ptr<Building> buildinginfo) {
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
 
         if (Button({ 186.f + 16.f * (i % 3), IconY - 12.f + yoffset }, engine.GetMousePos(), { 16,16 })) {
-            buildinginfo->ProduceUnit(buildinginfo->unitproduction[i]);
+            buildinginfo->productionQue.push(buildinginfo->unitproduction[i]);
+            //buildinginfo->ProduceUnit(buildinginfo->unitproduction[i]);
             //engine.worldManager->GenerateUnit(buildinginfo->unitproduction[i], buildinginfo->pos + olc::vf2d(rand() % 5 + 0.f, 32.f));
         }
     }

@@ -12,6 +12,8 @@ class Building: public Collidable {
 public:
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
 	void ProduceUnit(std::string unit);
+	void SentUnitlocation(olc::vf2d Mouse);
+	void SendUnit(std::shared_ptr<Unit> unit);
 	void BuildingBehaviour();
 	void Draw(olc::TileTransformedView* gfx) override;
 	void Update(float delta) override;
@@ -19,11 +21,14 @@ public:
 	virtual ~Building();
 	bool bFriendly;
 	std::string name;
-	olc::vf2d pos;
 	olc::vi2d Size; //Width and height
+	//
+	olc::vf2d sentUnitPos;
 	//       stage  offset
 	bool building;
+	bool startbuilding;
 	float productiontime;
+	std::queue<std::string> productionQue;
 	std::string unitproduced;
 	std::vector<std::string> unitproduction;
 	std::string curStage = "Level Four"; // current stage - oof good luck with this

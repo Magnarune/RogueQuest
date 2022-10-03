@@ -50,6 +50,8 @@ void Hud::ImportHudAssets() {
     loadImage("HealthBox","Assets/Gui/EmptyBar.png");
     loadImage("HealthBoxBackground", "Assets/Gui/BackRoundBar.png");
 
+    loadImage("flag","Assets/Gui/flag.png");
+
 }
 
 void Hud::Update(float delta) {

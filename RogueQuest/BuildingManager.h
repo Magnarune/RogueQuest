@@ -31,6 +31,8 @@ public:
     std::shared_ptr<Building> GetBuilding(const std::string& name, size_t index = 0);
     std::shared_ptr<Building> GetBuilding(size_t index = 0);
 
+    void SentUnitslocation(olc::vf2d Target);
+
     bool IterateSelectetBuildings(std::function<bool(std::shared_ptr<Building>)> cb);
     bool IterateAllBuildings(std::function<bool(std::shared_ptr<Building>)> cb);
 

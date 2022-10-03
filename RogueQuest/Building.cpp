@@ -10,9 +10,7 @@ Building::~Building() {
 }
 
 bool Building::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
-	if (other.get() == this || Position == other->Position) return true;
-	predPosition -= vOverlap;
-		return false;
+	return false;
 }
 void Building::BuildingBehaviour(){
 	//Do nothing
@@ -23,29 +21,36 @@ void Building::BuildingBehaviour(){
 void Building::ProduceUnit(std::string unit) {
 	auto& engine = Game_Engine::Current();
 	
-	if (!building) {
-		unitproduced = unit;
+	if (!building) {		
 		auto& data = engine.assetManager->GetUnitData(unit);
 		productiontime = data.lua_data["Stats"]["Health"];
 		building = true;
 	}
 	if (m_fTimer > productiontime) {
-		engine.worldManager->GenerateUnit(unit, pos + olc::vf2d({ 0.f, float(rand() % Size.y) }));
-		building = false;		
+		if (!productionQue.empty()) productionQue.pop();
+		SendUnit(engine.worldManager->GenerateUnit(unit, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
+		building = false;
+		startbuilding = false;
 	}
 }
 
+void Building::SendUnit(std::shared_ptr<Unit> unit) {
+	if (sentUnitPos != olc::vf2d(0.f,0.f))
+		unit->vTarget = sentUnitPos;
+}
 
-
-void Building::Update(float delta){
-	
+void Building::Update(float delta){	
 	Collidable::Update(delta); // Do this better
-	if (!building)
-		m_fTimer = 0.f;
-	else
-		ProduceUnit(unitproduced);
-	    m_fTimer += delta * 2.f;
 
+	if (productionQue.size() > 0 && !startbuilding) {
+		startbuilding = true;
+		m_fTimer = 0.f;
+		ProduceUnit(productionQue.front());		
+	}
+	if (building) {
+		ProduceUnit(productionQue.front());
+		m_fTimer += delta * 2.f;
+	}
 	if(health < 0)
 		Collidable::Destroy();
 	
@@ -57,5 +62,5 @@ void Building::Draw(olc::TileTransformedView* gfx){
 
 	Collidable::Draw(gfx); // inherit
 
-	gfx->DrawPartialDecal(pos, Size, decals[Graphic_State].get(), stage.offset, stage.tile_size, bSelected ? olc::WHITE : olc::GREY);
+	gfx->DrawPartialDecal(Position, Size, decals[Graphic_State].get(), stage.offset, stage.tile_size, bSelected ? olc::WHITE : olc::GREY);
 }

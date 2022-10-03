@@ -41,6 +41,8 @@ public:
 	bool bLoot;			//If dead then drop some loot?
 	bool bAttacked;    //Was I attacked
 
+	std::weak_ptr<Building> homebuilding;
+
 	float buildtime;
 	float progress;
 	bool isconstucting;

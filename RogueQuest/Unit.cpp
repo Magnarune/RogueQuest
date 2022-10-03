@@ -71,7 +71,7 @@ void Unit::UnitBehaviour() {
 bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 
 	if (other.get() == this || Position == other->Position) return true; // act as a continue
-	if(std::shared_ptr<Unit> unit = std::dynamic_pointer_cast<Unit, Collidable>(other)){
+	if(std::shared_ptr<Unit> unit = std::dynamic_pointer_cast<Unit>(other)){
 		// unit vs unit
 
 
@@ -86,6 +86,11 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 		predPosition -= vOverlap;
 		Velocity /= 1.05f;
 	}
+	if(std::shared_ptr<Building> build = std::dynamic_pointer_cast<Building>(other)){
+		// unit vs building
+		predPosition -= vOverlap;
+	}
+
 
 	return true;
 }
@@ -137,7 +142,7 @@ void Unit::UnitBuild(std::string Buildingname) {
 	if (progress > buildtime) {
 		isconstucting = false;
 		progress = 0.f;
-		engine.worldManager->GenerateBuilding(Buildingname, Position);
+		engine.worldManager->GenerateBuilding(Buildingname, Position + olc::vf2d(3.f,3.f));
 		Graphic_State = Walking;
 	}
 }
@@ -269,6 +274,11 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 			SpriteSheetOffset.y = Direction[FacingDirection] * SpriteSheetTileSize.y;
 			SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;
 			break;
+		case Build:
+			SpriteSheetOffset.y = Direction[FacingDirection] * SpriteSheetTileSize.y;
+			SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;
+			break;
+
 	}
 	gfx->DrawPartialDecal((Position - Origin), decals[Graphic_State].get(),
 		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, bSelected ? olc::WHITE : olc::GREY);

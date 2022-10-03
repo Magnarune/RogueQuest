@@ -65,7 +65,7 @@ void UserInput::GetUserInput() {
                 Clicked = false;
             }
             if (engine.GetMouse(0).bReleased){
-                if(!engine.GetKey(olc::SHIFT).bHeld || !engine.ActivityDone) // if not holding shift key (otherwise add to selection)
+                if(!engine.GetKey(olc::SHIFT).bHeld && !engine.ActivityDone) // if not holding shift key (otherwise add to selection)
                     engine.unitManager->DeselectUnits(); // deselect units before new selection
                 (Initial - Final).mag2() > 16 ? // if larger than 4 px is selected
                     engine.unitManager->SelectUnits(Initial, Final) : engine.unitManager->SelectUnit(Final);
@@ -79,6 +79,7 @@ void UserInput::GetUserInput() {
                 if(!engine.GetKey(olc::SHIFT).bHeld)
                     engine.unitManager->StopUnits();
                 engine.unitManager->MoveUnits(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld);
+                engine.buildingManager->SentUnitslocation(engine.tv.ScreenToWorld(engine.GetMousePos()));
             }
             if (engine.GetKey(olc::S).bPressed)
                 engine.unitManager->StopUnits();

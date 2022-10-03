@@ -72,7 +72,7 @@ void Collidable::Update(float fElapsedTime) {
 	Position = predPosition;
 }
 
-// I want this collision code i put a lot of work into it - x)
+
 bool Collidable::CheckCollision(float fElapsedTime) {
 	auto& engine = Game_Engine::Current();
 
@@ -102,8 +102,7 @@ bool Collidable::CheckCollision(float fElapsedTime) {
 		if(std::isnan(overlap)) overlap = 0;
 
 		if(overlap > 0.01f) // collision
-			return OnCollision(other, ray.norm() * overlap * (inverse ? 1.f : -1.f));
-
+			return OnCollision(other, ray.norm() * overlap);
 		return true;
 	};
 
@@ -143,7 +142,7 @@ bool Collidable::CheckCollision(float fElapsedTime) {
 				return checkRvR(obj, mask.rect, rect);
 			}
 			if(mask.type == Mask::MASK_CIRCLE){
-				return checkRvC(obj, mask.radius, rect);
+				return checkRvC(obj, mask.radius, rect,true);
 			}
 		}
 		if(obj->mask.type == Mask::MASK_CIRCLE){
@@ -152,10 +151,11 @@ bool Collidable::CheckCollision(float fElapsedTime) {
 				return checkCvC(obj, mask.radius, radius);
 			}
 			if(mask.type == Mask::MASK_RECTANGLE){
-				return checkRvC(obj, radius, mask.rect, true);
+				return checkRvC(obj, radius, mask.rect);
 			}
 		}
 
 		throw std::runtime_error("Invalid collision detection reached");
 	});
+	return true;
 }
