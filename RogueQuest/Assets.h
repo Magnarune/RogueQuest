@@ -25,6 +25,7 @@ public:
             olc::vf2d scale;
         };
         std::map<std::string, TextureMetaData> texture_metadata;
+        std::vector<std::string> task_abilities;
         sol::table lua_data;
 
         struct {
@@ -62,7 +63,7 @@ public:
 
 private:
     //Unit name, Unit data
-    std::map<std::string, UnitType> assetCache;
+    std::map<std::string, UnitType> unitCache;
     std::map<std::string, BuildingType> buildCache;
 	
     std::map<std::string, Cursor> assetCursorCache;
@@ -76,8 +77,8 @@ public:
     inline bool BuildingExists(const std::string& name) { return !!buildCache.count(name); }
     inline const BuildingType& GetBuildingData(const std::string& name) { return buildCache[name]; }
 
-    inline bool UnitExists(const std::string& name) { return !!assetCache.count(name); }
-    inline const UnitType& GetUnitData(const std::string& name) { return assetCache[name]; }
+    inline bool UnitExists(const std::string& name) { return !!unitCache.count(name); }
+    inline const UnitType& GetUnitData(const std::string& name) { return unitCache[name]; }
     void LoadUnitAssets();
     void LoadBuildingAssets();
   

@@ -61,8 +61,6 @@ void Hud::Update(float delta) {
 
     //DrawMiniMap(gfx);
 }
-	
-
 
 void Hud::RefreshMiniMap() {
     auto& engine = Game_Engine::Current();
@@ -125,11 +123,11 @@ void Hud::DrawHud(){
     auto& engine = Game_Engine::Current();
     const auto& ucount = engine.unitManager->GetSelectedUnitCount();
     const auto& bcount = engine.buildingManager->GetSelectedBuildingCount();
-    //Draw Bottom of screen    
+
     engine.DrawPartialDecal({ 1.f,(float)engine.ScreenHeight() * 0.75f }, { (float)engine.ScreenWidth(),(float)engine.ScreenHeight() * 0.75f }, decals["Hud"].get(), { 0,96 }, { 96,96 });
     engine.DrawDecal({ 152.f,177.f }, decals["HudBox"].get(),{0.66f,0.63f});
     engine.DrawPartialDecal({ 59.f,(float)engine.ScreenHeight() * 0.75f }, { 96,60.f }, decals["Hud"].get(), { 224,223 }, { 96,97 });
-   // engine.DrawPartialDecal({ 185.5f,185.5f }, { 16,16 }, decals["Gui"].get(), { 775,168 }, { 32,32 });
+
 
     //Options Icon top left
     if (engine.GetMousePos().x < 79.5 && engine.GetMousePos().y < 13) {
@@ -144,70 +142,45 @@ void Hud::DrawHud(){
     //
 
     
-    if (ucount == 1) {//If you select one unit
+    if (ucount == 1) //If you select one unit
         engine.hudManager->UnitSelected();
-    }
-   if (bcount == 1) {
+    if (ucount > 1) 
+        engine.hudManager->UnitsSelected(ucount);
+   if (bcount == 1)
        engine.hudManager->BuildingSelected();
-    }
+   if (bcount > 1)
+       engine.hudManager->BuildingsSelected(bcount);
 
-    //Draws Box to fit all units
-    if(ucount > 1){
-        
-        engine.DrawStringDecal({ 63.f,(float)engine.ScreenHeight() * 0.825f - 6 }, "Units: " + std::to_string(ucount), olc::WHITE, { 0.4f,0.4f });
+   
+    if (BuildMode)
+        DrawBuild();
 
-        olc::vf2d sz = ucount <= 10 ? olc::vf2d(96,16) : (ucount <= 20 ? olc::vf2d(96,24) : olc::vf2d(96,32));
 
-        engine.DrawPartialDecal({ 58.f,(float)engine.ScreenHeight() * 0.825f - 3 }, sz, decals["Hud"].get(), { 0,64 }, { 96,32 });
-    }
 
-    std::map<std::string, int> _types;
-    engine.unitManager->IterateSelectedUnits([&](std::shared_ptr<Unit> unit){
-        if(!_types.count(unit->sUnitName)) _types.insert_or_assign(unit->sUnitName, 0);
-        ++_types[unit->sUnitName];
-        return true;
-    });
-    
-    ////Draw The number of units on hud
-    if (ucount > 1) {
-        int i = 0;
-        const size_t max_units = 30;
-        for (const auto& [name, count] : _types) {
-            const auto& data = engine.assetManager->GetUnitData(name);
-            
-            
-            std::string _refname = name + "__tex";
-            if (!decals.count(_refname)) {
-                loadImage(_refname, data.head.tex_id);
-            }
-            olc::Decal* decal = decals[_refname].get();
-
-            for (int r = 0; r < count; ++r) {
-                float yoffset = i < 10 ? 0 : (i < 20 ? 8.f : 16.f);
-                engine.DrawPartialDecal({ 63.f + 8 * (i % 10) ,(float)engine.ScreenHeight() * 0.825f + yoffset }, { 8.f,8.f }, decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
-                engine.DrawPartialDecal({ 63.f + 8 * (i % 10),(float)engine.ScreenHeight() * 0.825f + yoffset }, { 8.f,8.f }, decal, data.head.tl, data.head.sz);
-                engine.DrawPartialDecal({ 63.f + 8 * (i % 10),(float)engine.ScreenHeight() * 0.825f + yoffset }, { 8.f,8.f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
-                if (++i == max_units) break;
-            }
-            if(ucount > max_units){
-                engine.DrawDecal({ 63.f + 80,(float)engine.ScreenHeight() * 0.825f + 18.f }, decals["Plus"].get(), { 0.025f,0.025f });
-            }
-        }
-    }
-   /* int y = 0;
-    for (int i = 0; i < engine.worldManager->curMap().layerSize.x * engine.worldManager->curMap().layerSize.y; i++) {
-        if (i > 0 && i % engine.worldManager->curMap().layerSize.x == 0) {
-            y++;
-        }
-        float X = 11.f + i % engine.worldManager->curMap().layerSize.x;
-        
-        engine.DrawPartialDecal({ 11.f + 1.4375f * (i % engine.worldManager->curMap().layerSize.x),((float)engine.ScreenHeight() * 0.823f - 10.0f + y * 1.5333f) }, { 1.4375f,1.5333f }, decals["Pixel"].get(), { 0.f,0.f }, { 1.f,1.f }, olc::GREEN);
-    }*/
 
 }
 
 void Hud::CalculateMiniMap(int x, int y, const Map &cur_map) {
     auto& engine = Game_Engine::Current();
-    
+    /* int y = 0;
+ for (int i = 0; i < engine.worldManager->curMap().layerSize.x * engine.worldManager->curMap().layerSize.y; i++) {
+     if (i > 0 && i % engine.worldManager->curMap().layerSize.x == 0) {
+         y++;
+     }
+     float X = 11.f + i % engine.worldManager->curMap().layerSize.x;
 
+     engine.DrawPartialDecal({ 11.f + 1.4375f * (i % engine.worldManager->curMap().layerSize.x),((float)engine.ScreenHeight() * 0.823f - 10.0f + y * 1.5333f) }, { 1.4375f,1.5333f }, decals["Pixel"].get(), { 0.f,0.f }, { 1.f,1.f }, olc::GREEN);
+ }*/
+}
+
+void Hud::DrawBuild() {
+    auto& engine = Game_Engine::Current();
+
+    const auto& data = engine.assetManager->GetBuildingData(Object);
+    std::string _refname = Object + "__tex";
+    if (!engine.hud->decals.count(_refname)) {
+        engine.hud->loadImage(_refname, data.icon.tex_id);
+    }
+    olc::Decal* decal = engine.hud->decals[_refname].get();
+    engine.tv.DrawPartialDecal(engine.GetMousePos(), { 64,64 }, decal, { 0,0 }, data.icon.fsz, olc::PixelF(0.f, 255.f, 0.f, 0.7f));   
 }

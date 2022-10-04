@@ -14,15 +14,17 @@ WorldManager::~WorldManager() {
 }
 
 
-void WorldManager::Update(float fElapedtime) {//Update last frames
-    currentMap->UpdateMap(fElapedtime);
+void WorldManager::Update(float delta) {//Update last frames
+    currentMap->UpdateMap(delta);
     for (auto& object : objectList) {
 		if (object == nullptr) continue;
-		if(objectList.begin() != objectList.end()){
-            // nothing
-        }
+        object->Update(delta);
+	}
 
-        object->Update(fElapedtime);
+    // after updates
+    for (auto& object : objectList) {
+		if (object == nullptr) continue;
+        object->AfterUpdate(delta);
 	}
 }
 
@@ -100,10 +102,10 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     const auto& data = engine.assetManager->GetUnitData(name);
     // Make Unit
     std::shared_ptr<Unit> unit;
-    unit.reset(new Unit());
-    if (pos == olc::vf2d({ 0.f, 0.f }))
-        pos = { engine.worldManager->curMap().layerSize.x * 32 / 2.f, engine.worldManager->curMap().layerSize.y *32 / 2.f };
-    CheckandFixUnit(pos);
+    unit.reset(new Unit(data)); // pass in primary unit type
+    if (pos == olc::vf2d(0.f, 0.f))
+        pos = { engine.worldManager->curMap().layerSize.x * 32 / 2.f, engine.worldManager->curMap().layerSize.y * 32 / 2.f };
+
     unit->Position = pos;
 
     // Update Internal Values Of New Unit
@@ -132,16 +134,6 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
         {"Dead", Unit::Dead},
         {"Build", Unit::Build}
     };
-    
-    if (data.lua_data["Abilities"] != sol::nil) {
-        if (data.lua_data["Abilities"]["Buildables"] != sol::nil) {
-            sol::table Buildables = data.lua_data["Abilities"]["Buildables"];
-            for (int i = 0; i < Buildables.size(); i++) {
-                unit->Constructables.push_back(Buildables[i + 1]);
-            }            
-        }
-
-    }
 
     // create decals for each texture state
     for(auto& [ name, meta ] : data.texture_metadata){
@@ -156,12 +148,9 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     unit->bFriendly = true;
     if (unit->sUnitName == "Goblin" || unit->sUnitName == "Imp")
         if (engine.config->GetValue<bool>("Evil") == true) unit->bFriendly = false;
-        
-    
 
     unit->SetMask(Collidable::Mask(unit->Unit_Collision_Radius));
     
-
     objectList.emplace_back(unit);
     engine.unitManager->addNewUnit(unit);
     return unit;
@@ -247,19 +236,4 @@ bool WorldManager::ChangeMap(const std::string& name) {
     }
     currentMap = *it;
     return true;
-}
-
-void WorldManager::CheckandFixUnit(olc::vf2d pos) {
-    for (auto& object : objectList) {
-        if (object == nullptr) continue;
-        if (object->Position == pos)
-        {
-            pos += olc::vf2d(-0.5f, 0.5f);
-
-        }
-    }
-}
-
-void WorldManager::AssignUnitLocation(std::shared_ptr<Unit> unit) {
-    //if()
 }

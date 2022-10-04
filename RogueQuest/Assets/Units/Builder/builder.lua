@@ -43,6 +43,10 @@ return
 	},
 	Parameters = {
 		CollisionRadius = 10,
+		Abilities = {
+			Tasks = {"Move", "Build", "Attack", "Gather"}, -- task names allowed to be delegated to this unit
+			Buildables = {"House"},
+		}
 	},
 	Stats =
 	{
@@ -59,9 +63,4 @@ return
 		SpellCooldown = 1,
 		KnockBackResist = 1
 	},
-	Abilities = 
-	{
-	Buildables = {"House"},
-	Gathering = true	
-	}
 }

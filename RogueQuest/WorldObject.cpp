@@ -9,14 +9,10 @@
 */
 
 
-WorldObject::WorldObject(): Position({512.f,480.f }), Velocity({0.f, 0.f}) {
-	
-	
-		
+WorldObject::WorldObject(): Position({512.f,480.f }), Velocity({0.f, 0.f}) {		
 }
 
 WorldObject::~WorldObject() {
-
 }
 
 void WorldObject::Destroy() {
@@ -24,8 +20,10 @@ void WorldObject::Destroy() {
     engine.worldManager->DestroyObject(this);
 }
 
-void WorldObject::Update(float fElapsedTime) {
+void WorldObject::Update(float delta) {
+}
 
+void WorldObject::AfterUpdate(float delta) {
 }
 
 void WorldObject::Draw(olc::TileTransformedView* gfx) {
@@ -45,8 +43,10 @@ void WorldObject::Draw(olc::TileTransformedView* gfx) {
 	*/
 }
 
+/*
+	World Collidable Object
+*/
 
-// __Collisions__
 Collidable::Collidable(): WorldObject() {
 
 }
@@ -62,29 +62,30 @@ void Collidable::SetMask(const Mask& mask) {
 	this->mask = mask;
 }
 
-void Collidable::Update(float fElapsedTime) {
-	WorldObject::Update(fElapsedTime); // inherit
+void Collidable::Update(float delta) {
+	WorldObject::Update(delta); // inherit
 
-	predPosition = Position + Velocity * fElapsedTime;
-
-	CheckCollision(fElapsedTime);
-
-	Position = predPosition;
+	predPosition = Position + Velocity * delta; // set the next potential position to jump to
+	Position = predPosition; // temporary assignment of ghosting position for post step collision calculations (it's complicated, but this is absolutely necessary or it won't work)
+	CheckCollision(delta); // collision checking
 }
 
+void Collidable::AfterUpdate(float delta) {
+	Position = predPosition; // finalize position after calcuations are made
+	WorldObject::AfterUpdate(delta); // inherit
+}
 
-bool Collidable::CheckCollision(float fElapsedTime) {
+bool Collidable::CheckCollision(float delta) {
 	auto& engine = Game_Engine::Current();
 
-	const olc::vf2d& nextPos = predPosition; // predict the next potential space to land
-
+	const olc::vf2d& nextPos = predPosition; // next frame position
 	auto checkCvC = [&](std::shared_ptr<Collidable> other, float r1, float r2) {
-		olc::vf2d ray = (nextPos - other->Position);
+		olc::vf2d ray = (other->Position - nextPos);
 		float overlap = (r1 + r2) - ray.mag();
 		if(std::isnan(overlap)) overlap = 0;
 
 		if(overlap > 0.01f)
-			return OnCollision(other, -ray.norm() * overlap);
+			return OnCollision(other, (ray.mag2() < 0.01 ? ray : ray.norm()) * overlap);
 
 		return true; // yay for simple
 	};
@@ -94,15 +95,14 @@ bool Collidable::CheckCollision(float fElapsedTime) {
 				  rectPos = inverse ? other->Position : nextPos;
 
 		// nearest position
-		olc::vf2d nPos(std::clamp(circlePos.x, rectPos.x, rectPos.x + size.x), 
-					   std::clamp(circlePos.y, rectPos.y, rectPos.y + size.y));		
+		olc::vf2d nPos = circlePos.max(rectPos).min(rectPos + size); // simplified vector clamp
 
 		olc::vf2d ray(nPos - circlePos);
 		float overlap = (float)radius - ray.mag();
 		if(std::isnan(overlap)) overlap = 0;
 
 		if(overlap > 0.01f) // collision
-			return OnCollision(other, ray.norm() * overlap);
+			return OnCollision(other, (ray.mag2() < 0.01 ? ray : ray.norm()) * overlap);
 		return true;
 	};
 
@@ -123,7 +123,7 @@ bool Collidable::CheckCollision(float fElapsedTime) {
 		}
 
 		if (overlap.x > 0.01f || overlap.y > 0.01f) {
-			return OnCollision(other, -overlap);
+			return OnCollision(other, overlap);
 		}
 		return true;
 	};
@@ -142,7 +142,7 @@ bool Collidable::CheckCollision(float fElapsedTime) {
 				return checkRvR(obj, mask.rect, rect);
 			}
 			if(mask.type == Mask::MASK_CIRCLE){
-				return checkRvC(obj, mask.radius, rect,true);
+				return checkRvC(obj, mask.radius, rect, true); // reverse for circle v rect
 			}
 		}
 		if(obj->mask.type == Mask::MASK_CIRCLE){
@@ -151,7 +151,7 @@ bool Collidable::CheckCollision(float fElapsedTime) {
 				return checkCvC(obj, mask.radius, radius);
 			}
 			if(mask.type == Mask::MASK_RECTANGLE){
-				return checkRvC(obj, radius, mask.rect);
+				return checkRvC(obj, radius, mask.rect); // just rect v circle
 			}
 		}
 

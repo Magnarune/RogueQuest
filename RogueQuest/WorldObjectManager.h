@@ -44,11 +44,7 @@ public:
 
 	inline const Map& curMap() { assert(currentMap.get() != nullptr); return *currentMap; } // do not store
 
-	void AssignUnitLocation(std::shared_ptr<Unit> unit);
-	void CheckandFixUnit(olc::vf2d Pos);
-
 	std::shared_ptr<Unit> GenerateUnit(const std::string& name, olc::vf2d pos={0.f, 0.f});
-	
 
 	std::shared_ptr<Building> GenerateBuilding(const std::string& name, olc::vf2d pos = { 0.f,0.f });
 

@@ -1,5 +1,7 @@
 #include "BuildingManager.h"
 #include "Engine.h"
+
+
 BuildingManager::BuildingManager() {
 	BuildingList.reserve(100);
   
@@ -25,12 +27,8 @@ void BuildingManager::SelectBuilding(olc::vf2d Mouse) {
     for (auto& _build : BuildingList) {
         auto build = _build.lock();
         if (build->bSelected) continue;
-
         const float& r = (build->Size.x /2.f);
-        const float r2 = 0.25; // less Grab distance
-
-     
-
+        const float r2 = 0.55f;
         if (Mouse.x > build->Position.x + r2 && Mouse.y > build->Position.y + r2 &&
             Mouse.x < build->Position.x + build->Size.x - r2 &&
             Mouse.y < build->Position.y + build->Size.y - r2) {
@@ -42,7 +40,6 @@ void BuildingManager::SelectBuilding(olc::vf2d Mouse) {
 }
 
 void BuildingManager::SentUnitslocation(olc::vf2d Mouse) {
-
     for (auto& _build : selectedBuildings) {
         if (_build.expired()) continue;
         auto build = _build.lock();
@@ -50,13 +47,11 @@ void BuildingManager::SentUnitslocation(olc::vf2d Mouse) {
     }
 }
 
-
 void BuildingManager::DeselectBuildings() {
     for (auto& _build : selectedBuildings) {
         if (_build.expired()) continue;
         auto build = _build.lock();
-        build->bSelected = false;
-       
+        build->bSelected = false;       
     }
     selectedBuildings.clear();
 }
@@ -87,5 +82,16 @@ std::shared_ptr<Building> BuildingManager::GetBuilding(size_t index) {
             return build;
         }
     }
-    return nullptr; // couldn't find unit
+    return nullptr;
+}/*
+    Building Manager Tasks For Selected Units - Will eventually be migrated into TaskManager
+*/
+
+void BuildingManager::StopBuilding() {
+   
+    for (auto& _building : selectedBuildings) {
+        if (_building.expired()) continue;
+        auto building = _building.lock();
+        building->Stop();
+    }
 }

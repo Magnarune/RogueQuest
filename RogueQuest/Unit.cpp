@@ -2,7 +2,7 @@
 #include "Engine.h"
 
 
-Unit::Unit() : Collidable(),
+Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
 	vTarget({ 0.f,0.f }), fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0) {
 }
 
@@ -13,6 +13,7 @@ void Unit::MarchingtoTarget(const olc::vf2d& Target){
 	MoveQue.push(Target);
 	vTarget = Target;
 }
+
 void Unit::Stop() {
 	std::queue<olc::vf2d> cq;
 	std::swap(MoveQue, cq);
@@ -28,10 +29,12 @@ void Unit::UnitBehaviour() {
 		switch (ULogic){
 			case Passive://Just walk with no logic
 				break;
+
 			case Neutral:
 				if (bAttacked) //Walk to location unless you are attacked
 					ULogic = Attack;
 				break;
+
 			case Attack:
 				if(Hunted.expired()){
 					engine.worldManager->IterateObjects([&](std::shared_ptr<WorldObject> obj) {
@@ -70,7 +73,7 @@ void Unit::UnitBehaviour() {
 
 bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 
-	if (other.get() == this || Position == other->Position) return true; // act as a continue
+	if (other.get() == this) return true; // act as a continue
 	if(std::shared_ptr<Unit> unit = std::dynamic_pointer_cast<Unit>(other)){
 		// unit vs unit
 
@@ -129,61 +132,54 @@ void Unit::Destroy() {
 	Collidable::Destroy(); // inherit
 }
 
-void Unit::UnitBuild(std::string Buildingname) {
-	auto& engine = Game_Engine::Current();
-
-	if (!isconstucting) {
-		
-		curbuild = Buildingname;
-		isconstucting = true;
-		const auto& data = engine.assetManager->GetBuildingData(Buildingname);
-		buildtime = data.lua_data["Parameters"]["BuildTime"];
-	}
-	if (progress > buildtime) {
-		isconstucting = false;
-		progress = 0.f;
-		engine.worldManager->GenerateBuilding(Buildingname, Position + olc::vf2d(3.f,3.f));
-		Graphic_State = Walking;
-	}
-}
-
-void Unit::Update(float fElapsedTime) {
+void Unit::Update(float delta) {
 	if(fAttackCD > 0)
-		fAttackCD -= fElapsedTime;
+		fAttackCD -= delta;
+	if(bAnimating) 
+		m_fTimer += delta;
 
-	if (isconstucting) {
-		
-		UnitBuild(curbuild);
-		progress += fElapsedTime * 4.f;
-		bAnimating = true;
-	}
-
-	if(bAnimating) m_fTimer += fElapsedTime;	
-	if (m_fTimer >= 0.1f){
-		m_fTimer -= 0.1f;
-		++curFrame %= textureMetadata[Graphic_State].ani_len;
-	}
+	if(!Hunted.expired())
+		UnitHunting();
+	else
+		UpdatePosition(delta);
 	
-
-	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1)
-		Destroy();
-
-	UpdatePosition(fElapsedTime);
-
-	UnitGraphicUpdate();
-	Collidable::Update(fElapsedTime);
+	Collidable::Update(delta);
 }
 
+void Unit::AfterUpdate(float delta) {
+	UnitGraphicUpdate();
 
-void Unit::UpdatePosition(float fElapsedTime) {
+	Collidable::AfterUpdate(delta);// inherit
+}
+
+void Unit::UnitHunting() {
+
+	olc::vf2d Distance = AttackTarget - Position;
+	fUnitAngle = std::fmod(2.0f * PI + (Distance).polar().y, 2.0f * PI);
+
+	if (Distance.mag2() > 32 * 32) {
+		olc::vf2d Direction = (AttackTarget - Position).norm();
+		Velocity = Direction * fMoveSpeed;
+	}
+	else if (Distance.mag2() < fAttackRange * fAttackRange && fAttackCD <= 0) {
+		Graphic_State = Attacking;
+		bAnimating = true; // ugh this is all so spaghetti
+		if (curFrame == textureMetadata[Graphic_State].ani_len - 1) {
+			PerformAttack();
+			Graphic_State = Walking;
+		}
+		Velocity = { 0.f,0.f };
+	}
+}
+
+void Unit::UpdatePosition(float delta) {
 
 	if (Graphic_State != Dead) {
 		UnitBehaviour();
-		if (MoveQue.size() > 0)
-			vTarget = MoveQue.front();
+		if (MoveQue.size() > 0)//has move order
+			vTarget = MoveQue.front();//this is target location
 
-		if (Hunted.expired()) {
-			olc::vf2d Distance = vTarget - Position;
+			olc::vf2d Distance = vTarget - Position;//dist to target
 			if (Graphic_State != Walking) Graphic_State = Walking;
 			if (vTarget != olc::vf2d({ 0.f, 0.f })) {
 				olc::vf2d Direction = (vTarget - Position).norm();
@@ -196,41 +192,35 @@ void Unit::UpdatePosition(float fElapsedTime) {
 			} else {
 				Velocity = { 0.f, 0.f };
 				bAnimating = false;
-			}
-		} else {
-			olc::vf2d Distance = AttackTarget - Position;
-			fUnitAngle = std::fmod(2.0f * PI + (Distance).polar().y, 2.0f * PI);
-			if (Distance.mag2() > 32 * 32) {
-				olc::vf2d Direction = (AttackTarget - Position).norm();
-				Velocity = Direction * fMoveSpeed;
-			} else if (Distance.mag2() < fAttackRange * fAttackRange && fAttackCD <= 0) {
-				Graphic_State = Attacking;
-				bAnimating = true; // ugh this is all so spaghetti
-				if (curFrame == textureMetadata[Graphic_State].ani_len - 1) {
-					PerformAttack();
-					Graphic_State = Walking;
-				}
-				Velocity = { 0.f,0.f };
-			}
-		}
-	} else {
+			}	
+	}
+	else {
 		bAnimating = true;
 	}
 
 
-	HitVelocity *= std::pow(0.05f, fElapsedTime);
+	HitVelocity *= std::pow(0.05f, delta);
 
 	if (HitVelocity.mag2() < 4.f)
 		HitVelocity = { 0.f, 0.f };
 	else
 		bAnimating = true;
 
-	predPosition += HitVelocity * fElapsedTime; // hitback only
+	predPosition += HitVelocity * delta; // hitback only
 }
 
-void Unit::UnitGraphicUpdate() {
+void Unit::UnitGraphicUpdate() {	
+	if (m_fTimer >= 0.1f) {
+		m_fTimer -= 0.1f;
+		++curFrame %= textureMetadata[Graphic_State].ani_len;
+	}
+
 	if (fHealth <= 0)
 		Graphic_State = Dead;
+
+	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1)
+		Destroy();
+
 	if (Last_State != Graphic_State) {
 		curFrame = 0;
 		Last_State = Graphic_State;
@@ -239,8 +229,7 @@ void Unit::UnitGraphicUpdate() {
 
 void Unit::Draw(olc::TileTransformedView* gfx){
 	Collidable::Draw(gfx); // inherit
-	if(isconstucting)
-		Graphic_State = Build;
+
 	const auto& meta = textureMetadata[Graphic_State];
 	olc::vi2d SpriteSheetOffset = { 0, 0 };
 	olc::vi2d SpriteSheetTileSize = meta.tile_size;

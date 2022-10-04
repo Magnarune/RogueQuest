@@ -4,9 +4,11 @@
 #include <functional>
 #include <memory>
 #include "Unit.h"
+#include "TaskManager.h"
 #include "Assets.h"
 #include "Projectiles.h"
 #include "WorldObjectManager.h"
+
 /*
 
 namespace olc
@@ -318,12 +320,15 @@ class UnitManager {
     std::vector<std::weak_ptr<Unit>> selectedUnits; // units currently selected - DO NOT USE EXTERNALY
 public:
     UnitManager();
-    ~UnitManager() { unitList.clear(); }
+    ~UnitManager() = default;
 
     void Update(float delta);
     void CollectGarbage();
 	
+	TaskManager taskMgr;
+
 	void StopUnits();
+	void MoveConstructBuilding(const std::string& buildingName, const olc::vf2d& Target);
     void MoveUnits(olc::vf2d Target , bool Attackstate);
 	void SelectUnit(olc::vf2d Mouse);
     void SelectUnits(olc::vf2d Initial, olc::vf2d Final);
@@ -338,5 +343,6 @@ public:
 	bool IterateAllUnits(std::function<bool(std::shared_ptr<Unit>)> cb);
 
     friend class WorldManager;
+	friend class TaskManager;
 
 };

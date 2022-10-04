@@ -161,6 +161,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Abilities.cpp" />
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Building.cpp" />
     <ClCompile Include="BuildingManager.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Options.cpp" />
     <ClCompile Include="Projectiles.cpp" />
+    <ClCompile Include="TaskManager.cpp" />
     <ClCompile Include="Unit.cpp" />
     <ClCompile Include="UnitManager.cpp" />
     <ClCompile Include="UserInput.cpp" />
@@ -180,6 +182,7 @@
     <ClCompile Include="WorldObjectManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Abilities.h" />
     <ClInclude Include="Assets.h" />
     <ClInclude Include="Building.h" />
     <ClInclude Include="BuildingManager.h" />
@@ -195,6 +198,7 @@
     <ClInclude Include="olcPixelGameEngine.h" />
     <ClInclude Include="Options.h" />
     <ClInclude Include="Projectiles.h" />
+    <ClInclude Include="TaskManager.h" />
     <ClInclude Include="Unit.h" />
     <ClInclude Include="UnitManager.h" />
     <ClInclude Include="UserInput.h" />

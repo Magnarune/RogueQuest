@@ -80,10 +80,18 @@ void cAssets::LoadUnitAssets(){
 
                 unitType.texture_metadata.insert_or_assign(name, std::move(meta));
             }
+            if(UnitData["Parameters"] != sol::nil &&
+               UnitData["Parameters"]["Abilities"] != sol::nil &&
+               UnitData["Parameters"]["Abilities"]["Tasks"] != sol::nil){
+                sol::table tasks = UnitData["Parameters"]["Abilities"]["Tasks"];
+                for(int i = 0; i < tasks.size(); ++i){
+                    unitType.task_abilities.emplace_back(tasks[i + 1].get<std::string>());
+                }
+            }
 
             unitType.lua_data = std::move(UnitData); // UnitData is empty now
 
-            assetCache.insert_or_assign(name, std::move(unitType));//if you say unit you get Full table!
+            unitCache.insert_or_assign(name, std::move(unitType));//if you say unit you get Full table!
         } catch(std::exception e) {
             std::cerr << e.what() << "\n";
         }

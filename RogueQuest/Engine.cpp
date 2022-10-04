@@ -50,7 +50,7 @@ std::string StringifyObject(sol::object val) {
 
 Game_Engine* Game_Engine::self = nullptr;
 Game_Engine::Game_Engine() {
-    sAppName = "Simple RTS GAME";
+    sAppName = "Simple PGE RTS GAME";
     self = this;
 }
 Game_Engine::~Game_Engine() {
@@ -119,14 +119,15 @@ bool Game_Engine::OnUserUpdate(float fElapsedTime) {
 
 bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     userinputs->GetUserInput();
-
+    // Game Updates
     if(!IsConsoleShowing()){
         unitManager->Update(fElapsedTime);
-        hud->Update(fElapsedTime);
         worldManager->Update(fElapsedTime);
+        hud->Update(fElapsedTime); // hud update should be last for game updates (I think)
     }
-
+    // GC
     worldManager->CollectGarbage();
+    // Drawing
     worldManager->Draw();
     userinputs->DrawUserInput();
     hud->DrawHud();

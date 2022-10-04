@@ -5,6 +5,7 @@
 #include <memory>
 #include "Building.h"
 #include "WorldObjectManager.h"
+#include "TaskManager.h"
 
 class BuildingManager {
 
@@ -13,9 +14,11 @@ class BuildingManager {
     void addNewBuilding(std::weak_ptr<Building> Building); 
 
     std::vector<std::weak_ptr<Building>> selectedBuildings;
+
+    TaskManager taskMgr;
 public:
     BuildingManager();
-    ~BuildingManager() { BuildingList.clear(); }
+    ~BuildingManager() = default;
 
     void Update(float delta);
     void CollectGarbage();
@@ -37,5 +40,5 @@ public:
     bool IterateAllBuildings(std::function<bool(std::shared_ptr<Building>)> cb);
 
     friend class WorldManager;
-
+    friend class TaskManager;
 };

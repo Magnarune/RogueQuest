@@ -6,29 +6,33 @@
 #include "Assets.h"
 #include "WorldObject.h"
 #include "clock.h"
+#include "TaskManager.h"
 #include <map>
 #include <vector>
 #include <queue>
 #include <iostream>
 
 class Unit : public Collidable {
-	Unit();
+	Unit(const cAssets::UnitType& unitType);
 
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
-	//void CheckCollision(); 
-	void UnitBuild(std::string Buildingname);
+	void MarchingtoTarget(const olc::vf2d& Target);
+	void TrytoBuild();
 	void UnitBehaviour();
+	void UnitHunting();
 	void UnitGraphicUpdate();
 	void UpdatePosition(float felapstedtime);
-
-	void PerformAttack(); //Kill this fool
-	void MarchingtoTarget(const olc::vf2d& Target);
-	void Stop();
+	void PerformAttack();//good
+	void Stop();//fine
 	
-	void Update(float fElapsedTime) override;
-	void Draw(olc::TileTransformedView* gfx) override;
+	void Update(float fElapsedTime) override; //remake
+	void AfterUpdate(float delta) override;
+	void Draw(olc::TileTransformedView* gfx) override;//good
+
 public:
 	virtual ~Unit();
+	const cAssets::UnitType& unitType; // internal unit type reference
+
 	// Data
 	Clock execTimeout; //Delay In unit thinking time
 	std::string sUnitName; //Name
@@ -41,13 +45,15 @@ public:
 	bool bLoot;			//If dead then drop some loot?
 	bool bAttacked;    //Was I attacked
 
-	std::weak_ptr<Building> homebuilding;
+	// Vars For Task Manager System
 
-	float buildtime;
-	float progress;
-	bool isconstucting;
-	std::string curbuild;
-	std::vector<std::string> Constructables;
+	std::shared_ptr<TaskManager::Task> currentTask; // the current task I was assigned and should be following
+
+	// Going to all be replaced with a task delegated action
+	// olc::vf2d BuildLocation;
+	// std::weak_ptr<Building> constructingBuilding;
+	// std::string newBuildingName;
+
 	std::queue<olc::vf2d> MoveQue; //Move to this location
 	olc::vf2d vRubberBand;   // X , Y, Position to go back to
 	olc::vf2d vTarget;       //Where to move after the player clicked on screen
@@ -133,10 +139,12 @@ private:
 	std::map<GFXState, cAssets::UnitType::TextureMetaData> textureMetadata;
 	Clock sClock; // slow clock for expensive update operations
 	float PI = 3.14159265358f;
-
+	friend class UserInput;
+	friend class Hud;
 	friend class Engine;
 	friend class cAssets;
 	friend class UnitManager;
 	friend class WorldManager;
 	friend class HudManager;
+	friend class TaskManager;
 };

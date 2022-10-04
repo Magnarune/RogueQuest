@@ -5,18 +5,20 @@
 #include "WorldObject.h"
 #include "Assets.h"
 #include "Unit.h"
+#include "TaskManager.h"
 
 
 class Building: public Collidable {
 	Building();
 public:
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
-	void ProduceUnit(std::string unit);
+	void ProduceUnit(const std::string& unit);
 	void SentUnitlocation(olc::vf2d Mouse);
 	void SendUnit(std::shared_ptr<Unit> unit);
 	void BuildingBehaviour();
 	void Draw(olc::TileTransformedView* gfx) override;
 	void Update(float delta) override;
+	void Stop();
 
 	virtual ~Building();
 	bool bFriendly;
@@ -24,16 +26,21 @@ public:
 	olc::vi2d Size; //Width and height
 	//
 	olc::vf2d sentUnitPos;
-	//       stage  offset
+	// unit production vars
 	bool building;
 	bool startbuilding;
 	float productiontime;
+	int buildtime;
+	// building development vars
+	float buildProgress = 0.f;
+
 	std::queue<std::string> productionQue;
 	std::string unitproduced;
 	std::vector<std::string> unitproduction;
+	//       stage  offset
 	std::string curStage = "Level Four"; // current stage - oof good luck with this
+	
 	bool bSelected;
-	int buildtime;
 	float health;
 	float maxHealth;
 	int Stage;//What stage is this in? lvl 1 house lvl 2 house etc
@@ -51,5 +58,6 @@ private:
 	friend class cAssets;
 	friend class WorldManager;
 	friend class BuildingManager;
+	friend class TaskManager;
 };
 

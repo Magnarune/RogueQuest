@@ -2,14 +2,18 @@
 #include "Engine.h"
 class HudManager{
 public:
-	bool Button(olc::vf2d Position, olc::vi2d Mouse, olc::vf2d Width_Height);
+	
 
 	void UnitSelected();
-	void UnitsSelected();
-	void BuildingSelected();
-	void BuildingsSelected();
+	void UnitsSelected(size_t unitcount);
 	void UnitAbilities(std::shared_ptr<Unit> unitinfo);
+	void PrimaryUnitSelection();//if you select units of differing types what abilities do you want shown
+
+	void BuildingSelected();
+	void BuildingsSelected(size_t buildingcount);
 	void BuildingAbilities(std::shared_ptr<Building> buildinginfo);
+	void PrimaryBuildingSelection();//if you select buildings of differing types what abilities do you want shown
+
 	HudManager();
 	~HudManager();
 

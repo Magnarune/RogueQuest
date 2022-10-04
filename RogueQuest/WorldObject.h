@@ -19,7 +19,8 @@ public:
 	float m_fTimer {};		//Graphics timer
 
 	virtual void Draw(olc::TileTransformedView* gfx);
-	virtual void Update(float fElapsedTime);
+	virtual void Update(float delta);
+	virtual void AfterUpdate(float delta);
 	virtual void Destroy();
 
 	// to do, consider adding collision method here or maybe use a different class for that
@@ -51,7 +52,8 @@ public:
 	virtual ~Collidable();
 
 	void SetMask(const Mask& mask);
-	virtual void Update(float fElapsedTime) override;
+	virtual void Update(float delta) override;
+	virtual void AfterUpdate(float delta) override;
 	virtual bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) = 0;
 
 

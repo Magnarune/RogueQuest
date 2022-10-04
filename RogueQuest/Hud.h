@@ -20,6 +20,9 @@ public:
 	void DrawMiniMap();
 	void DrawHud();
 
+	void DrawBuild();
+	bool BuildMode;
+	std::string Object;
 	//olc::vf2d tl_MMap{11 , (float)gfx.ScreenHeight() * 0.823f - 10.f };
 	//olc::vf2d br_MMap{57 , (float)gfx.ScreenHeight() * 0.823f + 36.f };
 
