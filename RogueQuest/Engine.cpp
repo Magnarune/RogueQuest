@@ -70,7 +70,7 @@ bool Game_Engine::OnUserCreate() {
     hudManager.reset(new HudManager);//Creates HudManager
     optionsManager.reset(new Options);//Create options menu
     userinputs.reset(new UserInput); //Create user options    
-    
+    inputmanager.reset(new UserInputManager);
     // Configure Controllers
     assetManager->LoadUnitAssets();     // Load all the Lua files
     assetManager->LoadBuildingAssets(); // Load all the Buildings files
@@ -176,6 +176,7 @@ bool Game_Engine::OnUserDestroy(){
     hud.reset();
     optionsManager.reset();
     userinputs.reset();
+    inputmanager.reset();
     TextureCache::FreeCache();
     return true;
 }

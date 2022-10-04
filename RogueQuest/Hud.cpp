@@ -150,14 +150,9 @@ void Hud::DrawHud(){
        engine.hudManager->BuildingSelected();
    if (bcount > 1)
        engine.hudManager->BuildingsSelected(bcount);
-
    
     if (BuildMode)
         DrawBuild();
-
-
-
-
 }
 
 void Hud::CalculateMiniMap(int x, int y, const Map &cur_map) {
@@ -182,5 +177,6 @@ void Hud::DrawBuild() {
         engine.hud->loadImage(_refname, data.icon.tex_id);
     }
     olc::Decal* decal = engine.hud->decals[_refname].get();
-    engine.tv.DrawPartialDecal(engine.GetMousePos(), { 64,64 }, decal, { 0,0 }, data.icon.fsz, olc::PixelF(0.f, 255.f, 0.f, 0.7f));   
+    olc::vf2d Center = engine.GetMousePos() - olc::vf2d(data.icon.sz.x , data.icon.sz.y );
+    engine.DrawPartialDecal( ((Center)), {64,64}, decal, {0,0}, data.icon.fsz, olc::PixelF(0.f, 255.f, 0.f, 0.7f));
 }

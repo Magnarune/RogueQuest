@@ -10,6 +10,7 @@
 #include "Building.h"
 #include "BuildingManager.h"
 #include "UserInput.h"
+#include "UserInputManager.h"
 #include "Unit.h"
 #include "Assets.h"
 #include "Map.h"
@@ -76,6 +77,7 @@ public:
 
 	std::unique_ptr<Options> optionsManager;
 	std::unique_ptr<UserInput> userinputs;
+	std::unique_ptr<UserInputManager> inputmanager;
 	bool ActivityDone;
 	struct Player{
 		olc::vf2d vPOS;

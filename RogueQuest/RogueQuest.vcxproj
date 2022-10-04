@@ -178,6 +178,7 @@
     <ClCompile Include="Unit.cpp" />
     <ClCompile Include="UnitManager.cpp" />
     <ClCompile Include="UserInput.cpp" />
+    <ClCompile Include="UserInputManager.cpp" />
     <ClCompile Include="WorldObject.cpp" />
     <ClCompile Include="WorldObjectManager.cpp" />
   </ItemGroup>
@@ -202,6 +203,7 @@
     <ClInclude Include="Unit.h" />
     <ClInclude Include="UnitManager.h" />
     <ClInclude Include="UserInput.h" />
+    <ClInclude Include="UserInputManager.h" />
     <ClInclude Include="WorldObject.h" />
     <ClInclude Include="WorldObjectManager.h" />
   </ItemGroup>

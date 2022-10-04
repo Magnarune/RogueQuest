@@ -46,13 +46,13 @@ public:
 	bool bAttacked;    //Was I attacked
 
 	// Vars For Task Manager System
-
-	std::shared_ptr<TaskManager::Task> currentTask; // the current task I was assigned and should be following
-
-	// Going to all be replaced with a task delegated action
-	// olc::vf2d BuildLocation;
-	// std::weak_ptr<Building> constructingBuilding;
-	// std::string newBuildingName;
+	
+	std::queue<std::shared_ptr<TaskManager::Task>> taskQueue; // queue of tasks
+	std::shared_ptr<TaskManager::Task> currentTask; // current task
+	
+	olc::vf2d buildLocation;
+	std::weak_ptr<Building> constructingBuilding;
+	std::string newBuildingName;
 
 	std::queue<olc::vf2d> MoveQue; //Move to this location
 	olc::vf2d vRubberBand;   // X , Y, Position to go back to

@@ -7,24 +7,64 @@ UnitManager::UnitManager() {
 
     // task registration looks similar to
     // lua scripts for units should also have a list to associate the Allowed Task Names
+
+    // Eveything you want the Unit to be able to do, goes here:
+    // Hotkey doesn't work yet
+
     taskMgr.RegisterTask("Move",
-        { [&](std::shared_ptr<TaskManager::Task> task) -> bool {
-            const auto& params = std::any_cast<std::pair<olc::vf2d,bool>>(task->data);
+        { [&](std::shared_ptr<TaskManager::Task> task) -> bool { // task begin
+            // required
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;
+            // customizable parameters
+            const auto& params = std::any_cast<std::pair<olc::vf2d,bool>>(arguments.second);
             const olc::vf2d& target = params.first;
             const bool& attackstate = params.second;
-
-            for (auto& _unit : selectedUnits) {
-                if (_unit.expired()) continue;
-                auto unit = _unit.lock();
-                if (unit->bFriendly == true) {
-                    unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
-                    unit->MarchingtoTarget(target);
-                    unit->currentTask = task;
-                }
-            }
+            // action code
+            unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
+            unit->MarchingtoTarget(target);
             return true;
-        }, 0});
+        },
+        [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
+            // required
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;
+
+            float distance = (unit->vTarget - unit->Position).mag2();
+            return distance < 8.f * 8.f;
+        }
+        , 0, olc::Key::M }); // metadata , hotkey
+
+    taskMgr.RegisterTask("Build",
+        { [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+            // required
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;
+            // customizable parameters
+            const auto& params = std::any_cast<std::pair<olc::vf2d,std::string>>(arguments.second);
+            const olc::vf2d& target = params.first;
+            const std::string& buildingname = params.second;
+
+            // action code
+            unit->ULogic = unit->Neutral;
+            unit->MarchingtoTarget(target);
+            unit->buildLocation = target;
+            unit->newBuildingName = buildingname;
+
+            return true;
+        },
+        [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
+            // required
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;
+
+            // temporary, fix later
+            float distance = (unit->buildLocation - unit->Position).mag2();
+            return distance < 8.f * 8.f;
+        }
+        , 0, olc::Key::B }); // metadata , hotkey
 }
+
 
 // internal do not touch
 void UnitManager::addNewUnit(std::weak_ptr<Unit> unit) {
@@ -44,6 +84,19 @@ void UnitManager::CollectGarbage() {
         }
         unitList = std::move(copyList);
     }
+}
+
+// Task delegation
+void UnitManager::DelegateTask(const std::string& name, const std::any& data) {
+	for (auto& _unit : selectedUnits) {
+		if (_unit.expired()) continue;
+		auto unit = _unit.lock();
+        const auto& abilities = unit->unitType.task_abilities;
+        if (std::find(abilities.begin(), abilities.end(), name) == abilities.end()) continue;
+		if (unit->bFriendly) {
+            unit->taskQueue.push(taskMgr.PrepareTask(name, std::pair<std::shared_ptr<Unit>, std::any>{unit, data}));
+		}
+	}
 }
 
 // Get methods

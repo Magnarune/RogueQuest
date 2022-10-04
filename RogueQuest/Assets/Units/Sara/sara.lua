@@ -37,7 +37,7 @@ return
 	{
 		CollisionRadius = 10,
 		Abilities = {
-			Tasks = {"Move", "Attack", "Gather", "Kiss"}, -- task names allowed to be delegated to this unit
+			Tasks = {"Move", "Attack"}, -- task names allowed to be delegated to this unit
 		},
 	},
 	Stats =

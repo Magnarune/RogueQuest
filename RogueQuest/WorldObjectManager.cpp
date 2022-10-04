@@ -106,7 +106,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     if (pos == olc::vf2d(0.f, 0.f))
         pos = { engine.worldManager->curMap().layerSize.x * 32 / 2.f, engine.worldManager->curMap().layerSize.y * 32 / 2.f };
 
-    unit->Position = pos;
+    unit->predPosition = unit->Position = pos;
 
     // Update Internal Values Of New Unit
     unit->sUnitName = data.lua_data["Name"]; //This is in top of .lua
@@ -171,7 +171,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
 
     if (pos == olc::vf2d(0.f, 0.f))
         pos = { 10.f,10.f };
-    build->Position = pos;
+	build->predPosition = build->Position = pos;
     build->name = data.lua_data["Name"];
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];

@@ -9,7 +9,7 @@ Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
 Unit::~Unit() {
 }
 
-void Unit::MarchingtoTarget(const olc::vf2d& Target){
+void Unit::MarchingtoTarget(const olc::vf2d& Target) {
 	MoveQue.push(Target);
 	vTarget = Target;
 }
@@ -137,6 +137,15 @@ void Unit::Update(float delta) {
 		fAttackCD -= delta;
 	if(bAnimating) 
 		m_fTimer += delta;
+	if(!currentTask){
+		if(taskQueue.size()){
+			currentTask = taskQueue.front();
+			taskQueue.pop();
+			currentTask->initTask();
+		}
+	} else if(currentTask->checkCompleted()){
+		currentTask.reset();
+	}
 
 	if(!Hunted.expired())
 		UnitHunting();
@@ -185,10 +194,10 @@ void Unit::UpdatePosition(float delta) {
 				olc::vf2d Direction = (vTarget - Position).norm();
 				Velocity = Direction * fMoveSpeed;
 				bAnimating = true;
-				if (Distance.mag2() < 64) {
-					vTarget = { 0.f,0.f };
-					if (!MoveQue.empty()) MoveQue.pop();
-				}
+				// if (Distance.mag2() < 64) {
+				// 	vTarget = { 0.f,0.f };
+				// 	if (!MoveQue.empty()) MoveQue.pop();
+				// }
 			} else {
 				Velocity = { 0.f, 0.f };
 				bAnimating = false;

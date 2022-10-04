@@ -51,85 +51,31 @@ void UserInput::CameraInput(){
 }
 
 void UserInput::GetUserInput() {
-	auto& engine = Game_Engine::Current();
-    CameraInput();
-
+    auto& engine = Game_Engine::Current();
     if (!engine.IsConsoleShowing()) {
         if (engine.IsFocused()) {
+            CameraInput();
 
-            if (engine.GetMouse(0).bPressed){
-                Clicked = true;
-                Initial = engine.tv.ScreenToWorld(engine.GetMousePos());
-            }
-            if (engine.GetMouse(0).bHeld){
-                Final = engine.tv.ScreenToWorld(engine.GetMousePos());
-            } else {
-                Clicked = false;
-            }
-            if (engine.GetMouse(0).bReleased){
-                if(!engine.GetKey(olc::SHIFT).bHeld && !engine.ActivityDone)
-                    engine.unitManager->DeselectUnits(); 
+            if (engine.hud->BuildMode)
+                engine.inputmanager->GetBuildModeUserInput();
 
-                (Initial - Final).mag2() > 16 ?
-                    engine.unitManager->SelectUnits(Initial, Final) : engine.unitManager->SelectUnit(Final);
-                
-                if (!engine.ActivityDone)
-                    engine.buildingManager->DeselectBuildings();
-                else
-                    engine.ActivityDone = false;
-
-                engine.buildingManager->SelectBuilding(Final);
-            }
-            if (engine.GetMouse(1).bPressed){
-                if(!engine.GetKey(olc::SHIFT).bHeld)
-                    engine.unitManager->StopUnits();
-                // this is what delegating a task will look similar to
-                engine.unitManager->taskMgr.DelegateTask("Move",
-                    std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld));
-
-                //engine.unitManager->MoveUnits(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld);
-                engine.buildingManager->SentUnitslocation(engine.tv.ScreenToWorld(engine.GetMousePos()));
-            }
-            if (engine.GetKey(olc::S).bPressed)
-                engine.unitManager->StopUnits();
+            engine.inputmanager->StandardUserInput();
 
         }
     }
+
 }
 
-void UserInput::GetBuildModeUserInput() {
-    auto& engine = Game_Engine::Current();
-    if (engine.GetMouse(0).bReleased) {
-        std::shared_ptr<Unit> unit = engine.unitManager->GetUnit();
-        engine.hud->BuildMode = false;
-        engine.unitManager->StopUnits();
-      //  unit->ConstructBuilding(engine.hud->Object, engine.tv.ScreenToWorld(engine.GetMousePos()));
-    }
-    if (engine.GetMouse(0).bPressed)
-        engine.hud->BuildMode = false;
-}
 
 void UserInput::DrawUserInput() {
     auto& engine = Game_Engine::Current();
     if (!engine.IsConsoleShowing()) {
-        if (Clicked){
+        if (engine.inputmanager->Clicked){
             olc::Pixel color = olc::RED;
-            engine.tv.DrawLineDecal(Final,   { Initial.x,Final.y }, color);
-            engine.tv.DrawLineDecal(Initial, { Initial.x,Final.y }, color);
-            engine.tv.DrawLineDecal(Initial, { Final.x,Initial.y }, color);
-            engine.tv.DrawLineDecal(Final,   { Final.x,Initial.y }, color);
+            engine.tv.DrawLineDecal(engine.inputmanager->Final,   { engine.inputmanager->Initial.x,engine.inputmanager->Final.y }, color);
+            engine.tv.DrawLineDecal(engine.inputmanager->Initial, { engine.inputmanager->Initial.x,engine.inputmanager->Final.y }, color);
+            engine.tv.DrawLineDecal(engine.inputmanager->Initial, { engine.inputmanager->Final.x,engine.inputmanager->Initial.y }, color);
+            engine.tv.DrawLineDecal(engine.inputmanager->Final,   { engine.inputmanager->Final.x,engine.inputmanager->Initial.y }, color);
         }
     }
-}
-
-bool UserInput::Button(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size) {
-    auto& engine = Game_Engine::Current();
-    if (engine.GetMouse(0).bPressed &&
-        Mouse.x > pos.x && Mouse.y > pos.y &&
-        Mouse.x < pos.x + Size.x && Mouse.y < pos.y + Size.y) {
-        engine.ActivityDone = true;
-        return true;
-    }
-    else
-        return false;
 }

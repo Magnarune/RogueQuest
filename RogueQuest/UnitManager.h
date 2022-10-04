@@ -327,6 +327,8 @@ public:
 	
 	TaskManager taskMgr;
 
+	void DelegateTask(const std::string& name, const std::any& data);
+
 	void StopUnits();
 	void MoveConstructBuilding(const std::string& buildingName, const olc::vf2d& Target);
     void MoveUnits(olc::vf2d Target , bool Attackstate);

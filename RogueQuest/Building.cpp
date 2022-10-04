@@ -34,18 +34,19 @@ void Building::ProduceUnit(const std::string& unitName) {
 
 	if (m_fTimer > productiontime) {
 		if (!productionQue.empty()) productionQue.pop();
-		auto unit = engine.worldManager->GenerateUnit(unitName, Position + olc::vf2d({ -10.f, float(rand() % Size.y) }));
-		if(!unit) return; 
+		
+		 
 
-		SendUnit(unit);
+		SendUnit(engine.worldManager->GenerateUnit(unitName, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
 		building = false;
 		startbuilding = false;
 	}
 }
 
 void Building::SendUnit(std::shared_ptr<Unit> unit) {
-	if (sentUnitPos != olc::vf2d(0.f,0.f))
+	if(sentUnitPos.mag2() > 0.f) {
 		unit->vTarget = sentUnitPos;
+	}
 }
 
 void Building::Update(float delta){
