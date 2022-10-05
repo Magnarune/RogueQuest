@@ -73,25 +73,21 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>liblua-main/include;C:\Users\BloodworthJr\source\repos\RogueQuest\RogueQuest\lua-5.4.4\src;$(IncludePath)</IncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
-    <ExternalIncludePath>C:\Users\BloodworthJr\source\repos\STK\Lua\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>Lua\include;liblua-main\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>liblua-main/include;C:\Users\BloodworthJr\source\repos\RogueQuest\RogueQuest\lua-5.4.4\src;$(IncludePath)</IncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
-    <ExternalIncludePath>C:\Users\BloodworthJr\source\repos\STK\Lua\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>Lua\include;liblua-main\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>liblua-main/include;C:\Users\BloodworthJr\source\repos\RogueQuest\RogueQuest\lua-5.4.4\src;$(IncludePath)</IncludePath>
-    <ExternalIncludePath>C:\Users\BloodworthJr\source\repos\STK\Lua\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>Lua\include;liblua-main\include</ExternalIncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>liblua-main/include;C:\Users\BloodworthJr\source\repos\RogueQuest\RogueQuest\lua-5.4.4\src;$(IncludePath)</IncludePath>
-    <ExternalIncludePath>C:\Users\BloodworthJr\source\repos\STK\Lua\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>Lua\include;liblua-main\include</ExternalIncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -106,7 +102,9 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\Users\BloodworthJr\source\repos\STK\Lua\lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>lua54.lib;</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -124,7 +122,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\Users\BloodworthJr\source\repos\STK\Lua\lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>lua54.lib;</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -135,11 +135,15 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>C:\Users\Owner\Desktop\C++\RogueQuest\RogueQuest\Lua\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\Users\BloodworthJr\source\repos\STK\Lua\lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Lua\lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>lua54.lib;</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,13 +155,18 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>C:\Users\Owner\Desktop\C++\RogueQuest\RogueQuest\Lua\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\Users\BloodworthJr\source\repos\STK\Lua\lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Lua\lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>lua54.lib;</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -194,6 +203,14 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Hud.h" />
     <ClInclude Include="HudManager.h" />
+    <ClInclude Include="liblua-main\include\sol\config.hpp" />
+    <ClInclude Include="liblua-main\include\sol\forward.hpp" />
+    <ClInclude Include="liblua-main\include\sol\sol.hpp" />
+    <ClInclude Include="Lua\include\lauxlib.h" />
+    <ClInclude Include="Lua\include\lua.h" />
+    <ClInclude Include="Lua\include\lua.hpp" />
+    <ClInclude Include="Lua\include\luaconf.h" />
+    <ClInclude Include="Lua\include\lualib.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="olcPGEX_TransformedView.h" />
