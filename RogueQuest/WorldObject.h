@@ -15,7 +15,9 @@ public:
 	
 	olc::vf2d Position {};
 	olc::vf2d Velocity {};
-	
+	std::optional<olc::vf2d>Target {};    //Move Target
+
+	olc::vf2d Distance {};   //distange to Target	
 	float m_fTimer {};		//Graphics timer
 
 	virtual void Draw(olc::TileTransformedView* gfx);

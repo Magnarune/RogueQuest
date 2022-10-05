@@ -1,18 +1,19 @@
 #include "Unit.h"
 #include "Engine.h"
+#include <optional>
 
 
 Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
-	vTarget({ 0.f,0.f }), fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0) {
+	 fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0) {
 }
 
 Unit::~Unit() {
 	repairedbuilding.reset();
 }
 
-void Unit::MarchingtoTarget(const olc::vf2d& Target) {
-	MoveQue.push(Target);
-	vTarget = Target;
+void Unit::MarchingtoTarget(const olc::vf2d& target) {
+	MoveQue.push(target);
+	Target = target;
 }
 
 void Unit::Stop() {
@@ -20,7 +21,7 @@ void Unit::Stop() {
 	std::swap(MoveQue, cq);
 	Hunted.reset();
 	ULogic = Passive;
-	vTarget = { 0.f,0.f };
+	Target = std::nullopt;
 }
 
 void Unit::UnitBehaviour() {
@@ -76,9 +77,6 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 	if (other.get() == this) return true; // act as a continue
 	if(std::shared_ptr<Unit> unit = std::dynamic_pointer_cast<Unit>(other)){
 		// unit vs unit
-
-
-		// move object via collision overlap compensation
 		if(unit->Velocity.mag2() < 4.f){
 			unit->Velocity += Velocity;
 			unit->bAnimating = true;
@@ -136,8 +134,7 @@ void Unit::Destroy() {
 void Unit::Update(float delta) {
 	if(fAttackCD > 0)
 		fAttackCD -= delta;
-	if(bAnimating) 
-		m_fTimer += delta;
+
 	if(!currentTask){
 		if(taskQueue.size()){
 			currentTask = taskQueue.front();
@@ -150,47 +147,54 @@ void Unit::Update(float delta) {
 
 	if(!Hunted.expired())
 		UnitHunting();
-	else
+
+	if (Graphic_State != Dead) 
 		UpdatePosition(delta);
 	
-	TrytoBuild();
+	
 	Collidable::Update(delta);
 }
 
-void Unit::TrytoBuild() {
+void Unit::TrytoBuild(const std::string& name,const olc::vf2d& target) {
 	auto& engine = Game_Engine::Current();
-
-	olc::vf2d Distance = buildlocation - Position; //Distance to X could be in WorldObject
-
-	if (Distance.mag2() < buildingSize.x * buildingSize.y) {//close enough to building
-		ConstructBuilding(engine.worldManager->GenerateBuilding(buildName, buildlocation));
-	}
-
+	const auto& buildingdata = engine.assetManager->GetBuildingData(name);
+	auto to_vi2d = [](sol::table obj) -> olc::vi2d {
+		int32_t x = obj[1],
+			y = obj[2];
+		return { x, y };
+	};
+	taskTic.push(isBuilding);
+	MarchingtoTarget(target);
+	//buildlocation = target;
+	buildName = name;
+	buildingSize = to_vi2d(buildingdata.lua_data["Parameters"]["CollisionSize"]);
 }
 
-void Unit::ConstructBuilding(std::shared_ptr<Building> building) {
-	repairedbuilding.lock() = building;
+void Unit::ConstructBuilding(std::weak_ptr<Building> building) {
+	repairedbuilding.lock() = building.lock();//think about this :C
 }
 
 void Unit::RepairBuilding() {
-	repairedbuilding.lock()->health += 1.f;
+	repairedbuilding.lock()->health += 5.f;
 	if (repairedbuilding.lock()->curStage == "Construction" && repairedbuilding.lock()->health > repairedbuilding.lock()->maxHealth){
 		repairedbuilding.lock()->curStage = "Level one";
 		repairedbuilding.reset();
 	}
-	if (repairedbuilding.lock()->health > repairedbuilding.lock()->maxHealth)
+	if (repairedbuilding.lock()->health > repairedbuilding.lock()->maxHealth) {
 		repairedbuilding.reset();
+		UTask = isMoving;
+	}
 }
 
 void Unit::AfterUpdate(float delta) {
-	UnitGraphicUpdate();
+	UnitGraphicUpdate(delta);
 
 	Collidable::AfterUpdate(delta);// inherit
 }
 
 void Unit::UnitHunting() {
 
-	olc::vf2d Distance = AttackTarget - Position;
+	 Distance = AttackTarget - Position;
 	fUnitAngle = std::fmod(2.0f * PI + (Distance).polar().y, 2.0f * PI);
 
 	if (Distance.mag2() > 32 * 32) {
@@ -209,48 +213,63 @@ void Unit::UnitHunting() {
 }
 
 void Unit::UpdatePosition(float delta) {
-
-	if (Graphic_State != Dead) {
-		UnitBehaviour();
-		if (MoveQue.size() > 0)//has move order
-			vTarget = MoveQue.front();//this is target location
-
-			olc::vf2d Distance = vTarget - Position;//dist to target
-			if (Graphic_State != Walking) Graphic_State = Walking;
-			if (vTarget != olc::vf2d({ 0.f, 0.f })) {
-				olc::vf2d Direction = (vTarget - Position).norm();
-				Velocity = Direction * fMoveSpeed;
-				bAnimating = true;
-				 if (Distance.mag2() < 64) {
-				 	vTarget = { 0.f,0.f };
-				 	if (!MoveQue.empty()) MoveQue.pop();
-				 }
-			} else {
-				Velocity = { 0.f, 0.f };
-				bAnimating = false;
-			}	
+	auto& engine = Game_Engine::Current();
+	UnitBehaviour();
+	if (MoveQue.size() > 0)
+		Target = MoveQue.front();
+	if (taskTic.size() > 0){
+		if (taskTic.front() == 0)
+			UTask = isBuilding;
+		if (taskTic.front() == 5)
+			UTask = isMoving;
 	}
-	else {
-		bAnimating = true;
+	switch (UTask) {
+	case isMoving:		
+		TaskFinZone = 64;
+		break;
+	case isBuilding:
+		TaskFinZone = buildingSize.x + buildingSize.y / 2.f;
+		break;
+	case isHunting:
+		Target = AttackTarget;
+		break;
+	case isRepairing:
+		TaskFinZone = repairedbuilding.lock()->Size.x + repairedbuilding.lock()->Size.y / 2.f;
 	}
 
+		if (Target.has_value()) {		
+			Distance = Target.value() - Position;
+			olc::vf2d direction = (Target.value() - Position).norm();
+			Velocity = direction * fMoveSpeed;
+			if (Distance.mag2() < TaskFinZone) {				
+				Velocity = { 0.f,0.f };
 
+				if (UTask == isBuilding) {
+					ConstructBuilding(engine.worldManager->GenerateBuilding(buildName, Target.value()));
+				}
+				if (UTask == isRepairing)
+					RepairBuilding();
+				
+				Target = std::nullopt;	
+
+				if (!MoveQue.empty() && UTask != isRepairing) {
+					MoveQue.pop();
+					taskTic.pop();
+				}
+			}
+		}
+	
+
+
+	//KnockBack
 	HitVelocity *= std::pow(0.05f, delta);
-
 	if (HitVelocity.mag2() < 4.f)
 		HitVelocity = { 0.f, 0.f };
-	else
-		bAnimating = true;
-
 	predPosition += HitVelocity * delta; // hitback only
 }
 
-void Unit::UnitGraphicUpdate() {	
-	if (m_fTimer >= 0.1f) {
-		m_fTimer -= 0.1f;
-		++curFrame %= textureMetadata[Graphic_State].ani_len;
-	}
-	if (repairedbuilding.lock())
+void Unit::UnitGraphicUpdate(float delta) {	
+	if (repairedbuilding.lock() && Velocity.mag2() < 0.1f * 0.1f)
 		Graphic_State = Build;
 
 	if (fHealth <= 0)
@@ -263,6 +282,23 @@ void Unit::UnitGraphicUpdate() {
 		curFrame = 0;
 		Last_State = Graphic_State;
 	}
+	bAnimating = true;
+
+	if (Velocity.mag2() < 0.1f * 0.1f) {
+		if (Graphic_State != Build) {
+			bAnimating = false;	
+		}
+
+	}else
+		Graphic_State = Walking;
+
+	if (bAnimating)
+		m_fTimer += delta;
+	if (m_fTimer >= 0.1f) {
+		m_fTimer -= 0.1f;
+		++curFrame %= textureMetadata[Graphic_State].ani_len;
+	}
+
 }
 
 void Unit::Draw(olc::TileTransformedView* gfx){
@@ -328,7 +364,7 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 
 
 
-		if (vTarget != olc::vf2d(0, 0)) {
+		if (Target.has_value()) {
 			std::queue<olc::vf2d> ShowQue = MoveQue;
 			while (!ShowQue.empty()) {
 				if (ULogic == Attack) {

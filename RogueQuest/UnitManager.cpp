@@ -20,8 +20,9 @@ UnitManager::UnitManager() {
             const auto& params = std::any_cast<std::pair<olc::vf2d,bool>>(arguments.second);
             const olc::vf2d& target = params.first;
             const bool& attackstate = params.second;
-            // action code
+            // action code            
             unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
+            unit->taskTic.push(unit->isMoving);
             unit->MarchingtoTarget(target);
             return true;
         },
@@ -29,8 +30,9 @@ UnitManager::UnitManager() {
             // required
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;
-
-            float distance = (unit->vTarget - unit->Position).mag2();
+            if (!unit->Target.has_value()) return true;
+            
+            float distance = (unit->Target.value() - unit->Position).mag2();
             return distance < 16.f * 16.f;
         }
         , 0, olc::Key::M }); // metadata , hotkey
@@ -41,16 +43,16 @@ UnitManager::UnitManager() {
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;
             // customizable parameters
-            const auto& params = std::any_cast<std::pair<olc::vf2d,std::string>>(arguments.second);
-            const olc::vf2d& target = params.first;
-            const std::string& buildingname = params.second;
+            const auto& params = std::any_cast<std::pair<std::string, olc::vf2d>>(arguments.second);
+            const std::string& buildingname = params.first;// Only allowed two >.<
+            const olc::vf2d& target = params.second;
 
             // action code
-           // unit->ULogic = unit->Neutral;
-            unit->MarchingtoTarget(target);//Target
-            unit->buildlocation = target;
-            unit->buildName = buildingname;
-
+           // unit->UTask = unit->isBuilding;
+            unit->ULogic = unit->Neutral;
+            unit->TrytoBuild(buildingname, target);
+           //Build Location
+           
             return true;
         },
         [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
@@ -59,10 +61,41 @@ UnitManager::UnitManager() {
             auto& unit = arguments.first;
 
             // temporary, fix later
-            float distance = (unit->buildlocation - unit->Position).mag2();
-            return distance < 8.f * 8.f;
+            float distance = (unit->Target.value() - unit->Position).mag2();
+            return distance < 16.f * 16.f;
         }
         , 0, olc::Key::B }); // metadata , hotkey
+
+    taskMgr.RegisterTask("Repair",
+        { [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+            // required
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;
+            // customizable parameters
+            const auto& params = std::any_cast<std::pair<std::weak_ptr, olc::vf2d>>(arguments.second);
+            std::weak_ptr building = params.first;// Only allowed two >.<
+            const olc::vf2d& target = params.second;
+
+            // action code
+           // unit->UTask = unit->isBuilding;
+            unit->ULogic = unit->Neutral;
+            
+            unit->RepairBuilding();
+            
+            //Build Location
+
+             return true;
+         },
+         [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
+             // required
+             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+             auto& unit = arguments.first;
+
+             // temporary, fix later
+             float distance = (unit->Target.value() - unit->Position).mag2();
+             return distance < 16.f * 16.f;
+         }
+         , 0, olc::Key::B }); // metadata , hotkey
 }
 
 

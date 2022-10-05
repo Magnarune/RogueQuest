@@ -18,12 +18,15 @@ class Unit : public Collidable {
 
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
 	void MarchingtoTarget(const olc::vf2d& Target);
+
 	void RepairBuilding();
-	void ConstructBuilding(std::shared_ptr<Building> build);
-	void TrytoBuild();
+
+	void ConstructBuilding(std::weak_ptr<Building> build);
+
+	void TrytoBuild(const std::string& name, const olc::vf2d& Target);
 	void UnitBehaviour();
 	void UnitHunting();
-	void UnitGraphicUpdate();
+	void UnitGraphicUpdate(float delta);
 	void UpdatePosition(float felapstedtime);
 	void PerformAttack();//good
 	void Stop();//fine
@@ -44,7 +47,9 @@ public:
 	std::string buildName; //Name of what Im building
 	std::weak_ptr<Building> repairedbuilding; //pointer to building being repaired
 
-
+	std::queue<int> taskTic;
+	std::queue<olc::vf2d> MoveQue; //Move to this location
+	float TaskFinZone; //a
 	//End of Testing
 	// Data
 	Clock execTimeout; //Delay In unit thinking time
@@ -66,14 +71,11 @@ public:
 	
 	
 
-	std::queue<olc::vf2d> MoveQue; //Move to this location
 	olc::vf2d vRubberBand;   // X , Y, Position to go back to
-	olc::vf2d vTarget;       //Where to move after the player clicked on screen
 	olc::vf2d AttackTarget;  // Target you are chasing
 	olc::vf2d HitVelocity;	// velocity for getting kicked
 	float AgroRange = 80.f; //How far will you look to kill somthing
 	std::weak_ptr<WorldObject> Hunted; // currently attacking a world object
-	// bool bHunting;				//I am hunting prey stop walking to your clicked location
 	float fUnitAngle;        // Angle of the player 0->2pi Radians
 
 	// Parameters
@@ -101,9 +103,8 @@ public:
 	int	SONorth = 0;
 	int	SOWest = 1;
 	int	SOSouth = 2;
-	int	SOEast = 3;
-	
-	std::vector<int> Direction;
+	int	SOEast = 3;	
+	std::vector<int> Direction;//Sprite order direction
 	
 	enum UnitLogic {
 		Attack, //If you say attack a pos Search and Kill anything within agro-range
@@ -118,7 +119,7 @@ public:
 		isHunting,// Move toward enemy target | What if I tell unit to attack a specific target?
 		isPetroling, //Going back and forth
 		isMoving	// Move toward move target
-	} UWork;
+	} UTask;
 
 public:
 	void Destroy() override;

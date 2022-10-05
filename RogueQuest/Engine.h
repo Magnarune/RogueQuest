@@ -25,6 +25,7 @@
 #include "Options.h"
 #include "clock.h"
 
+
 extern std::string StringifyObject(sol::object val);
 
 class Game_Engine : public olc::PixelGameEngine {

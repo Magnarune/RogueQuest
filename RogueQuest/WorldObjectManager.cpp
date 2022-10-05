@@ -1,5 +1,6 @@
 #include "WorldObjectManager.h"
 #include "Engine.h"
+#include <optional>
 
 WorldManager::WorldManager() {
     objectList.reserve(1024 * 512);
@@ -113,7 +114,8 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     //Load Sprite Order
     for (int i = 0; i < 4; i++)
         unit->Direction.push_back(data.lua_data["SpriteOrder"][i+1]);
-    
+    unit->Target = std::nullopt;//{0.f,0.f};
+       
     // Load Parameters
     unit->Unit_Collision_Radius = data.lua_data["Parameters"]["CollisionRadius"]; //I'm not in stats section of .lua
     // Load Stats
@@ -173,14 +175,11 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
         pos = { 10.f,10.f };
 	build->predPosition = build->Position = pos;
     build->name = data.lua_data["Name"];
-    //build->curStage = Stage;
+  
 
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];
-    build->health = 0.1f;
-
-    //if(Stage !="Construction")
-    
+    build->health = 0.1f;    
    // build->health = data.lua_data["Stats"]["Health"];
     build->health = 0.4f;
     build->maxHealth = data.lua_data["Stats"]["MaxHealth"];

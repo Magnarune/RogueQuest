@@ -60,10 +60,7 @@ void UserInput::GetUserInput() {
                 engine.inputmanager->GetBuildModeUserInput();
 
             engine.inputmanager->StandardUserInput();
-            if (engine.GetKey(olc::T).bPressed) {
-                
-            }
-
+          
         }
     }
 

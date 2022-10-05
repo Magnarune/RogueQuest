@@ -44,8 +44,11 @@ void Building::ProduceUnit(const std::string& unitName) {
 }
 
 void Building::SendUnit(std::shared_ptr<Unit> unit) {
-	if(sentUnitPos.mag2() > 0.f) {
-		unit->vTarget = sentUnitPos;
+	auto& engine = Game_Engine::Current();
+	if (sentUnitPos.mag2() > 0.f) {
+
+		//unit->Target = sentUnitPos;
+		unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {sentUnitPos, false} }));
 	}
 }
 
