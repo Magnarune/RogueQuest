@@ -7,6 +7,7 @@ Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
 }
 
 Unit::~Unit() {
+	repairedbuilding.reset();
 }
 
 void Unit::MarchingtoTarget(const olc::vf2d& Target) {
@@ -55,7 +56,6 @@ void Unit::UnitBehaviour() {
 				} else {
 					auto other = Hunted.lock();
 					float distance = (other->Position - Position).mag2();
-
 					AttackTarget = other->Position;
 
 					if(distance >= AgroRange*AgroRange){
@@ -99,17 +99,18 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 }
 
 void Unit::PerformAttack() {
+	auto& engine = Game_Engine::Current();
 	Graphic_State = Attacking;
 	bAnimating = true;
 	//Projectilemanager->AddProjectile(Unit, AttackTarget)
 
 	if(!Hunted.expired()){
 		auto obj = Hunted.lock();
-
 		if(auto unit = std::dynamic_pointer_cast<Unit>(obj)){
 			olc::vf2d vel = (unit->Position - Position).norm() * fAttackDamage * 0.f;
 			if(std::isnan(vel.x) || std::isnan(vel.y)) vel = {0.f,0.f};
 			unit->KnockBack(fAttackDamage, vel);
+			engine.particles->CreateParticles(unit->Position);
 		}
 		
 		if(auto building = std::dynamic_pointer_cast<Building>(obj)){
@@ -152,7 +153,33 @@ void Unit::Update(float delta) {
 	else
 		UpdatePosition(delta);
 	
+	TrytoBuild();
 	Collidable::Update(delta);
+}
+
+void Unit::TrytoBuild() {
+	auto& engine = Game_Engine::Current();
+
+	olc::vf2d Distance = buildlocation - Position; //Distance to X could be in WorldObject
+
+	if (Distance.mag2() < buildingSize.x * buildingSize.y) {//close enough to building
+		ConstructBuilding(engine.worldManager->GenerateBuilding(buildName, buildlocation));
+	}
+
+}
+
+void Unit::ConstructBuilding(std::shared_ptr<Building> building) {
+	repairedbuilding.lock() = building;
+}
+
+void Unit::RepairBuilding() {
+	repairedbuilding.lock()->health += 1.f;
+	if (repairedbuilding.lock()->curStage == "Construction" && repairedbuilding.lock()->health > repairedbuilding.lock()->maxHealth){
+		repairedbuilding.lock()->curStage = "Level one";
+		repairedbuilding.reset();
+	}
+	if (repairedbuilding.lock()->health > repairedbuilding.lock()->maxHealth)
+		repairedbuilding.reset();
 }
 
 void Unit::AfterUpdate(float delta) {
@@ -172,7 +199,7 @@ void Unit::UnitHunting() {
 	}
 	else if (Distance.mag2() < fAttackRange * fAttackRange && fAttackCD <= 0) {
 		Graphic_State = Attacking;
-		bAnimating = true; // ugh this is all so spaghetti
+		bAnimating = true; 
 		if (curFrame == textureMetadata[Graphic_State].ani_len - 1) {
 			PerformAttack();
 			Graphic_State = Walking;
@@ -194,10 +221,10 @@ void Unit::UpdatePosition(float delta) {
 				olc::vf2d Direction = (vTarget - Position).norm();
 				Velocity = Direction * fMoveSpeed;
 				bAnimating = true;
-				// if (Distance.mag2() < 64) {
-				// 	vTarget = { 0.f,0.f };
-				// 	if (!MoveQue.empty()) MoveQue.pop();
-				// }
+				 if (Distance.mag2() < 64) {
+				 	vTarget = { 0.f,0.f };
+				 	if (!MoveQue.empty()) MoveQue.pop();
+				 }
 			} else {
 				Velocity = { 0.f, 0.f };
 				bAnimating = false;
@@ -223,6 +250,8 @@ void Unit::UnitGraphicUpdate() {
 		m_fTimer -= 0.1f;
 		++curFrame %= textureMetadata[Graphic_State].ani_len;
 	}
+	if (repairedbuilding.lock())
+		Graphic_State = Build;
 
 	if (fHealth <= 0)
 		Graphic_State = Dead;

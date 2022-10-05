@@ -12,15 +12,17 @@
 #include "UserInput.h"
 #include "UserInputManager.h"
 #include "Unit.h"
-#include "Assets.h"
-#include "Map.h"
-#include "Hud.h"
-#include "HudManager.h"
-#include "Options.h"
-#include "Config.h"
 #include "UnitManager.h"
+#include "Assets.h"
+#include "Hud.h"
+#include "Map.h"
+#include "HudManager.h"
+#include "TaskManager.h"
 #include "WorldObject.h"
 #include "WorldObjectManager.h"
+#include "Particles.h"
+#include "Config.h"
+#include "Options.h"
 #include "clock.h"
 
 extern std::string StringifyObject(sol::object val);
@@ -74,7 +76,7 @@ public:
 	std::unique_ptr<cAssets> assetManager;
 	std::unique_ptr<Hud> hud;
 	std::unique_ptr<HudManager> hudManager;
-
+	std::unique_ptr<Particles> particles;
 	std::unique_ptr<Options> optionsManager;
 	std::unique_ptr<UserInput> userinputs;
 	std::unique_ptr<UserInputManager> inputmanager;

@@ -3,7 +3,11 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+//#include "Engine.h"
+#include "Hud.h"
+#include "HudManager.h"
 #include "Unit.h"
+#include "Building.h"
 #include "TaskManager.h"
 #include "Assets.h"
 #include "Projectiles.h"

@@ -173,6 +173,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Options.cpp" />
+    <ClCompile Include="Particles.cpp" />
     <ClCompile Include="Projectiles.cpp" />
     <ClCompile Include="TaskManager.cpp" />
     <ClCompile Include="Unit.cpp" />
@@ -198,6 +199,7 @@
     <ClInclude Include="olcPGEX_TransformedView.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
     <ClInclude Include="Options.h" />
+    <ClInclude Include="Particles.h" />
     <ClInclude Include="Projectiles.h" />
     <ClInclude Include="TaskManager.h" />
     <ClInclude Include="Unit.h" />

@@ -31,7 +31,7 @@ UnitManager::UnitManager() {
             auto& unit = arguments.first;
 
             float distance = (unit->vTarget - unit->Position).mag2();
-            return distance < 8.f * 8.f;
+            return distance < 16.f * 16.f;
         }
         , 0, olc::Key::M }); // metadata , hotkey
 
@@ -46,10 +46,10 @@ UnitManager::UnitManager() {
             const std::string& buildingname = params.second;
 
             // action code
-            unit->ULogic = unit->Neutral;
-            unit->MarchingtoTarget(target);
-            unit->buildLocation = target;
-            unit->newBuildingName = buildingname;
+           // unit->ULogic = unit->Neutral;
+            unit->MarchingtoTarget(target);//Target
+            unit->buildlocation = target;
+            unit->buildName = buildingname;
 
             return true;
         },
@@ -59,7 +59,7 @@ UnitManager::UnitManager() {
             auto& unit = arguments.first;
 
             // temporary, fix later
-            float distance = (unit->buildLocation - unit->Position).mag2();
+            float distance = (unit->buildlocation - unit->Position).mag2();
             return distance < 8.f * 8.f;
         }
         , 0, olc::Key::B }); // metadata , hotkey

@@ -177,6 +177,6 @@ void Hud::DrawBuild() {
         engine.hud->loadImage(_refname, data.icon.tex_id);
     }
     olc::Decal* decal = engine.hud->decals[_refname].get();
-    olc::vf2d Center = engine.GetMousePos() - olc::vf2d(data.icon.sz.x , data.icon.sz.y );
+    olc::vf2d Center = olc::vf2d(engine.GetMousePos()) - olc::vf2d((float)data.icon.sz.x , (float)data.icon.sz.y );
     engine.DrawPartialDecal( ((Center)), {64,64}, decal, {0,0}, data.icon.fsz, olc::PixelF(0.f, 255.f, 0.f, 0.7f));
 }

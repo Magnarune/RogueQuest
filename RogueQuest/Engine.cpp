@@ -71,6 +71,7 @@ bool Game_Engine::OnUserCreate() {
     optionsManager.reset(new Options);//Create options menu
     userinputs.reset(new UserInput); //Create user options    
     inputmanager.reset(new UserInputManager);
+    particles.reset(new Particles);
     // Configure Controllers
     assetManager->LoadUnitAssets();     // Load all the Lua files
     assetManager->LoadBuildingAssets(); // Load all the Buildings files
@@ -124,10 +125,12 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
         unitManager->Update(fElapsedTime);
         worldManager->Update(fElapsedTime);
         hud->Update(fElapsedTime); // hud update should be last for game updates (I think)
+        particles->UpdateParticles(fElapsedTime);
     }
     // GC
     worldManager->CollectGarbage();
     // Drawing
+
     worldManager->Draw();
     userinputs->DrawUserInput();
     hud->DrawHud();
@@ -178,6 +181,7 @@ bool Game_Engine::OnUserDestroy(){
     userinputs.reset();
     inputmanager.reset();
     TextureCache::FreeCache();
+    particles.reset();
     return true;
 }
 
@@ -241,6 +245,7 @@ const std::map<std::string, CommandFunction> commands = {
             auto unit = engine.unitManager->GetUnit(name, i);
             if(unit) {
                 unit->fHealth -= 1000.f;
+                engine.particles->CreateParticles(unit->Position);
                 // unit->Destroy();
                 std::cout << name << " #" << i << " destroyed\n";
             }

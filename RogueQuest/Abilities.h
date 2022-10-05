@@ -1,4 +1,4 @@
-
+#pragma once
 class Ability{
 public:
 	void DrawConstructableObjects();//What am I doing...

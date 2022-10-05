@@ -32,7 +32,7 @@ void WorldManager::Draw() {//Draw
     Game_Engine& engine = Game_Engine::Current();
 
     currentMap->DrawMap(&engine.tv);
-
+    engine.particles->DrawDestroyParticles();
     for (auto& object : objectList) {
         if (object == nullptr) continue;
 
@@ -173,9 +173,16 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
         pos = { 10.f,10.f };
 	build->predPosition = build->Position = pos;
     build->name = data.lua_data["Name"];
+    //build->curStage = Stage;
+
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];
-    build->health = data.lua_data["Stats"]["Health"];
+    build->health = 0.1f;
+
+    //if(Stage !="Construction")
+    
+   // build->health = data.lua_data["Stats"]["Health"];
+    build->health = 0.4f;
     build->maxHealth = data.lua_data["Stats"]["MaxHealth"];
 
     sol::table UnitProduction = data.lua_data["Production"]["Units"];
@@ -204,16 +211,16 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     return build;    
 }
 
-
-std::shared_ptr<Projectile> WorldManager::GenerateProjectile(olc::vf2d start, olc::vf2d Target) {
-    std::shared_ptr<Projectile> proj;
-    //Projectile.reset(new proj());
-    proj->Position = start; proj->Target = Target;
-    proj->Damage; proj->Velocity;
-
-    objectList.emplace_back(proj);
-    return proj;
-}
+//
+//std::shared_ptr<Projectile> WorldManager::GenerateProjectile(olc::vf2d start, olc::vf2d Target) {
+//    std::shared_ptr<Projectile> proj;
+//    //Projectile.reset(new proj());
+//    proj->Position = start; proj->Target = Target;
+//    proj->Damage; proj->Velocity;
+//
+//    objectList.emplace_back(proj);
+//    return proj;
+//}
 
 void WorldManager::ImportMapData() {
     // to do: iterate map folder and find maps

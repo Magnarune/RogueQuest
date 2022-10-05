@@ -4,8 +4,10 @@
 #include "olcPGEX_TransformedView.h"
 #include "WorldObject.h"
 #include "Unit.h"
+#include "UnitManager.h"
 #include "Map.h"
 #include "Building.h"
+#include "BuildingManager.h"
 #include "Projectiles.h"
 #include <vector>
 #include <memory>
@@ -15,7 +17,7 @@
 #include <cmath>
 #include <functional>
 #include <cassert>
-
+class Unit;
 
 class WorldManager {
 	std::vector<std::shared_ptr<Map>> mapList; // Maybe
@@ -48,7 +50,9 @@ public:
 
 	std::shared_ptr<Building> GenerateBuilding(const std::string& name, olc::vf2d pos = { 0.f,0.f });
 
-    std::shared_ptr<Projectile> GenerateProjectile(olc::vf2d pos, olc::vf2d trgt);
+   // std::shared_ptr<Projectile> GenerateProjectile(olc::vf2d pos, olc::vf2d trgt);
 	
 	friend class WorldObject;
+	friend class Unit;
+	friend class UnitManager;
 };

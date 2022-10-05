@@ -1,5 +1,9 @@
 #pragma once
-#include "Engine.h"
+#include "Unit.h"
+#include "Building.h"
+//#include "Engine.h"
+class Unit;
+
 class HudManager{
 public:
 	

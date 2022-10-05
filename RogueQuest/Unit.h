@@ -7,16 +7,19 @@
 #include "WorldObject.h"
 #include "clock.h"
 #include "TaskManager.h"
+#include "Building.h"
 #include <map>
 #include <vector>
 #include <queue>
 #include <iostream>
 
 class Unit : public Collidable {
-	Unit(const cAssets::UnitType& unitType);
+
 
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
 	void MarchingtoTarget(const olc::vf2d& Target);
+	void RepairBuilding();
+	void ConstructBuilding(std::shared_ptr<Building> build);
 	void TrytoBuild();
 	void UnitBehaviour();
 	void UnitHunting();
@@ -30,9 +33,19 @@ class Unit : public Collidable {
 	void Draw(olc::TileTransformedView* gfx) override;//good
 
 public:
+	Unit(const cAssets::UnitType& unitType);
 	virtual ~Unit();
 	const cAssets::UnitType& unitType; // internal unit type reference
 
+	//Testing Some Build Logic Gates
+
+	olc::vf2d buildlocation;//Where is the building going to be made
+	olc::vf2d buildingSize; //Size of Building | Given by construct
+	std::string buildName; //Name of what Im building
+	std::weak_ptr<Building> repairedbuilding; //pointer to building being repaired
+
+
+	//End of Testing
 	// Data
 	Clock execTimeout; //Delay In unit thinking time
 	std::string sUnitName; //Name
@@ -50,9 +63,8 @@ public:
 	std::queue<std::shared_ptr<TaskManager::Task>> taskQueue; // queue of tasks
 	std::shared_ptr<TaskManager::Task> currentTask; // current task
 	
-	olc::vf2d buildLocation;
-	std::weak_ptr<Building> constructingBuilding;
-	std::string newBuildingName;
+	
+	
 
 	std::queue<olc::vf2d> MoveQue; //Move to this location
 	olc::vf2d vRubberBand;   // X , Y, Position to go back to
@@ -147,4 +159,6 @@ private:
 	friend class WorldManager;
 	friend class HudManager;
 	friend class TaskManager;
+	friend class Building;
+	friend class BuildingManager;
 };

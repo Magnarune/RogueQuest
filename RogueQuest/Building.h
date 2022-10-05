@@ -5,7 +5,9 @@
 #include "WorldObject.h"
 #include "Assets.h"
 #include "Unit.h"
+#include "UnitManager.h"
 #include "TaskManager.h"
+#include <queue>
 
 
 class Building: public Collidable {
@@ -38,7 +40,7 @@ public:
 	std::string unitproduced;
 	std::vector<std::string> unitproduction;
 	//       stage  offset
-	std::string curStage = "Level Four"; // current stage - oof good luck with this
+	std::string curStage = "Construction"; // current stage - oof good luck with this
 	
 	bool bSelected;
 	float health;
@@ -58,6 +60,8 @@ private:
 	friend class cAssets;
 	friend class WorldManager;
 	friend class BuildingManager;
+	friend class UnitManager;
 	friend class TaskManager;
+	friend class Unit;
 };
 

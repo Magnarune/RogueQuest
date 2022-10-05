@@ -14,6 +14,11 @@ return
 			FileName = "Assets/Buildings/House/House.png",
 			LevelOffsets = {
 				{
+					Name = "Construction",
+					Offset = {22, 80},
+					TileSize = {123, 110}
+				},
+				{
 					Name = "Level one",
 					Offset = {171, 64},
 					TileSize = {144, 132}
@@ -24,12 +29,12 @@ return
 					TileSize = {167, 140}
 				},
 				{
-					Name = "Level Three",
+					Name = "Level three",
 					Offset = {515, 47},
 					TileSize = {139, 138}
 				},
 				{
-					Name = "Level Four",
+					Name = "Level four",
 					Offset = {671, 0},
 					TileSize = {140, 185}
 				}

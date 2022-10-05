@@ -36,6 +36,7 @@ void UserInputManager::StandardUserInput() {
     if (engine.GetMouse(1).bPressed) {
         if (!engine.GetKey(olc::SHIFT).bHeld)
             engine.unitManager->StopUnits();
+
         // this is what delegating a task will look similar to
         engine.unitManager->DelegateTask("Move",
             std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld));
