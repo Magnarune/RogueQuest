@@ -6,6 +6,7 @@
 #include "Building.h"
 #include "WorldObjectManager.h"
 #include "TaskManager.h"
+#include "UnitManager.h"
 
 class BuildingManager {
 
@@ -41,4 +42,5 @@ public:
 
     friend class WorldManager;
     friend class TaskManager;
+    friend class UnitManager;
 };

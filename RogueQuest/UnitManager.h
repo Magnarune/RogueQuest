@@ -338,6 +338,11 @@ public:
     void MoveUnits(olc::vf2d Target , bool Attackstate);
 	void SelectUnit(olc::vf2d Mouse);
     void SelectUnits(olc::vf2d Initial, olc::vf2d Final);
+	//prob a better way
+	std::optional<std::weak_ptr<Collidable>> findobject(olc::vf2d Mouse);
+	void ParseObject(olc::vf2d Mouse);
+	
+
 	void DeselectUnits();
 
 	size_t GetSelectedUnitCount();

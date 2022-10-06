@@ -9,19 +9,23 @@ Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
 
 Unit::~Unit() {
 	repairedbuilding.reset();
-}
-
-void Unit::MarchingtoTarget(const olc::vf2d& target) {
-	MoveQue.push(target);
-	Target = target;
+	currentTask.reset();
+	std::queue<std::shared_ptr<TaskManager::Task>> cq;
+	if (!taskQueue.empty())
+		cq.swap(taskQueue);
+	Hunted.reset();
 }
 
 void Unit::Stop() {
-	std::queue<olc::vf2d> cq;
-	std::swap(MoveQue, cq);
+	currentTask.reset();
+	std::queue<std::shared_ptr<TaskManager::Task>> cq;
+	if(!taskQueue.empty())
+	cq.swap(taskQueue);
 	Hunted.reset();
 	ULogic = Passive;
 	Target = std::nullopt;
+	Velocity = { 0.f,0.f };
+	repairedbuilding.reset();
 }
 
 void Unit::UnitBehaviour() {
@@ -125,8 +129,6 @@ void Unit::KnockBack(float damage, olc::vf2d velocity) {
 	fHealth -= damage;
 }
 
-// Override Methods
-
 void Unit::Destroy() {
 	Collidable::Destroy(); // inherit
 }
@@ -145,9 +147,6 @@ void Unit::Update(float delta) {
 		currentTask.reset();
 	}
 
-	if(!Hunted.expired())
-		UnitHunting();
-
 	if (Graphic_State != Dead) 
 		UpdatePosition(delta);
 	
@@ -163,27 +162,19 @@ void Unit::TrytoBuild(const std::string& name,const olc::vf2d& target) {
 			y = obj[2];
 		return { x, y };
 	};
-	taskTic.push(isBuilding);
-	MarchingtoTarget(target);
-	//buildlocation = target;
+	Target = target;
 	buildName = name;
 	buildingSize = to_vi2d(buildingdata.lua_data["Parameters"]["CollisionSize"]);
-}
 
-void Unit::ConstructBuilding(std::weak_ptr<Building> building) {
-	repairedbuilding.lock() = building.lock();//think about this :C
 }
 
 void Unit::RepairBuilding() {
-	repairedbuilding.lock()->health += 5.f;
-	if (repairedbuilding.lock()->curStage == "Construction" && repairedbuilding.lock()->health > repairedbuilding.lock()->maxHealth){
+	repairedbuilding.lock()->health += 0.1f;
+	if (repairedbuilding.lock()->curStage == "Construction" && repairedbuilding.lock()->health >= repairedbuilding.lock()->maxHealth){
 		repairedbuilding.lock()->curStage = "Level one";
 		repairedbuilding.reset();
-	}
-	if (repairedbuilding.lock()->health > repairedbuilding.lock()->maxHealth) {
-		repairedbuilding.reset();
-		UTask = isMoving;
-	}
+		
+	}	
 }
 
 void Unit::AfterUpdate(float delta) {
@@ -213,64 +204,44 @@ void Unit::UnitHunting() {
 }
 
 void Unit::UpdatePosition(float delta) {
-	auto& engine = Game_Engine::Current();
-	UnitBehaviour();
-	if (MoveQue.size() > 0)
-		Target = MoveQue.front();
-	if (taskTic.size() > 0){
-		if (taskTic.front() == 0)
-			UTask = isBuilding;
-		if (taskTic.front() == 5)
-			UTask = isMoving;
-	}
-	switch (UTask) {
-	case isMoving:		
-		TaskFinZone = 64;
-		break;
-	case isBuilding:
-		TaskFinZone = buildingSize.x + buildingSize.y / 2.f;
-		break;
-	case isHunting:
-		Target = AttackTarget;
-		break;
-	case isRepairing:
-		TaskFinZone = repairedbuilding.lock()->Size.x + repairedbuilding.lock()->Size.y / 2.f;
-	}
+	auto& engine = Game_Engine::Current();//UnitBehaviour();
 
-		if (Target.has_value()) {		
-			Distance = Target.value() - Position;
-			olc::vf2d direction = (Target.value() - Position).norm();
-			Velocity = direction * fMoveSpeed;
-			if (Distance.mag2() < TaskFinZone) {				
-				Velocity = { 0.f,0.f };
-
-				if (UTask == isBuilding) {
-					ConstructBuilding(engine.worldManager->GenerateBuilding(buildName, Target.value()));
-				}
-				if (UTask == isRepairing)
-					RepairBuilding();
-				
-				Target = std::nullopt;	
-
-				if (!MoveQue.empty() && UTask != isRepairing) {
-					MoveQue.pop();
-					taskTic.pop();
-				}
-			}
+	if (Target.has_value()) {
+		Distance = Target.value() - Position;
+		olc::vf2d direction = (Target.value() - Position).norm();
+		Velocity = direction * fMoveSpeed;
+		if (Distance.mag2() < ActionZone.mag2()) {
+			if(currentTask)
+				currentTask->performTask();
+			Velocity = { 0.f,0.f };
 		}
-	
+	}
 
+	//HitVelocity *= std::pow(0.05f, delta);
+	//if (HitVelocity.mag2() < 4.f)
+	//	HitVelocity = { 0.f, 0.f };
 
-	//KnockBack
-	HitVelocity *= std::pow(0.05f, delta);
-	if (HitVelocity.mag2() < 4.f)
-		HitVelocity = { 0.f, 0.f };
-	predPosition += HitVelocity * delta; // hitback only
+	//predPosition += HitVelocity * delta; // hitback only
+
 }
 
 void Unit::UnitGraphicUpdate(float delta) {	
+
+		bAnimating = true;
+	if (Velocity.mag2() < 0.1f * 0.1f && Graphic_State != Dead) 
+		bAnimating = false;
+
+	
+	if (currentTask) {
+		if (currentTask->taskName == "Repair" && Velocity.mag2() < 0.1f * 0.1f)
+			Graphic_State = Build;
+	}
+	else
+		Graphic_State = Walking; //idle
+
+
 	if (repairedbuilding.lock() && Velocity.mag2() < 0.1f * 0.1f)
-		Graphic_State = Build;
+		bAnimating = true;
 
 	if (fHealth <= 0)
 		Graphic_State = Dead;
@@ -282,15 +253,6 @@ void Unit::UnitGraphicUpdate(float delta) {
 		curFrame = 0;
 		Last_State = Graphic_State;
 	}
-	bAnimating = true;
-
-	if (Velocity.mag2() < 0.1f * 0.1f) {
-		if (Graphic_State != Build) {
-			bAnimating = false;	
-		}
-
-	}else
-		Graphic_State = Walking;
 
 	if (bAnimating)
 		m_fTimer += delta;
@@ -298,7 +260,6 @@ void Unit::UnitGraphicUpdate(float delta) {
 		m_fTimer -= 0.1f;
 		++curFrame %= textureMetadata[Graphic_State].ani_len;
 	}
-
 }
 
 void Unit::Draw(olc::TileTransformedView* gfx){

@@ -44,7 +44,7 @@ return
 	Parameters = {
 		CollisionRadius = 10,
 		Abilities = {
-			Tasks = {"Move", "Build", "Attack", "Gather"}, -- task names allowed to be delegated to this unit
+			Tasks = {"Move", "Build", "Attack","Repair", "Gather"}, -- task names allowed to be delegated to this unit
 			Buildables = {"House"},
 		}
 	},

@@ -152,7 +152,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
         if (engine.config->GetValue<bool>("Evil") == true) unit->bFriendly = false;
 
     unit->SetMask(Collidable::Mask(unit->Unit_Collision_Radius));
-    
+    unit->cType = unit->isUnit;
     objectList.emplace_back(unit);
     engine.unitManager->addNewUnit(unit);
     return unit;
@@ -205,6 +205,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
         build->textureMetadata.insert_or_assign(state, meta);
     }
     build->SetMask(Collidable::Mask(olc::vf2d(build->Size)));
+    build->cType = build->isBuilding;
     objectList.emplace_back(build);
     engine.buildingManager->addNewBuilding(build);
     return build;    

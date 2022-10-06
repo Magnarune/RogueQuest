@@ -1,4 +1,5 @@
 #include "UnitManager.h"
+
 #include "Engine.h"
 
 
@@ -10,7 +11,7 @@ UnitManager::UnitManager() {
 
     // Eveything you want the Unit to be able to do, goes here:
     // Hotkey doesn't work yet
-
+    auto& engine = Game_Engine::Current();
     taskMgr.RegisterTask("Move",
         { [&](std::shared_ptr<TaskManager::Task> task) -> bool { // task begin
             // required
@@ -21,9 +22,16 @@ UnitManager::UnitManager() {
             const olc::vf2d& target = params.first;
             const bool& attackstate = params.second;
             // action code            
-            unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
-            unit->taskTic.push(unit->isMoving);
-            unit->MarchingtoTarget(target);
+           // unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
+            unit->ActionZone.x = 8.f;
+            unit->ActionZone.y = 8.f;
+
+            unit->Target = target;
+            return true;
+        },
+        [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;
             return true;
         },
         [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
@@ -31,9 +39,7 @@ UnitManager::UnitManager() {
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;
             if (!unit->Target.has_value()) return true;
-            
-            float distance = (unit->Target.value() - unit->Position).mag2();
-            return distance < 16.f * 16.f;
+            return unit->Distance.mag2() < unit->ActionZone.mag2();
         }
         , 0, olc::Key::M }); // metadata , hotkey
 
@@ -49,22 +55,28 @@ UnitManager::UnitManager() {
 
             // action code
            // unit->UTask = unit->isBuilding;
-            unit->ULogic = unit->Neutral;
+            //unit->ULogic = unit->Neutral;
             unit->TrytoBuild(buildingname, target);
-           //Build Location
-           
-            return true;
-        },
-        [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
-            // required
-            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
-            auto& unit = arguments.first;
+            unit->ActionZone = olc::vf2d(32.f, 32.f);//Fix this
+            //Build Location
 
-            // temporary, fix later
-            float distance = (unit->Target.value() - unit->Position).mag2();
-            return distance < 16.f * 16.f;
-        }
-        , 0, olc::Key::B }); // metadata , hotkey
+             return true;
+         },
+         [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+             auto& unit = arguments.first;
+             engine.worldManager->GenerateBuilding(unit->buildName, unit->Target.value() - unit->buildingSize / 2.f);
+             return true;
+
+         },
+         [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
+             // required
+             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+             auto& unit = arguments.first;
+             if (!unit->Target.has_value()) return true;
+             return unit->Distance.mag2() < unit->ActionZone.mag2();
+         }
+         , 0, olc::Key::B }); // metadata , hotkey
 
     taskMgr.RegisterTask("Repair",
         { [&](std::shared_ptr<TaskManager::Task> task) -> bool {
@@ -72,30 +84,42 @@ UnitManager::UnitManager() {
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;
             // customizable parameters
-            const auto& params = std::any_cast<std::pair<std::weak_ptr, olc::vf2d>>(arguments.second);
-            std::weak_ptr building = params.first;// Only allowed two >.<
-            const olc::vf2d& target = params.second;
 
-            // action code
-           // unit->UTask = unit->isBuilding;
-            unit->ULogic = unit->Neutral;
+            const auto& params = std::any_cast<std::pair< std::optional<std::weak_ptr<Building>>, olc::vf2d>>(arguments.second);
             
-            unit->RepairBuilding();
+            std::optional< std::weak_ptr <Building>> build = params.first;
+            const olc::vf2d& target = params.second;
+            unit->Target = build.value().lock()->Position + unit->buildingSize / 2.f;
+            unit->ActionZone = olc::vf2d(32.f, 32.f);
+            unit->repairedbuilding = build.value();
             
-            //Build Location
 
              return true;
+         },
+
+        [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;
+            if (unit->repairedbuilding.lock())
+                unit->RepairBuilding();
+            return true;
+            
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
              // required
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
+             if (unit->repairedbuilding.lock() && unit->repairedbuilding.lock()->health > unit->repairedbuilding.lock()->maxHealth)
+                 unit->repairedbuilding.reset();
 
-             // temporary, fix later
-             float distance = (unit->Target.value() - unit->Position).mag2();
-             return distance < 16.f * 16.f;
+             if (unit->repairedbuilding.expired())
+                 return true;
+             else
+                 return false;
+
+             
          }
-         , 0, olc::Key::B }); // metadata , hotkey
+         , 0, olc::Key::R }); // metadata , hotkey
 }
 
 
@@ -256,7 +280,7 @@ void UnitManager::MoveUnits(olc::vf2d Target, bool attackstate) {
         auto unit = _unit.lock();
         if (unit->bFriendly == true) {
             unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
-            unit->MarchingtoTarget(Target);
+            //unit->MarchingtoTarget(Target);
         }
     }
 }
@@ -269,7 +293,43 @@ void UnitManager::MoveConstructBuilding(const std::string& buildingName, const o
         auto unit = _unit.lock();
         if (unit->bFriendly == true) {
             unit->ULogic = unit->Neutral;
-            unit->MarchingtoTarget(Target);
+            //unit->MarchingtoTarget(Target);
         }
     }
+}
+
+std::optional<std::weak_ptr<Collidable>> UnitManager::findobject(olc::vf2d Mouse) {
+    auto& engine = Game_Engine::Current();
+    for (auto& _unit : unitList) {
+        auto unit = _unit.lock();
+        if (unit->bSelected) continue;
+        const float& r = unit->Unit_Collision_Radius;
+        const float r2 = 0; // extra collision distance
+        if ((unit->Position - Mouse).mag2() < (r * r + r2 * r2)) {
+            return _unit;
+        }
+    }
+    for (auto& _build : engine.buildingManager->BuildingList) {
+        auto build = _build.lock();
+        const float& sz = (build->Size.x + build->Size.y) / 2.f;
+        const float r2 = 0;
+        if ((build->Position - Mouse).mag2() < (sz * sz + r2 * r2)) {
+            return _build;
+        }
+    }
+  
+    return  std::nullopt;    
+}
+
+void UnitManager::ParseObject(olc::vf2d Mouse) {
+    std::optional<std::weak_ptr<Collidable>>object =  findobject(Mouse);
+
+    if (object.value().lock()->cType == 0) {
+        std::optional<std::weak_ptr<Building>>build = object.value().lock();
+   }
+    
+    
+    //if (object == std::nullopt)
+     
+
 }

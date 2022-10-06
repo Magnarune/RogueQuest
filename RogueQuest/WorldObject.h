@@ -48,6 +48,11 @@ public:
 protected:
 	bool CheckCollision(float delta);
 public:
+	enum {
+		isUnit,
+		isBuilding,
+		isProjectile
+	}cType;
 	olc::vf2d predPosition;
 
 	Collidable();

@@ -26,13 +26,16 @@ public:
     struct Task {
         const RegisteredTask* regtask;
         std::function<bool()> initTask;
+        std::function<bool()> performTask;
         std::function<bool()> checkCompleted;
         std::any data;
+        std::string taskName;
     };  
     typedef std::function<bool(std::shared_ptr<Task> _this)> TaskCallback;
 
     struct RegisteredTask {
         TaskCallback initTask;
+        TaskCallback preformTask;
         TaskCallback checkCompleted;
         std::any metadata;
         olc::Key bind;

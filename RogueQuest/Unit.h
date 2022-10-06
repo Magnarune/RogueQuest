@@ -17,11 +17,8 @@ class Unit : public Collidable {
 
 
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
-	void MarchingtoTarget(const olc::vf2d& Target);
 
 	void RepairBuilding();
-
-	void ConstructBuilding(std::weak_ptr<Building> build);
 
 	void TrytoBuild(const std::string& name, const olc::vf2d& Target);
 	void UnitBehaviour();
@@ -49,7 +46,8 @@ public:
 
 	std::queue<int> taskTic;
 	std::queue<olc::vf2d> MoveQue; //Move to this location
-	float TaskFinZone; //a
+
+	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both
 	//End of Testing
 	// Data
 	Clock execTimeout; //Delay In unit thinking time

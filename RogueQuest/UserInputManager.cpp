@@ -49,6 +49,15 @@ void UserInputManager::StandardUserInput() {
         engine.unitManager->DelegateTask("Build",
             std::make_pair( std::string("House"), engine.tv.ScreenToWorld(engine.GetMousePos())));
     }
+    if (engine.GetKey(olc::R).bPressed) {
+  
+
+        engine.unitManager->DelegateTask("Repair",
+            std::make_pair(engine.unitManager->TargetBuilding(engine.tv.ScreenToWorld(engine.GetMousePos())), engine.tv.ScreenToWorld(engine.GetMousePos())));
+    }
+
+
+
 
     if (engine.GetKey(olc::S).bPressed)
         engine.unitManager->StopUnits();
