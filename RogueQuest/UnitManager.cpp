@@ -85,13 +85,13 @@ UnitManager::UnitManager() {
             auto& unit = arguments.first;
             // customizable parameters
 
-            const auto& params = std::any_cast<std::pair< std::optional<std::weak_ptr<Building>>, olc::vf2d>>(arguments.second);
+            const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, olc::vf2d>>(arguments.second);
             
-            std::optional< std::weak_ptr <Building>> build = params.first;
+            std::weak_ptr <Building> build = params.first;
             const olc::vf2d& target = params.second;
-            unit->Target = build.value().lock()->Position + unit->buildingSize / 2.f;
+            unit->Target = build.lock()->Position + unit->buildingSize / 2.f;
             unit->ActionZone = olc::vf2d(32.f, 32.f);
-            unit->repairedbuilding = build.value();
+            unit->repairedbuilding = build;
             
 
              return true;
@@ -298,15 +298,14 @@ void UnitManager::MoveConstructBuilding(const std::string& buildingName, const o
     }
 }
 
-std::optional<std::weak_ptr<Collidable>> UnitManager::findobject(olc::vf2d Mouse) {
+std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {
     auto& engine = Game_Engine::Current();
     for (auto& _unit : unitList) {
         auto unit = _unit.lock();
-        if (unit->bSelected) continue;
         const float& r = unit->Unit_Collision_Radius;
         const float r2 = 0; // extra collision distance
         if ((unit->Position - Mouse).mag2() < (r * r + r2 * r2)) {
-            return _unit;
+            return unit;
         }
     }
     for (auto& _build : engine.buildingManager->BuildingList) {
@@ -314,22 +313,22 @@ std::optional<std::weak_ptr<Collidable>> UnitManager::findobject(olc::vf2d Mouse
         const float& sz = (build->Size.x + build->Size.y) / 2.f;
         const float r2 = 0;
         if ((build->Position - Mouse).mag2() < (sz * sz + r2 * r2)) {
-            return _build;
+            return build;
         }
-    }
-  
-    return  std::nullopt;    
+    }  
+    return {};
 }
 
-void UnitManager::ParseObject(olc::vf2d Mouse) {
-    std::optional<std::weak_ptr<Collidable>>object =  findobject(Mouse);
 
-    if (object.value().lock()->cType == 0) {
-        std::optional<std::weak_ptr<Building>>build = object.value().lock();
-   }
-    
-    
-    //if (object == std::nullopt)
-     
-
+void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit) {
+    std::shared_ptr<Unit> unit;
+    if (unit = std::dynamic_pointer_cast<Unit>(object)) {
+        _unit = std::move(unit);
+    }else
+        _unit.reset();
+    std::shared_ptr<Building> build;
+    if (build = std::dynamic_pointer_cast<Building>(object)) {
+         _build = std::move(build);
+    }else
+        _build.reset();
 }

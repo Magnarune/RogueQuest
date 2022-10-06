@@ -4,6 +4,8 @@ UserInputManager::UserInputManager() {
 }
 
 UserInputManager::~UserInputManager() {
+    build.reset();
+    unit.reset();
 }
 
 void UserInputManager::StandardUserInput() {
@@ -51,9 +53,10 @@ void UserInputManager::StandardUserInput() {
     }
     if (engine.GetKey(olc::R).bPressed) {
   
-
-        engine.unitManager->DelegateTask("Repair",
-            std::make_pair(engine.unitManager->TargetBuilding(engine.tv.ScreenToWorld(engine.GetMousePos())), engine.tv.ScreenToWorld(engine.GetMousePos())));
+        engine.unitManager->ParseObject(engine.unitManager->FindObject(engine.tv.ScreenToWorld(engine.GetMousePos())), build, unit);   
+        if (!build.expired())
+            engine.unitManager->DelegateTask("Repair",
+                std::make_pair(build, engine.tv.ScreenToWorld(engine.GetMousePos())));    
     }
 
 

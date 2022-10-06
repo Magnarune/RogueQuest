@@ -1,5 +1,10 @@
 #pragma once
 #include "olcPixelGameEngine.h"
+#include "WorldObject.h"
+#include "UnitManager.h"
+#include "Unit.h"
+#include "Building.h"
+#include "BuildingManager.h"
 class UserInputManager {
 
 public:
@@ -13,5 +18,6 @@ public:
 
 	olc::vf2d Initial, Final;
 	bool Clicked = false;
-
+	std::weak_ptr<Building> build;
+	std::weak_ptr<Unit> unit;
 };

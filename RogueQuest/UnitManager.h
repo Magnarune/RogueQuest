@@ -11,6 +11,7 @@
 #include "TaskManager.h"
 #include "Assets.h"
 #include "Projectiles.h"
+#include "WorldObject.h"
 #include "WorldObjectManager.h"
 
 /*
@@ -339,8 +340,8 @@ public:
 	void SelectUnit(olc::vf2d Mouse);
     void SelectUnits(olc::vf2d Initial, olc::vf2d Final);
 	//prob a better way
-	std::optional<std::weak_ptr<Collidable>> findobject(olc::vf2d Mouse);
-	void ParseObject(olc::vf2d Mouse);
+	std::shared_ptr<Collidable> FindObject(olc::vf2d Mouse);
+	void ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& build, std::weak_ptr<Unit>& unit );
 	
 
 	void DeselectUnits();

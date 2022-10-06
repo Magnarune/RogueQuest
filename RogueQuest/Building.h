@@ -63,5 +63,7 @@ private:
 	friend class UnitManager;
 	friend class TaskManager;
 	friend class Unit;
+	friend class UserInputManager;
+	
 };
 
