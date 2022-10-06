@@ -14,6 +14,8 @@ Unit::~Unit() {
 	if (!taskQueue.empty())
 		cq.swap(taskQueue);
 	Hunted.reset();
+	pUnit.reset();
+	pBuilding.reset();
 }
 
 void Unit::Stop() {

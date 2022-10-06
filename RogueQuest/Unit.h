@@ -44,8 +44,10 @@ public:
 	std::string buildName; //Name of what Im building
 	std::weak_ptr<Building> repairedbuilding; //pointer to building being repaired
 
-	std::queue<int> taskTic;
-	std::queue<olc::vf2d> MoveQue; //Move to this location
+//Move to this location
+	std::weak_ptr<Building> pBuilding;//parsing pointer
+	std::weak_ptr<Unit> pUnit;//parsing pointer
+
 
 	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both
 	//End of Testing

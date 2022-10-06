@@ -298,7 +298,7 @@ void UnitManager::MoveConstructBuilding(const std::string& buildingName, const o
     }
 }
 
-std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {
+std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
     auto& engine = Game_Engine::Current();
     for (auto& _unit : unitList) {
         auto unit = _unit.lock();
@@ -318,8 +318,6 @@ std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {
     }  
     return {};
 }
-
-
 void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit) {
     std::shared_ptr<Unit> unit;
     if (unit = std::dynamic_pointer_cast<Unit>(object)) {
@@ -330,5 +328,35 @@ void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<
     if (build = std::dynamic_pointer_cast<Building>(object)) {
          _build = std::move(build);
     }else
+        _build.reset();
+}
+std::shared_ptr<Collidable> UnitManager::FindObjects(olc::vf2d pos, float SearchRadius) {
+    auto& engine = Game_Engine::Current();
+    for (auto& _unit : unitList) {
+        auto unit = _unit.lock();        
+        if ((unit->Position - pos).mag2() < (SearchRadius*SearchRadius)) {
+            return unit;
+        }
+    }
+    for (auto& _build : engine.buildingManager->BuildingList) {
+        auto build = _build.lock();
+        if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x)) {
+            return build;
+        }
+    }
+    return {};
+}
+void UnitManager::ParseObjects(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit) {
+    std::shared_ptr<Unit> unit;
+    if (unit = std::dynamic_pointer_cast<Unit>(object)) {
+        _unit = std::move(unit);
+    }
+    else
+        _unit.reset();
+    std::shared_ptr<Building> build;
+    if (build = std::dynamic_pointer_cast<Building>(object)) {
+        _build = std::move(build);
+    }
+    else
         _build.reset();
 }

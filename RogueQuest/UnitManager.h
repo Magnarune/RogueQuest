@@ -342,7 +342,9 @@ public:
 	//prob a better way
 	std::shared_ptr<Collidable> FindObject(olc::vf2d Mouse);
 	void ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& build, std::weak_ptr<Unit>& unit );
-	
+
+	std::shared_ptr<Collidable> FindObjects(olc::vf2d pos,float Radius);
+	void ParseObjects(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& build, std::weak_ptr<Unit>& unit);
 
 	void DeselectUnits();
 
