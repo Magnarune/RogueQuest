@@ -22,7 +22,7 @@ UnitManager::UnitManager() {
             const olc::vf2d& target = params.first;
             const bool& attackstate = params.second;
             // action code            
-           // unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
+            unit->ULogic = attackstate ? unit->Aggressive : unit->Neutral;
             unit->ActionZone.x = 8.f;
             unit->ActionZone.y = 8.f;
 
@@ -52,14 +52,8 @@ UnitManager::UnitManager() {
             const auto& params = std::any_cast<std::pair<std::string, olc::vf2d>>(arguments.second);
             const std::string& buildingname = params.first;// Only allowed two >.<
             const olc::vf2d& target = params.second;
-
-            // action code
-           // unit->UTask = unit->isBuilding;
-            //unit->ULogic = unit->Neutral;
             unit->TrytoBuild(buildingname, target);
             unit->ActionZone = olc::vf2d(32.f, 32.f);//Fix this
-            //Build Location
-
              return true;
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool {
@@ -67,7 +61,6 @@ UnitManager::UnitManager() {
              auto& unit = arguments.first;
              engine.worldManager->GenerateBuilding(unit->buildName, unit->Target.value() - unit->buildingSize / 2.f);
              return true;
-
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
              // required
@@ -120,6 +113,68 @@ UnitManager::UnitManager() {
              
          }
          , 0, olc::Key::R }); // metadata , hotkey
+
+    taskMgr.RegisterTask("Hunting",
+        { [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+            // required
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;           // customizable parameters
+            const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, std::weak_ptr<Unit>>>(arguments.second);
+            std::weak_ptr<Building> HBuild = params.first;
+            std::weak_ptr<Unit> HUnit = params.second;
+            if (!HBuild.expired()) {
+                unit->Target = HBuild.lock()->Position + HBuild.lock()->Size / 2.f; //center of building
+                unit->ActionZone.x = unit->fAttackRange + HBuild.lock()->Size.x/ 2.f;
+                unit->ActionZone.y = unit->fAttackRange + HBuild.lock()->Size.y / 2.f;
+
+            }
+            if (!HUnit.expired()) {
+                unit->Target = olc::vf2d(HUnit.lock()->Position.x + HUnit.lock()->Unit_Collision_Radius * 1.414f,
+                                         HUnit.lock()->Position.y + HUnit.lock()->Unit_Collision_Radius * 1.414f);
+                unit->ActionZone.x = unit->fAttackRange + HUnit.lock()->Unit_Collision_Radius * 1.414f;
+                unit->ActionZone.y = unit->fAttackRange + HUnit.lock()->Unit_Collision_Radius * 1.414f;
+
+            }
+            
+             return true;
+         },
+
+        [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;//ATTACK
+            if (unit->fAttackCD > 0 || unit->targetBuilding.expired() && unit->targetUnit.expired() ) {//if can't attack or target is dead
+                return false;
+            }
+            else {
+                unit->Graphic_State = unit->Attacking;
+                if(unit->curFrame == unit->textureMetadata[unit->Graphic_State].ani_len - 1)
+                    unit->PerformAttack();
+            }  
+            return true;            
+
+         },
+         [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
+             // required
+             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+             auto& unit = arguments.first;
+             if (unit->targetBuilding.expired() && unit->targetUnit.expired())
+                 return true;
+             if (unit->targetBuilding.lock() && unit->targetBuilding.lock()->health < 0.f) {
+                 unit->targetBuilding.reset();
+                 unit->targetUnit.reset();
+                 return true;
+             }
+                 if (unit->targetUnit.lock() && unit->targetUnit.lock()->fHealth < 0.f) {
+                     unit->targetUnit.reset();
+                     unit->targetBuilding.reset();
+                     return true;
+                 }
+             
+
+             return false;
+
+         }
+         , 0, olc::Key::A });
 }
 
 
@@ -279,7 +334,7 @@ void UnitManager::MoveUnits(olc::vf2d Target, bool attackstate) {
         if (_unit.expired()) continue;
         auto unit = _unit.lock();
         if (unit->bFriendly == true) {
-            unit->ULogic = attackstate ? unit->Attack : unit->Neutral;
+            unit->ULogic = attackstate ? unit->Aggressive : unit->Neutral;
             //unit->MarchingtoTarget(Target);
         }
     }
@@ -330,33 +385,76 @@ void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<
     }else
         _build.reset();
 }
-std::shared_ptr<Collidable> UnitManager::FindObjects(olc::vf2d pos, float SearchRadius) {
+
+std::vector<std::shared_ptr<Collidable>> UnitManager::FindObjects(olc::vf2d pos, float SearchRadius) {
+    testobjects.clear();
     auto& engine = Game_Engine::Current();
     for (auto& _unit : unitList) {
         auto unit = _unit.lock();        
         if ((unit->Position - pos).mag2() < (SearchRadius*SearchRadius)) {
-            return unit;
+             testobjects.push_back(unit);
         }
     }
     for (auto& _build : engine.buildingManager->BuildingList) {
         auto build = _build.lock();
         if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x)) {
-            return build;
+            testobjects.push_back(build);
         }
     }
-    return {};
+    return testobjects;
 }
-void UnitManager::ParseObjects(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit) {
-    std::shared_ptr<Unit> unit;
-    if (unit = std::dynamic_pointer_cast<Unit>(object)) {
-        _unit = std::move(unit);
+
+void UnitManager::ParseObjects(std::vector<std::shared_ptr<Collidable>> objects, std::queue<std::weak_ptr<Building>>& _builds, std::queue<std::weak_ptr<Unit>>& _units) {
+    std::queue<std::weak_ptr<Building>> ClearBuildings;
+    std::queue<std::weak_ptr<Unit>> ClearUnits;
+    _builds.swap(ClearBuildings);
+    _units.swap(ClearUnits);
+    for (int i = 0; i < objects.size(); i++) {
+        std::shared_ptr<Unit> unit;
+        if (unit = std::dynamic_pointer_cast<Unit>(objects[i])) {
+            _units.push(std::move(unit));
+        }
+        std::shared_ptr<Building> build;
+        if (build = std::dynamic_pointer_cast<Building>(objects[i])) {
+            _builds.push(std::move(build));
+        }
+    }
+}
+
+std::shared_ptr<Collidable> UnitManager::SearchClosestObject(olc::vf2d pos, float SearchRadius) {
+    auto& engine = Game_Engine::Current();
+    float Smallest = SearchRadius * SearchRadius;  
+    testobjects.clear();
+    for (auto& _unit : unitList) {
+        //if(_unit == this)
+
+        auto unit = _unit.lock();
+        if ((unit->Position - pos).mag2() < (SearchRadius * SearchRadius)) {
+            if ((unit->Position - pos ).mag2() < 0.2f) continue;
+            else
+                testobjects.push_back(unit);
+        }
+    }
+    for (auto& _build : engine.buildingManager->BuildingList) {
+        auto build = _build.lock();
+        if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x)) {
+            testobjects.push_back(build);
+        }
+    }
+    if (testobjects.size()) {
+        std::shared_ptr<Collidable> closest;
+        closest = testobjects[0];
+        for (auto& o : testobjects) {
+            
+            float test = (o->Position - pos).mag2();
+            if (test < Smallest) {
+                closest = o;
+                Smallest = test;
+            }
+        }
+        return closest;
+
     }
     else
-        _unit.reset();
-    std::shared_ptr<Building> build;
-    if (build = std::dynamic_pointer_cast<Building>(object)) {
-        _build = std::move(build);
-    }
-    else
-        _build.reset();
+        return {};    
 }

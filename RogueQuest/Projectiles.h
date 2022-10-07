@@ -2,9 +2,9 @@
 
 #include "Unit.h"
 #include "WorldObject.h"
+#include <queue>
 
-
-class Projectile : public WorldObject
+class Projectile : public Collidable
 {
 	Projectile();
 	void Update(float fElapsedtime) override;

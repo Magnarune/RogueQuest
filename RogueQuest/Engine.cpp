@@ -218,8 +218,8 @@ const std::map<std::string, CommandFunction> commands = {
         auto unit = engine.unitManager->GetUnit(name, n);
         if(unit) {
             unit->bFriendly = false;
-            unit->ULogic = Unit::Attack;
-            unit->Hunted.reset();
+            unit->ULogic = Unit::Aggressive;
+            
             std::cout << name << " #" << n << " is now an enemy\n";
         }
     }},

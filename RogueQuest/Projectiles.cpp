@@ -1,7 +1,7 @@
 #include "Projectiles.h"
 
 
-Projectile::Projectile() : WorldObject(),
+Projectile::Projectile() : Collidable(),
 	Target({0.f,0.f}) {
 }
 

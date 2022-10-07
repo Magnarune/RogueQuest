@@ -60,7 +60,7 @@ return
 		AttackRange = 21, 
 		AttackDamage = 2,
 		AttackSpeed = 1,
-		SpellCooldown = 1,
+		SpellCooldown = 5,
 		KnockBackResist = 1
 	},
 }

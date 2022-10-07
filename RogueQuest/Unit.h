@@ -13,7 +13,7 @@
 #include <queue>
 #include <iostream>
 
-class Unit : public Collidable {
+class Unit : public Collidable{
 
 
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
@@ -22,10 +22,11 @@ class Unit : public Collidable {
 
 	void TrytoBuild(const std::string& name, const olc::vf2d& Target);
 	void UnitBehaviour();
+	void UnitSearch();
 	void UnitHunting();
+	void PerformAttack();//good
 	void UnitGraphicUpdate(float delta);
 	void UpdatePosition(float felapstedtime);
-	void PerformAttack();//good
 	void Stop();//fine
 	
 	void Update(float fElapsedTime) override; //remake
@@ -44,9 +45,9 @@ public:
 	std::string buildName; //Name of what Im building
 	std::weak_ptr<Building> repairedbuilding; //pointer to building being repaired
 
-//Move to this location
-	std::weak_ptr<Building> pBuilding;//parsing pointer
-	std::weak_ptr<Unit> pUnit;//parsing pointer
+	//Searched units
+	std::weak_ptr<Building> targetBuilding;//parsing pointer
+	std::weak_ptr<Unit> targetUnit;//parsing pointer
 
 
 	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both
@@ -62,20 +63,19 @@ public:
 	bool bDead;			// Am I dead?
 	bool bLoot;			//If dead then drop some loot?
 	bool bAttacked;    //Was I attacked
-
+	float prevHealth; // I was Hit!
 	// Vars For Task Manager System
 	
 	std::queue<std::shared_ptr<TaskManager::Task>> taskQueue; // queue of tasks
 	std::shared_ptr<TaskManager::Task> currentTask; // current task
-	
-	
-	
+
+	bool Taskpaused;
+	std::shared_ptr<TaskManager::Task> HoldTask;
 
 	olc::vf2d vRubberBand;   // X , Y, Position to go back to
 	olc::vf2d AttackTarget;  // Target you are chasing
 	olc::vf2d HitVelocity;	// velocity for getting kicked
 	float AgroRange = 80.f; //How far will you look to kill somthing
-	std::weak_ptr<WorldObject> Hunted; // currently attacking a world object
 	float fUnitAngle;        // Angle of the player 0->2pi Radians
 
 	// Parameters
@@ -107,7 +107,7 @@ public:
 	std::vector<int> Direction;//Sprite order direction
 	
 	enum UnitLogic {
-		Attack, //If you say attack a pos Search and Kill anything within agro-range
+		Aggressive, //If you say attack a pos Search and Kill anything within agro-range
 		Neutral,//if attacked switch to attack mode
 		Passive //stay
 	} ULogic;
@@ -162,4 +162,5 @@ private:
 	friend class TaskManager;
 	friend class Building;
 	friend class BuildingManager;
+
 };

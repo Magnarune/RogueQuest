@@ -8,22 +8,29 @@ Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
 }
 
 Unit::~Unit() {
+	HoldTask.reset();
 	repairedbuilding.reset();
-	currentTask.reset();
+	std::shared_ptr<TaskManager::Task> trash;
+	currentTask.swap(trash);
 	std::queue<std::shared_ptr<TaskManager::Task>> cq;
 	if (!taskQueue.empty())
 		cq.swap(taskQueue);
-	Hunted.reset();
-	pUnit.reset();
-	pBuilding.reset();
+	if(targetBuilding.lock())
+		targetBuilding.reset();
+	if(targetUnit.lock())
+		targetUnit.reset();
+	//Direction.clear();
 }
 
 void Unit::Stop() {
-	currentTask.reset();
+	HoldTask.reset();
+	std::shared_ptr<TaskManager::Task> trash;
+	currentTask.swap(trash);
 	std::queue<std::shared_ptr<TaskManager::Task>> cq;
 	if(!taskQueue.empty())
 	cq.swap(taskQueue);
-	Hunted.reset();
+	targetBuilding.reset();
+	targetUnit.reset();
 	ULogic = Passive;
 	Target = std::nullopt;
 	Velocity = { 0.f,0.f };
@@ -32,49 +39,22 @@ void Unit::Stop() {
 
 void Unit::UnitBehaviour() {
 	auto& engine = Game_Engine::Current();
-
-	if (execTimeout.getMilliseconds() > 50) {//do this every 0.50ms
-		switch (ULogic){
-			case Passive://Just walk with no logic
-				break;
-
-			case Neutral:
-				if (bAttacked) //Walk to location unless you are attacked
-					ULogic = Attack;
-				break;
-
-			case Attack:
-				if(Hunted.expired()){
-					engine.worldManager->IterateObjects([&](std::shared_ptr<WorldObject> obj) {
-						auto other = std::dynamic_pointer_cast<Unit>(obj);
-						
-						if (other == nullptr || other.get() == this || Position == other->Position) return true; // act as a continue
-						float distance = (other->Position - Position).mag2();
-						
-						if (bFriendly != other->bFriendly && distance < AgroRange*AgroRange) {
-							Hunted = other;
-							return false;
-						}
-						
-						return true;
-						
-					});
-
-				} else {
-					auto other = Hunted.lock();
-					float distance = (other->Position - Position).mag2();
-					AttackTarget = other->Position;
-
-					if(distance >= AgroRange*AgroRange){
-						Hunted.reset();
-					}
-				}
-				break;
-			default:
-				ULogic = Passive;
-				break;
+	switch (ULogic) {
+	case Passive:
+		break;
+	case Neutral:
+		if (fHealth < prevHealth) {
+			ULogic = Aggressive;
 		}
-		execTimeout.restart();
+		break;
+	case Aggressive:
+		if(targetBuilding.lock() || targetUnit.lock()){
+			HoldTask = currentTask;//Stop and hunt
+			currentTask = engine.unitManager->taskMgr.PrepareTask("Hunting", std::pair<std::shared_ptr<Unit>, std::any>{this, std::pair<std::weak_ptr<Building>, std::weak_ptr<Unit>> {targetBuilding, targetUnit} });
+			Taskpaused = true;
+			currentTask->initTask();
+		}
+		break;
 	}
 }
 
@@ -102,30 +82,6 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 	return true;
 }
 
-void Unit::PerformAttack() {
-	auto& engine = Game_Engine::Current();
-	Graphic_State = Attacking;
-	bAnimating = true;
-	//Projectilemanager->AddProjectile(Unit, AttackTarget)
-
-	if(!Hunted.expired()){
-		auto obj = Hunted.lock();
-		if(auto unit = std::dynamic_pointer_cast<Unit>(obj)){
-			olc::vf2d vel = (unit->Position - Position).norm() * fAttackDamage * 0.f;
-			if(std::isnan(vel.x) || std::isnan(vel.y)) vel = {0.f,0.f};
-			unit->KnockBack(fAttackDamage, vel);
-			engine.particles->CreateParticles(unit->Position);
-		}
-		
-		if(auto building = std::dynamic_pointer_cast<Building>(obj)){
-
-		}
-		
-	}
-	
-	fAttackCD = fSpellCooldown; // reset time for next attack
-}
-
 void Unit::KnockBack(float damage, olc::vf2d velocity) {
 	HitVelocity += velocity;
 	fHealth -= damage;
@@ -136,8 +92,11 @@ void Unit::Destroy() {
 }
 
 void Unit::Update(float delta) {
+	auto& engine = Game_Engine::Current();
 	if(fAttackCD > 0)
 		fAttackCD -= delta;
+	if(!Taskpaused)
+		UnitBehaviour();
 
 	if(!currentTask){
 		if(taskQueue.size()){
@@ -146,13 +105,27 @@ void Unit::Update(float delta) {
 			currentTask->initTask();
 		}
 	} else if(currentTask->checkCompleted()){
-		currentTask.reset();
+		std::shared_ptr<TaskManager::Task> trash;
+		currentTask.swap(trash);
+		if (Taskpaused == true) { 
+			if (!HoldTask) {
+				currentTask = HoldTask;
+				std::shared_ptr<TaskManager::Task> trashHold;
+				HoldTask.swap(trashHold);
+			}
+			Taskpaused = false;
+		}
+	}
+	if (targetBuilding.expired() && targetUnit.expired() && ULogic == Aggressive){
+		if (execTimeout.getMilliseconds() > 50) {
+			UnitSearch();
+			execTimeout.restart();
+		}
 	}
 
 	if (Graphic_State != Dead) 
 		UpdatePosition(delta);
-	
-	
+		
 	Collidable::Update(delta);
 }
 
@@ -185,29 +158,49 @@ void Unit::AfterUpdate(float delta) {
 	Collidable::AfterUpdate(delta);// inherit
 }
 
-void Unit::UnitHunting() {
-
-	 Distance = AttackTarget - Position;
-	fUnitAngle = std::fmod(2.0f * PI + (Distance).polar().y, 2.0f * PI);
-
-	if (Distance.mag2() > 32 * 32) {
-		olc::vf2d Direction = (AttackTarget - Position).norm();
-		Velocity = Direction * fMoveSpeed;
-	}
-	else if (Distance.mag2() < fAttackRange * fAttackRange && fAttackCD <= 0) {
-		Graphic_State = Attacking;
-		bAnimating = true; 
-		if (curFrame == textureMetadata[Graphic_State].ani_len - 1) {
-			PerformAttack();
-			Graphic_State = Walking;
+void Unit::UnitSearch() {//Target = unit/build.front()
+	auto& engine = Game_Engine::Current();
+	engine.unitManager->ParseObject(engine.unitManager->SearchClosestObject(Position, AgroRange), targetBuilding, targetUnit);
+	if (!targetBuilding.expired() && !targetUnit.expired()) {
+		if (!targetBuilding.expired()) {
+			Target = targetBuilding.lock()->Position;
+			targetUnit.reset();
 		}
-		Velocity = { 0.f,0.f };
+		else {
+			Target = targetUnit.lock()->Position;
+			targetBuilding.reset();
+		}
+		Taskpaused = true;
+		UnitHunting();
 	}
+	else
+		Taskpaused = false;
+}
+
+void Unit::UnitHunting() {
+	if (targetBuilding.lock()) {
+		Target = targetBuilding.lock()->Position + targetBuilding.lock()->Size / 2.f;
+	}
+	if (targetUnit.lock()) {
+		Target = targetUnit.lock()->Position + olc::vf2d(targetUnit.lock()->Unit_Collision_Radius * 1.414f,
+			targetUnit.lock()->Unit_Collision_Radius * 1.414f);
+	}
+}
+
+void Unit::PerformAttack() {
+	auto& engine = Game_Engine::Current();
+	if (targetUnit.lock()) {
+		targetUnit.lock()->fHealth -= fAttackDamage;
+		//knockback here
+	}
+	else if (targetBuilding.lock()) {
+		targetBuilding.lock()->health -= fAttackDamage;
+	}	
+	fAttackCD = fSpellCooldown; // reset time for next attack
 }
 
 void Unit::UpdatePosition(float delta) {
 	auto& engine = Game_Engine::Current();//UnitBehaviour();
-
 	if (Target.has_value()) {
 		Distance = Target.value() - Position;
 		olc::vf2d direction = (Target.value() - Position).norm();
@@ -218,38 +211,39 @@ void Unit::UpdatePosition(float delta) {
 			Velocity = { 0.f,0.f };
 		}
 	}
-
 	//HitVelocity *= std::pow(0.05f, delta);
 	//if (HitVelocity.mag2() < 4.f)
 	//	HitVelocity = { 0.f, 0.f };
-
 	//predPosition += HitVelocity * delta; // hitback only
-
 }
 
-void Unit::UnitGraphicUpdate(float delta) {	
-
-		bAnimating = true;
-	if (Velocity.mag2() < 0.1f * 0.1f && Graphic_State != Dead) 
+void Unit::UnitGraphicUpdate(float delta) {
+	bAnimating = true;
+	if (Velocity.mag2() < 0.1f * 0.1f && Graphic_State != Dead)
 		bAnimating = false;
 
-	
-	if (currentTask) {
+if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1) {
+		Stop();
+		Destroy();
+	}
+	if (currentTask) {//Exceptions to the rule
 		if (currentTask->taskName == "Repair" && Velocity.mag2() < 0.1f * 0.1f)
 			Graphic_State = Build;
+		if (currentTask->taskName == "Hunting" && Velocity.mag2() < 0.1f * 0.1f)
+			Graphic_State = Attacking;
 	}
 	else
-		Graphic_State = Walking; //idle
-
+		Graphic_State = Walking;
 
 	if (repairedbuilding.lock() && Velocity.mag2() < 0.1f * 0.1f)
+		bAnimating = true;
+	if (targetUnit.lock() && Velocity.mag2() < 0.1f * 0.1f)
 		bAnimating = true;
 
 	if (fHealth <= 0)
 		Graphic_State = Dead;
 
-	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1)
-		Destroy();
+	
 
 	if (Last_State != Graphic_State) {
 		curFrame = 0;
@@ -326,18 +320,5 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 		//gfx->DrawLineDecal((Position)+olc::vf2d(-Unit_Collision_Radius, -Unit_Collision_Radius) * sqrtf(2) / 2, (Position)+olc::vf2d(Unit_Collision_Radius, Unit_Collision_Radius) * sqrtf(2) / 2, olc::GREY);
 
 
-
-		if (Target.has_value()) {
-			std::queue<olc::vf2d> ShowQue = MoveQue;
-			while (!ShowQue.empty()) {
-				if (ULogic == Attack) {
-					gfx->DrawLineDecal((Position), ShowQue.front(), olc::RED);
-				}
-				else
-					gfx->DrawLineDecal((Position), ShowQue.front(), olc::WHITE);
-				ShowQue.pop();
-			}
-			
-		}
 	}
 }
