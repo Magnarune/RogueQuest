@@ -196,9 +196,6 @@
     <None Include="Assets\Maps\BasicMap.lua">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="Assets\Maps\TerraProject.lua">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="Assets\Units\Builder\builder.lua">
       <Filter>Source Files</Filter>
     </None>
@@ -209,5 +206,8 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="Config.lua" />
+    <None Include="Assets\Maps\TerraProject2.lua">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -225,7 +225,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
 void WorldManager::ImportMapData() {
     // to do: iterate map folder and find maps
     const std::vector<std::string> paths = {
-        "TerraProject.lua",
+        "TerraProject2.lua",
         "BasicMap.lua",
         "BasicMap2.lua",
     };

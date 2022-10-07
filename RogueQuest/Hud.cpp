@@ -49,6 +49,7 @@ void Hud::ImportHudAssets() {
     loadImage("Health", "Assets/Gui/Red.png");
     loadImage("HealthBox","Assets/Gui/EmptyBar.png");
     loadImage("HealthBoxBackground", "Assets/Gui/BackRoundBar.png");
+    loadImage("MiniMap", "Assets/Gui/Minimap.png");
 
     loadImage("flag","Assets/Gui/flag.png");
 
@@ -79,6 +80,8 @@ void Hud::RefreshMiniMap() {
 void Hud::DrawMiniMap() {
     //MiniMap Border
     auto& engine = Game_Engine::Current();//46x46 Rect
+    if(engine.worldManager->currentMap->name == "Terra")
+        engine.DrawPartialDecal({ 6.9f ,(float)engine.ScreenHeight() * 0.825f - 15.1f }, { 54.8f,55.3f }, decals["MiniMap"].get(), { 0.f,0.f }, { 497.f,497.f });
     engine.DrawPartialDecal({ 6.9f ,(float)engine.ScreenHeight() * 0.825f -15.1f }, { 54.8f,55.3f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
  /*engine.DrawLineDecal({ 11,(float)engine.ScreenHeight() * 0.823f - 10 }, { 57,(float)engine.ScreenHeight() * 0.823f - 10 });
  engine.DrawLineDecal({ 11,(float)engine.ScreenHeight() * 0.823f - 10 }, { 11,(float)engine.ScreenHeight() * 0.823f + 36 });
@@ -92,7 +95,7 @@ void Hud::DrawMiniMap() {
 
     float CalculateX = 46.f / engine.worldManager->curMap().layerSize.x;
     float CalculateY = 46.f / engine.worldManager->curMap().layerSize.y;
-
+    
     engine.DrawLineDecal({ 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * CalculateY },
         { 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY });
     engine.DrawLineDecal({ 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * CalculateY },

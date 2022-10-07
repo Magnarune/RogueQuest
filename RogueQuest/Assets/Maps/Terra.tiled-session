@@ -3,10 +3,10 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "Map-Tiles/Grass-Shallows (Summer).tsx",
+    "activeFile": "TerraProsject.tmx",
     "expandedProjectPaths": [
-        "Map-Tiles",
-        "."
+        ".",
+        "Map-Tiles"
     ],
     "fileStates": {
         "Map-Tiles/Dirt (Non-Winter).tsx": {
@@ -54,11 +54,11 @@
             "scaleInEditor": 1
         },
         "TerraProsject.tmx": {
-            "scale": 2,
-            "selectedLayer": 2,
+            "scale": 0.015625,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 943.25,
-                "y": 433.25
+                "x": 2208,
+                "y": 8160
             }
         },
         "Trees, Pine.tsx": {
@@ -89,8 +89,6 @@
     "project": "Terra.tiled-project",
     "property.type": "object",
     "recentFiles": [
-        "TerraProsject.tmx",
-        "Map-Tiles/Grass (Summer).tsx",
         "Map-Tiles/trees-green.tsx",
         "Trees, Pine.tsx",
         "Map-Tiles/Trees, Trunks.tsx",
@@ -100,7 +98,9 @@
         "Map-Tiles/Mountain, Features (Summer).tsx",
         "Map-Tiles/Mountain, Animated Water (Summer).tsx",
         "Map-Tiles/Mountain (Summer).tsx",
-        "Map-Tiles/Grass-Shallows (Summer).tsx"
+        "Map-Tiles/Grass-Shallows (Summer).tsx",
+        "Map-Tiles/Grass (Summer).tsx",
+        "TerraProsject.tmx"
     ],
     "tileset.lastUsedFormat": "tsx"
 }

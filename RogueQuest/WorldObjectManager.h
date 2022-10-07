@@ -55,4 +55,5 @@ public:
 	friend class WorldObject;
 	friend class Unit;
 	friend class UnitManager;
+	friend class Hud;
 };
