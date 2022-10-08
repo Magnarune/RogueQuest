@@ -98,13 +98,7 @@ void Unit::Update(float delta) {
 	if(!Taskpaused)
 		UnitBehaviour();
 
-	if(!currentTask){
-		if(taskQueue.size()){
-			currentTask = taskQueue.front();
-			taskQueue.pop();
-			currentTask->initTask();
-		}
-	} else if(currentTask->checkCompleted()){
+	if(currentTask && currentTask->checkCompleted()){
 		std::shared_ptr<TaskManager::Task> trash;
 		currentTask.swap(trash);
 		if (Taskpaused == true) { 
@@ -116,6 +110,13 @@ void Unit::Update(float delta) {
 			Taskpaused = false;
 		}
 	}
+	if(!currentTask){
+		if(taskQueue.size()){
+			currentTask = taskQueue.front();
+			taskQueue.pop();
+			currentTask->initTask();
+		}
+	} 
 	if (targetBuilding.expired() && targetUnit.expired() && ULogic == Aggressive){
 		if (execTimeout.getMilliseconds() > 50) {
 			UnitSearch();
@@ -191,6 +192,7 @@ void Unit::PerformAttack() {
 	auto& engine = Game_Engine::Current();
 	if (targetUnit.lock()) {
 		targetUnit.lock()->fHealth -= fAttackDamage;
+		engine.particles->CreateParticles(targetUnit.lock()->Position);//Blood
 		//knockback here
 	}
 	else if (targetBuilding.lock()) {

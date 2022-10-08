@@ -83,10 +83,6 @@ void Hud::DrawMiniMap() {
     if(engine.worldManager->currentMap->name == "Terra")
         engine.DrawPartialDecal({ 6.9f ,(float)engine.ScreenHeight() * 0.825f - 15.1f }, { 54.8f,55.3f }, decals["MiniMap"].get(), { 0.f,0.f }, { 497.f,497.f });
     engine.DrawPartialDecal({ 6.9f ,(float)engine.ScreenHeight() * 0.825f -15.1f }, { 54.8f,55.3f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
- /*engine.DrawLineDecal({ 11,(float)engine.ScreenHeight() * 0.823f - 10 }, { 57,(float)engine.ScreenHeight() * 0.823f - 10 });
- engine.DrawLineDecal({ 11,(float)engine.ScreenHeight() * 0.823f - 10 }, { 11,(float)engine.ScreenHeight() * 0.823f + 36 });
- engine.DrawLineDecal({ 11,(float)engine.ScreenHeight() * 0.823f + 36 }, { 57,(float)engine.ScreenHeight() * 0.823f + 36 });
- engine.DrawLineDecal({ 57,(float)engine.ScreenHeight() * 0.823f - 10 }, { 57,(float)engine.ScreenHeight() * 0.823f + 36 });*/
   
     //ZOOMBOX
  /*engine.DrawPartialDecal({ 11.f + 1.4375f * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * 1.5333f },

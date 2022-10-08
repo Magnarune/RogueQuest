@@ -43,7 +43,7 @@ void HudManager::UnitSelected() {
     engine.DrawPartialDecal({ 64.f, IconY+ 17.f }, { 22.f,4.f }, engine.hud->decals["HealthBox"].get(), { 0,0 }, { 128,32 });
 
     engine.DrawStringDecal({ 64.f, IconY + 22.f }, std::to_string((int)unitinfo->fHealth) + "/" + std::to_string((int)unitinfo->fMaxHealth), olc::RED, { 0.4f,0.4f });
-   // UnitAbilities(unitinfo);
+    UnitAbilities(unitinfo);
 }
 
 void HudManager::UnitsSelected(size_t ucount) {

@@ -25,7 +25,7 @@ UnitManager::UnitManager() {
             unit->ULogic = attackstate ? unit->Aggressive : unit->Neutral;
             unit->ActionZone.x = 8.f;
             unit->ActionZone.y = 8.f;
-
+            //unit->Distance = target - unit->Position;
             unit->Target = target;
             return true;
         },
@@ -67,7 +67,7 @@ UnitManager::UnitManager() {
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
              if (!unit->Target.has_value()) return true;
-             return unit->Distance.mag2() < unit->ActionZone.mag2();
+             return unit->Distance.mag2() <= unit->ActionZone.mag2();
          }
          , 0, olc::Key::B }); // metadata , hotkey
 
