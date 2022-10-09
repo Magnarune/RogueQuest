@@ -119,6 +119,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     // Load Parameters
     unit->Unit_Collision_Radius = data.lua_data["Parameters"]["CollisionRadius"]; //I'm not in stats section of .lua
     // Load Stats
+    unit->bIsRanged = true;
     unit->fHealth = data.lua_data["Stats"]["Health"]; unit->fMaxHealth = data.lua_data["Stats"]["MaxHealth"];
     unit->fMana = data.lua_data["Stats"]["Mana"];     unit->fMaxMana = data.lua_data["Stats"]["MaxMana"];
     unit->fAmmo = data.lua_data["Stats"]["Ammo"];     unit->fMaxAmmo = data.lua_data["Stats"]["MaxAmmo"];
@@ -214,7 +215,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
 //
 //std::shared_ptr<Projectile> WorldManager::GenerateProjectile(olc::vf2d start, olc::vf2d Target) {
 //    std::shared_ptr<Projectile> proj;
-//    //Projectile.reset(new proj());
+//    proj.reset(new Projectile());
 //    proj->Position = start; proj->Target = Target;
 //    proj->Damage; proj->Velocity;
 //

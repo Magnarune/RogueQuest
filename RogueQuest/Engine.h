@@ -21,6 +21,7 @@
 #include "WorldObject.h"
 #include "WorldObjectManager.h"
 #include "Particles.h"
+#include "Projectiles.h"
 #include "Config.h"
 #include "Options.h"
 #include "clock.h"
@@ -81,6 +82,7 @@ public:
 	std::unique_ptr<Options> optionsManager;
 	std::unique_ptr<UserInput> userinputs;
 	std::unique_ptr<UserInputManager> inputmanager;
+	std::unique_ptr<Projectile> projectiles;
 	bool ActivityDone;
 	struct Player{
 		olc::vf2d vPOS;
@@ -96,6 +98,6 @@ public:
 
 	bool OnConsoleCommand(const std::string& stext) override;
 	friend class Hud;
-	
+	friend class Projectile;
 	
 };

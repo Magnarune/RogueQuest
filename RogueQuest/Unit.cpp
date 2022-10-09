@@ -15,9 +15,9 @@ Unit::~Unit() {
 	std::queue<std::shared_ptr<TaskManager::Task>> cq;
 	if (!taskQueue.empty())
 		cq.swap(taskQueue);
-	if(targetBuilding.lock())
+	if(targetBuilding)
 		targetBuilding.reset();
-	if(targetUnit.lock())
+	if(targetUnit)
 		targetUnit.reset();
 	//Direction.clear();
 }
@@ -48,10 +48,10 @@ void Unit::UnitBehaviour() {
 		}
 		break;
 	case Aggressive:
-		if(targetBuilding.lock() || targetUnit.lock()){
+		if(targetBuilding || targetUnit){
 			HoldTask = currentTask;//Stop and hunt
-			currentTask = engine.unitManager->taskMgr.PrepareTask("Hunting", std::pair<std::shared_ptr<Unit>, std::any>{this, std::pair<std::weak_ptr<Building>, std::weak_ptr<Unit>> {targetBuilding, targetUnit} });
-			Taskpaused = true;
+			currentTask = engine.unitManager->taskMgr.PrepareTask("Hunting", std::pair<std::shared_ptr<Unit>, std::any>{this, std::pair<std::shared_ptr<Building>, std::shared_ptr<Unit>> {targetBuilding, targetUnit} });
+			Taskpaused = false;
 			currentTask->initTask();
 		}
 		break;
@@ -95,19 +95,30 @@ void Unit::Update(float delta) {
 	auto& engine = Game_Engine::Current();
 	if(fAttackCD > 0)
 		fAttackCD -= delta;
-	if(!Taskpaused)
+	if (ULogic == Aggressive) {
+		//if (execTimeout.getMilliseconds() > 50) {
+		UnitSearch();
+		//	execTimeout.restart();
+	//}
+	}
+
+
+
+
+
+	if(Taskpaused)
 		UnitBehaviour();
 
 	if(currentTask && currentTask->checkCompleted()){
-		std::shared_ptr<TaskManager::Task> trash;
-		currentTask.swap(trash);
-		if (Taskpaused == true) { 
+		//std::shared_ptr<TaskManager::Task> trash;
+		currentTask.reset();//swap(trash);
+		if (Taskpaused == false) { 
 			if (!HoldTask) {
 				currentTask = HoldTask;
-				std::shared_ptr<TaskManager::Task> trashHold;
-				HoldTask.swap(trashHold);
+				//std::shared_ptr<TaskManager::Task> trashHold;
+				HoldTask.reset();//swap(trashHold);
 			}
-			Taskpaused = false;
+			Taskpaused = true;
 		}
 	}
 	if(!currentTask){
@@ -117,12 +128,7 @@ void Unit::Update(float delta) {
 			currentTask->initTask();
 		}
 	} 
-	if (targetBuilding.expired() && targetUnit.expired() && ULogic == Aggressive){
-		if (execTimeout.getMilliseconds() > 50) {
-			UnitSearch();
-			execTimeout.restart();
-		}
-	}
+
 
 	if (Graphic_State != Dead) 
 		UpdatePosition(delta);
@@ -162,13 +168,13 @@ void Unit::AfterUpdate(float delta) {
 void Unit::UnitSearch() {//Target = unit/build.front()
 	auto& engine = Game_Engine::Current();
 	engine.unitManager->ParseObject(engine.unitManager->SearchClosestObject(Position, AgroRange), targetBuilding, targetUnit);
-	if (!targetBuilding.expired() && !targetUnit.expired()) {
-		if (!targetBuilding.expired()) {
-			Target = targetBuilding.lock()->Position;
+	if (targetBuilding || targetUnit) {
+		if (targetBuilding) {
+			Target = targetBuilding->Position;
 			targetUnit.reset();
 		}
 		else {
-			Target = targetUnit.lock()->Position;
+			Target = targetUnit->Position;
 			targetBuilding.reset();
 		}
 		Taskpaused = true;
@@ -179,24 +185,28 @@ void Unit::UnitSearch() {//Target = unit/build.front()
 }
 
 void Unit::UnitHunting() {
-	if (targetBuilding.lock()) {
-		Target = targetBuilding.lock()->Position + targetBuilding.lock()->Size / 2.f;
+	if (targetBuilding) {
+		Target = targetBuilding->Position + targetBuilding->Size / 2.f;
 	}
-	if (targetUnit.lock()) {
-		Target = targetUnit.lock()->Position + olc::vf2d(targetUnit.lock()->Unit_Collision_Radius * 1.414f,
-			targetUnit.lock()->Unit_Collision_Radius * 1.414f);
+	if (targetUnit) {
+		Target = targetUnit->Position + olc::vf2d(targetUnit->Unit_Collision_Radius * 1.414f,
+			targetUnit->Unit_Collision_Radius * 1.414f);
 	}
 }
 
 void Unit::PerformAttack() {
 	auto& engine = Game_Engine::Current();
-	if (targetUnit.lock()) {
-		targetUnit.lock()->fHealth -= fAttackDamage;
-		engine.particles->CreateParticles(targetUnit.lock()->Position);//Blood
+	
+	if (targetUnit) {
+		if (bIsRanged) {
+			//engine.worldManager->GenerateProjectile(Position, targetUnit->Position);
+		}
+		targetUnit->fHealth -= fAttackDamage;
+		engine.particles->CreateParticles(targetUnit->Position);//Blood
 		//knockback here
 	}
-	else if (targetBuilding.lock()) {
-		targetBuilding.lock()->health -= fAttackDamage;
+	else if (targetBuilding) {
+		targetBuilding->health -= fAttackDamage;
 	}	
 	fAttackCD = fSpellCooldown; // reset time for next attack
 }
@@ -239,7 +249,7 @@ if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len 
 
 	if (repairedbuilding.lock() && Velocity.mag2() < 0.1f * 0.1f)
 		bAnimating = true;
-	if (targetUnit.lock() && Velocity.mag2() < 0.1f * 0.1f)
+	if (targetUnit && Velocity.mag2() < 0.1f * 0.1f)
 		bAnimating = true;
 
 	if (fHealth <= 0)

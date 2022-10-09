@@ -119,20 +119,20 @@ UnitManager::UnitManager() {
             // required
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;           // customizable parameters
-            const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, std::weak_ptr<Unit>>>(arguments.second);
-            std::weak_ptr<Building> HBuild = params.first;
-            std::weak_ptr<Unit> HUnit = params.second;
-            if (!HBuild.expired()) {
-                unit->Target = HBuild.lock()->Position + HBuild.lock()->Size / 2.f; //center of building
-                unit->ActionZone.x = unit->fAttackRange + HBuild.lock()->Size.x/ 2.f;
-                unit->ActionZone.y = unit->fAttackRange + HBuild.lock()->Size.y / 2.f;
+            const auto& params = std::any_cast<std::pair<std::shared_ptr<Building>, std::shared_ptr<Unit>>>(arguments.second);
+            std::shared_ptr<Building> HBuild = params.first;
+            std::shared_ptr<Unit> HUnit = params.second;
+            if (HBuild) {
+                unit->Target = HBuild->Position + olc::vf2d(HBuild->Size) / 2.f; //center of building
+                unit->ActionZone.x = unit->fAttackRange + (float)HBuild->Size.x/ 2.f;
+                unit->ActionZone.y = unit->fAttackRange + (float)HBuild->Size.y / 2.f;
 
             }
-            if (!HUnit.expired()) {
-                unit->Target = olc::vf2d(HUnit.lock()->Position.x + HUnit.lock()->Unit_Collision_Radius * 1.414f,
-                                         HUnit.lock()->Position.y + HUnit.lock()->Unit_Collision_Radius * 1.414f);
-                unit->ActionZone.x = unit->fAttackRange + HUnit.lock()->Unit_Collision_Radius * 1.414f;
-                unit->ActionZone.y = unit->fAttackRange + HUnit.lock()->Unit_Collision_Radius * 1.414f;
+            if (HUnit) {
+                unit->Target = olc::vf2d(HUnit->Position.x + HUnit->Unit_Collision_Radius * 1.414f,
+                                         HUnit->Position.y + HUnit->Unit_Collision_Radius * 1.414f);
+                unit->ActionZone.x = unit->fAttackRange + HUnit->Unit_Collision_Radius * 1.414f;
+                unit->ActionZone.y = unit->fAttackRange + HUnit->Unit_Collision_Radius * 1.414f;
 
             }
             
@@ -142,7 +142,7 @@ UnitManager::UnitManager() {
         [&](std::shared_ptr<TaskManager::Task> task) -> bool {
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;//ATTACK
-            if (unit->fAttackCD > 0 || unit->targetBuilding.expired() && unit->targetUnit.expired() ) {//if can't attack or target is dead
+            if (unit->fAttackCD > 0 || !unit->targetBuilding && !unit->targetUnit) {//if can't attack or target is dead
                 return false;
             }
             else {
@@ -153,22 +153,22 @@ UnitManager::UnitManager() {
             return true;            
 
          },
-         [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
+         [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished when unit dies here this == true
              // required
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
-             if (unit->targetBuilding.expired() && unit->targetUnit.expired())
+             if (!unit->targetBuilding && !unit->targetUnit)
                  return true;
-             if (unit->targetBuilding.lock() && unit->targetBuilding.lock()->health < 0.f) {
+             if (unit->targetBuilding && unit->targetBuilding->health < 0.f) {
                  unit->targetBuilding.reset();
                  unit->targetUnit.reset();
                  return true;
              }
-                 if (unit->targetUnit.lock() && unit->targetUnit.lock()->fHealth < 0.f) {
-                     unit->targetUnit.reset();
-                     unit->targetBuilding.reset();
-                     return true;
-                 }
+             if (unit->targetUnit && unit->targetUnit->fHealth < 0.f) {
+                 unit->targetUnit.reset();
+                 unit->targetBuilding.reset();
+                 return true;
+             }
              
 
              return false;
@@ -373,7 +373,7 @@ std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
     }  
     return {};
 }
-void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit) {
+void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::shared_ptr<Building>& _build, std::shared_ptr<Unit>& _unit) {
     std::shared_ptr<Unit> unit;
     if (unit = std::dynamic_pointer_cast<Unit>(object)) {
         _unit = std::move(unit);

@@ -341,7 +341,7 @@ public:
     void SelectUnits(olc::vf2d Initial, olc::vf2d Final);
 	//prob a better way
 	std::shared_ptr<Collidable> FindObject(olc::vf2d Mouse);
-	void ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& build, std::weak_ptr<Unit>& unit );
+	void ParseObject(std::shared_ptr<Collidable> object, std::shared_ptr<Building>& build, std::shared_ptr<Unit>& unit );
 	
 	std::vector<std::shared_ptr<Collidable>> testobjects;
 

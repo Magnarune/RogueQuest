@@ -18,6 +18,6 @@ public:
 
 	olc::vf2d Initial, Final;
 	bool Clicked = false;
-	std::weak_ptr<Building> build;
-	std::weak_ptr<Unit> unit;
+	std::shared_ptr<Building> build;
+	std::shared_ptr<Unit> unit;
 };

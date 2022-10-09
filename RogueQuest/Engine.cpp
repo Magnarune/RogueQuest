@@ -72,12 +72,14 @@ bool Game_Engine::OnUserCreate() {
     userinputs.reset(new UserInput); //Create user options    
     inputmanager.reset(new UserInputManager);
     particles.reset(new Particles);
+    projectiles.reset(new Projectile);
     // Configure Controllers
     assetManager->LoadUnitAssets();     // Load all the Lua files
     assetManager->LoadBuildingAssets(); // Load all the Buildings files
     assetManager->LoadCursorAssets();   // Load all the Cursors files
     worldManager->ImportMapData();      // Load all the Lua Map files
     hud->ImportHudAssets();      // Load all the Hud files
+    projectiles->ImportProjectileAssets();
 
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
@@ -182,6 +184,7 @@ bool Game_Engine::OnUserDestroy(){
     inputmanager.reset();
     TextureCache::FreeCache();
     particles.reset();
+    projectiles.reset();
     return true;
 }
 

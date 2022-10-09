@@ -46,8 +46,8 @@ public:
 	std::weak_ptr<Building> repairedbuilding; //pointer to building being repaired
 
 	//Searched units
-	std::weak_ptr<Building> targetBuilding;//parsing pointer
-	std::weak_ptr<Unit> targetUnit;//parsing pointer
+	std::shared_ptr<Building> targetBuilding;//parsing pointer
+	std::shared_ptr<Unit> targetUnit;//parsing pointer
 
 
 	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both
