@@ -4,7 +4,7 @@
 
 
 Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
-	 fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0) {
+	 fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0), currentTask(HoldTask){
 }
 
 Unit::~Unit() {
@@ -46,13 +46,16 @@ void Unit::UnitBehaviour() {
 		if (fHealth < prevHealth) {
 			ULogic = Aggressive;
 		}
+		prevHealth = fHealth;
 		break;
 	case Aggressive:
-		if(targetBuilding || targetUnit){
+		if(targetBuilding || targetUnit && !Taskpaused){
 			HoldTask = currentTask;//Stop and hunt
-			currentTask = engine.unitManager->taskMgr.PrepareTask("Hunting", std::pair<std::shared_ptr<Unit>, std::any>{this, std::pair<std::shared_ptr<Building>, std::shared_ptr<Unit>> {targetBuilding, targetUnit} });
-			Taskpaused = false;
+
+			currentTask = engine.unitManager->taskMgr.PrepareTask("Hunting", std::pair<std::shared_ptr<Unit>, std::any>
+						{engine.unitManager->This_shared_pointer(Position), std::pair<std::shared_ptr<Building>, std::shared_ptr<Unit>> {targetBuilding, targetUnit} });
 			currentTask->initTask();
+			Taskpaused = true;
 		}
 		break;
 	}
@@ -101,24 +104,18 @@ void Unit::Update(float delta) {
 		//	execTimeout.restart();
 	//}
 	}
+	UnitBehaviour();
 
-
-
-
-
-	if(Taskpaused)
-		UnitBehaviour();
-
-	if(currentTask && currentTask->checkCompleted()){
+	if(currentTask && currentTask->checkCompleted() || fHealth < 0){
 		//std::shared_ptr<TaskManager::Task> trash;
 		currentTask.reset();//swap(trash);
-		if (Taskpaused == false) { 
+		if (Taskpaused == true) {			
 			if (!HoldTask) {
 				currentTask = HoldTask;
 				//std::shared_ptr<TaskManager::Task> trashHold;
 				HoldTask.reset();//swap(trashHold);
 			}
-			Taskpaused = true;
+			Taskpaused = false;
 		}
 	}
 	if(!currentTask){
@@ -127,12 +124,9 @@ void Unit::Update(float delta) {
 			taskQueue.pop();
 			currentTask->initTask();
 		}
-	} 
-
-
+	}
 	if (Graphic_State != Dead) 
-		UpdatePosition(delta);
-		
+		UpdatePosition(delta);		
 	Collidable::Update(delta);
 }
 
@@ -151,12 +145,14 @@ void Unit::TrytoBuild(const std::string& name,const olc::vf2d& target) {
 }
 
 void Unit::RepairBuilding() {
-	repairedbuilding.lock()->health += 0.1f;
-	if (repairedbuilding.lock()->curStage == "Construction" && repairedbuilding.lock()->health >= repairedbuilding.lock()->maxHealth){
-		repairedbuilding.lock()->curStage = "Level one";
-		repairedbuilding.reset();
-		
-	}	
+	if (repairedbuilding) {
+		repairedbuilding->health += 0.1f;
+		if (repairedbuilding->curStage == "Construction" && repairedbuilding->health >= repairedbuilding->maxHealth) {
+			repairedbuilding->curStage = "Level one";
+			repairedbuilding.reset();
+
+		}
+	}
 }
 
 void Unit::AfterUpdate(float delta) {
@@ -169,24 +165,22 @@ void Unit::UnitSearch() {//Target = unit/build.front()
 	auto& engine = Game_Engine::Current();
 	engine.unitManager->ParseObject(engine.unitManager->SearchClosestObject(Position, AgroRange), targetBuilding, targetUnit);
 	if (targetBuilding || targetUnit) {
-		if (targetBuilding) {
+		if (targetBuilding && !targetBuilding->bFriendly) {
 			Target = targetBuilding->Position;
 			targetUnit.reset();
 		}
 		else {
+			if(!targetUnit->bFriendly)
 			Target = targetUnit->Position;
 			targetBuilding.reset();
-		}
-		Taskpaused = true;
+		}		
 		UnitHunting();
 	}
-	else
-		Taskpaused = false;
 }
 
 void Unit::UnitHunting() {
 	if (targetBuilding) {
-		Target = targetBuilding->Position + targetBuilding->Size / 2.f;
+		Target = targetBuilding->Position + olc::vf2d(targetBuilding->Size) / 2.f;
 	}
 	if (targetUnit) {
 		Target = targetUnit->Position + olc::vf2d(targetUnit->Unit_Collision_Radius * 1.414f,
@@ -199,7 +193,7 @@ void Unit::PerformAttack() {
 	
 	if (targetUnit) {
 		if (bIsRanged) {
-			//engine.worldManager->GenerateProjectile(Position, targetUnit->Position);
+			engine.worldManager->GenerateProjectile(Position, targetUnit->Position);
 		}
 		targetUnit->fHealth -= fAttackDamage;
 		engine.particles->CreateParticles(targetUnit->Position);//Blood
@@ -247,7 +241,7 @@ if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len 
 	else
 		Graphic_State = Walking;
 
-	if (repairedbuilding.lock() && Velocity.mag2() < 0.1f * 0.1f)
+	if (repairedbuilding && Velocity.mag2() < 0.1f * 0.1f)
 		bAnimating = true;
 	if (targetUnit && Velocity.mag2() < 0.1f * 0.1f)
 		bAnimating = true;

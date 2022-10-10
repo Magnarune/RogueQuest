@@ -13,7 +13,7 @@
 #include <queue>
 #include <iostream>
 
-class Unit : public Collidable{
+class Unit : public Collidable  {
 
 
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
@@ -39,17 +39,19 @@ public:
 	const cAssets::UnitType& unitType; // internal unit type reference
 
 	//Testing Some Build Logic Gates
-
 	olc::vf2d buildlocation;//Where is the building going to be made
 	olc::vf2d buildingSize; //Size of Building | Given by construct
 	std::string buildName; //Name of what Im building
-	std::weak_ptr<Building> repairedbuilding; //pointer to building being repaired
-
+	std::shared_ptr<Building> repairedbuilding; //pointer to building being repaired
 	//Searched units
 	std::shared_ptr<Building> targetBuilding;//parsing pointer
 	std::shared_ptr<Unit> targetUnit;//parsing pointer
-
-
+	std::queue<std::shared_ptr<TaskManager::Task>> taskQueue; // queue of tasks
+	std::shared_ptr<TaskManager::Task> &currentTask; // current task
+	std::weak_ptr<TaskManager::Task> trashtask;
+	bool Taskpaused;
+	std::shared_ptr<TaskManager::Task> HoldTask;
+	
 	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both
 	//End of Testing
 	// Data
@@ -64,14 +66,7 @@ public:
 	bool bLoot;			//If dead then drop some loot?
 	bool bAttacked;    //Was I attacked
 	float prevHealth; // I was Hit!
-	// Vars For Task Manager System
-	
-	std::queue<std::shared_ptr<TaskManager::Task>> taskQueue; // queue of tasks
-	std::shared_ptr<TaskManager::Task> currentTask; // current task
-
-	bool Taskpaused;
-	std::shared_ptr<TaskManager::Task> HoldTask;
-
+	// Vars For Task Manager System	
 	olc::vf2d vRubberBand;   // X , Y, Position to go back to
 	olc::vf2d AttackTarget;  // Target you are chasing
 	olc::vf2d HitVelocity;	// velocity for getting kicked

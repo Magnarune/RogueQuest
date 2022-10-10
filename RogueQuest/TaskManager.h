@@ -19,9 +19,7 @@ class TaskManager {
 public:
 	TaskManager();
 	virtual ~TaskManager();
-
 	struct RegisteredTask; // fwd
-
 
     struct Task {
         const RegisteredTask* regtask;
@@ -40,7 +38,6 @@ public:
         std::any metadata;
         olc::Key bind;
     };
-
     
     std::map<std::string, RegisteredTask> taskTypes;
 

@@ -31,13 +31,12 @@ void Projectile::loadImage(const std::string& name, size_t tex_id) {
 };
 
 void Projectile::ImportProjectileAssets() {
-    loadImage("Arrow", "Assets/Assets/Projectiles/Arrows/Arrow.png");
+    loadImage("Arrow", "Assets/Projectiles/Arrows/arrow.png");
 
 }
 
-void Projectile::Destroy() {
-    Collidable::Destroy();
-}
+void Projectile::Destroy() 
+{Collidable::Destroy();}
 
 void Projectile::Update(float fElapsedtime) {
 	m_fTimer += fElapsedtime;
@@ -55,7 +54,7 @@ void Projectile::Update(float fElapsedtime) {
 }
 
 void Projectile::Draw(olc::TileTransformedView* gfx) {
-	WorldObject::Draw(gfx); // what is this?
+	WorldObject::Draw(gfx);
 	auto& engine = Game_Engine::Current();
     float angle = std::fmod(2.0f * PI + Velocity.polar().y, 2.0f * PI);
 

@@ -34,6 +34,7 @@ return
 		}
 	},
 	Parameters = {
+		Ranged = true,
 		CollisionRadius = 10,
 		Abilities = {
 			Tasks = {"Move", "Attack"}, -- task names allowed to be delegated to this unit

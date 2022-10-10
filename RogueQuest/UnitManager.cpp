@@ -8,7 +8,6 @@ UnitManager::UnitManager() {
 
     // task registration looks similar to
     // lua scripts for units should also have a list to associate the Allowed Task Names
-
     // Eveything you want the Unit to be able to do, goes here:
     // Hotkey doesn't work yet
     auto& engine = Game_Engine::Current();
@@ -34,8 +33,7 @@ UnitManager::UnitManager() {
             auto& unit = arguments.first;
             return true;
         },
-        [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
-            // required
+        [&](std::shared_ptr<TaskManager::Task> task) -> bool {
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;
             if (!unit->Target.has_value()) return true;
@@ -77,69 +75,57 @@ UnitManager::UnitManager() {
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;
             // customizable parameters
-
-            const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, olc::vf2d>>(arguments.second);
-            
-            std::weak_ptr <Building> build = params.first;
+            const auto& params = std::any_cast<std::pair<std::shared_ptr<Building>, olc::vf2d>>(arguments.second);            
+            const std::shared_ptr<Building> &build = params.first;
             const olc::vf2d& target = params.second;
-            unit->Target = build.lock()->Position + unit->buildingSize / 2.f;
+            unit->Target = build->Position + unit->buildingSize / 2.f;
             unit->ActionZone = olc::vf2d(32.f, 32.f);
             unit->repairedbuilding = build;
-            
-
-             return true;
+            return true;
          },
 
         [&](std::shared_ptr<TaskManager::Task> task) -> bool {
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;
-            if (unit->repairedbuilding.lock())
+            if (unit->repairedbuilding)
                 unit->RepairBuilding();
-            return true;
-            
+            return true;            
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
              // required
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
-             if (unit->repairedbuilding.lock() && unit->repairedbuilding.lock()->health > unit->repairedbuilding.lock()->maxHealth)
+             if (unit->repairedbuilding && unit->repairedbuilding->health > unit->repairedbuilding->maxHealth)
                  unit->repairedbuilding.reset();
 
-             if (unit->repairedbuilding.expired())
+             if (!unit->repairedbuilding)
                  return true;
              else
-                 return false;
-
-             
+                 return false;             
          }
          , 0, olc::Key::R }); // metadata , hotkey
 
     taskMgr.RegisterTask("Hunting",
-        { [&](std::shared_ptr<TaskManager::Task> task) -> bool {
-            // required
+        { [&](std::shared_ptr<TaskManager::Task> task) -> bool {//Initiate Task
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;           // customizable parameters
             const auto& params = std::any_cast<std::pair<std::shared_ptr<Building>, std::shared_ptr<Unit>>>(arguments.second);
-            std::shared_ptr<Building> HBuild = params.first;
-            std::shared_ptr<Unit> HUnit = params.second;
+            const std::shared_ptr<Building> &HBuild = params.first;
+            const std::shared_ptr<Unit> &HUnit = params.second;
             if (HBuild) {
                 unit->Target = HBuild->Position + olc::vf2d(HBuild->Size) / 2.f; //center of building
                 unit->ActionZone.x = unit->fAttackRange + (float)HBuild->Size.x/ 2.f;
                 unit->ActionZone.y = unit->fAttackRange + (float)HBuild->Size.y / 2.f;
-
             }
             if (HUnit) {
                 unit->Target = olc::vf2d(HUnit->Position.x + HUnit->Unit_Collision_Radius * 1.414f,
                                          HUnit->Position.y + HUnit->Unit_Collision_Radius * 1.414f);
                 unit->ActionZone.x = unit->fAttackRange + HUnit->Unit_Collision_Radius * 1.414f;
                 unit->ActionZone.y = unit->fAttackRange + HUnit->Unit_Collision_Radius * 1.414f;
-
-            }
-            
+            }            
              return true;
          },
-
-        [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+        [&](std::shared_ptr<TaskManager::Task> task) -> bool {//Preform Task
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;//ATTACK
             if (unit->fAttackCD > 0 || !unit->targetBuilding && !unit->targetUnit) {//if can't attack or target is dead
@@ -149,9 +135,9 @@ UnitManager::UnitManager() {
                 unit->Graphic_State = unit->Attacking;
                 if(unit->curFrame == unit->textureMetadata[unit->Graphic_State].ani_len - 1)
                     unit->PerformAttack();
+                return true;
             }  
-            return true;            
-
+            return true;
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished when unit dies here this == true
              // required
@@ -166,15 +152,13 @@ UnitManager::UnitManager() {
              }
              if (unit->targetUnit && unit->targetUnit->fHealth < 0.f) {
                  unit->targetUnit.reset();
-                 unit->targetBuilding.reset();
+                 unit->targetBuilding.reset();                 
                  return true;
-             }
-             
-
+             }  
              return false;
-
          }
          , 0, olc::Key::A });
+
 }
 
 
@@ -429,15 +413,15 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestObject(olc::vf2d pos, floa
         //if(_unit == this)
 
         auto unit = _unit.lock();
-        if ((unit->Position - pos).mag2() < (SearchRadius * SearchRadius)) {
-            if ((unit->Position - pos ).mag2() < 0.2f) continue;
+        if ((unit->Position - pos).mag2() < (SearchRadius * SearchRadius) && unit->fHealth > 0.f) {
+            if ((unit->Position - pos).mag2() < 0.2f) continue;
             else
                 testobjects.push_back(unit);
         }
     }
     for (auto& _build : engine.buildingManager->BuildingList) {
         auto build = _build.lock();
-        if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x)) {
+        if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x) && build->health > 0.f) {
             testobjects.push_back(build);
         }
     }
@@ -457,4 +441,15 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestObject(olc::vf2d pos, floa
     }
     else
         return {};    
+}
+
+std::shared_ptr<Unit> UnitManager::This_shared_pointer(olc::vf2d pos) {
+    std::shared_ptr<Unit> thisUnit;
+    for (auto& _unit : unitList) {        
+        auto unit = _unit.lock();
+        if (unit->Position == pos) {            
+            thisUnit = unit;
+        }
+    }
+    return thisUnit;
 }

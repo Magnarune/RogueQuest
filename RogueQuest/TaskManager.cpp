@@ -27,5 +27,5 @@ std::shared_ptr<TaskManager::Task> TaskManager::PrepareTask(const std::string& n
 
     task->checkCompleted = [=]() -> bool { return _wtask.expired() ? true : regtask.checkCompleted(_wtask.lock()); };
     
-    return task; // return prepared task
+    return task;
 }
