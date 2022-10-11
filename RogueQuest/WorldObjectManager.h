@@ -23,6 +23,8 @@ class WorldManager {
 	std::vector<std::shared_ptr<Map>> mapList; // Maybe
 	std::vector<std::shared_ptr<WorldObject>> objectList; // fixed size for optimization
 	std::vector<std::shared_ptr<WorldObject>> garbageList;
+	bool cu;
+	bool cb;
 
 	std::shared_ptr<Map> currentMap;
 public:
@@ -50,7 +52,8 @@ public:
 
 	std::shared_ptr<Building> GenerateBuilding(const std::string& name, olc::vf2d pos = { 0.f,0.f });
 
-    std::shared_ptr<Projectile> GenerateProjectile(olc::vf2d pos, olc::vf2d trgt);
+    std::shared_ptr<Projectile> GenerateProjectile(olc::vf2d pos, std::shared_ptr<Collidable> trgt);
+
 	
 	friend class WorldObject;
 	friend class Unit;

@@ -72,7 +72,7 @@ bool Game_Engine::OnUserCreate() {
     userinputs.reset(new UserInput); //Create user options    
     inputmanager.reset(new UserInputManager);
     particles.reset(new Particles);
-    projectiles.reset(new Projectile);
+   projectiles.reset(new Projectile);
     // Configure Controllers
     assetManager->LoadUnitAssets();     // Load all the Lua files
     assetManager->LoadBuildingAssets(); // Load all the Buildings files
@@ -132,8 +132,8 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     // GC
     worldManager->CollectGarbage();
     // Drawing
-
     worldManager->Draw();
+    
     userinputs->DrawUserInput();
     hud->DrawHud();
     hud->DrawMiniMap();
@@ -298,7 +298,20 @@ const std::map<std::string, CommandFunction> commands = {
         if (engine.worldManager->GenerateBuilding(name, {x*32.f,y*32.f})) {
             std::cout << "Building Made\n";
         }
-        }},
+    }},
+    { "Crush", [](std::stringstream& ss) {
+    auto& engine = Game_Engine::Current();
+    std::string name;
+    float x{}, y{};
+    ss >> name;
+    if (!ss.eof()) ss >> x;
+    if (!ss.eof()) ss >> y;
+    auto Building = engine.buildingManager->GetBuilding(name, x);
+    if (Building) {
+        Building->Destroy();
+        std::cout << "Building Crushed\n";
+    }
+    }},
 
     /*
     {"", [](std::stringstream& ss){

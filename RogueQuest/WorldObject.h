@@ -4,7 +4,6 @@
 #include "clock.h"
 #include <variant>
 #include <map>
-#include "Projectiles.h"
 
 
 class WorldObject {
@@ -28,9 +27,7 @@ public:
 	// to do, consider adding collision method here or maybe use a different class for that
 	// virtual void Interaction() {};//If two world objects interact??? IDK Hmm i'll think about this - perhaps
 };
-
 /// Collidable v Collidable
-
 class Collidable : public WorldObject {
 public:
 	struct Mask {
@@ -62,6 +59,4 @@ public:
 	virtual void Update(float delta) override;
 	virtual void AfterUpdate(float delta) override;
 	virtual bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) = 0;
-
-
 };

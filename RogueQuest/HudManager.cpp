@@ -15,35 +15,37 @@ void HudManager::UnitSelected() {
 	auto& engine = Game_Engine::Current();
 
     std::shared_ptr<Unit> unitinfo = engine.unitManager->GetUnit();
-    const auto& data = engine.assetManager->GetUnitData(unitinfo->sUnitName);
-    std::string _refname = unitinfo->sUnitName + "__tex";
-    if (!engine.hud->decals.count(_refname)) {
-        engine.hud->loadImage(_refname, data.head.tex_id);
+    if (unitinfo) {
+        const auto& data = engine.assetManager->GetUnitData(unitinfo->sUnitName);
+        std::string _refname = unitinfo->sUnitName + "__tex";
+        if (!engine.hud->decals.count(_refname)) {
+            engine.hud->loadImage(_refname, data.head.tex_id);
+        }
+        float healthMod = unitinfo->fHealth / unitinfo->fMaxHealth;
+        olc::Decal* decal = engine.hud->decals[_refname].get();
+
+        engine.DrawPartialDecal({ 90.f, IconY - 8.f }, { 8.f,8.f }, engine.hud->decals["Attack"].get(), { 0,0 }, { 190,190 });
+        engine.DrawStringDecal({ 99.f,  IconY - 4.f }, std::to_string((int)unitinfo->fAttackDamage), olc::WHITE, { 0.4f,0.4f });
+
+        engine.DrawPartialDecal({ 90.f, IconY + 2.f }, { 8.f,8.f }, engine.hud->decals["Move"].get(), { 0,0 }, { 32,32 });
+        engine.DrawStringDecal({ 99.f,  IconY + 6.f }, std::to_string((int)unitinfo->fMoveSpeed), olc::WHITE, { 0.4f,0.4f });
+
+        engine.DrawPartialDecal({ 90.f, IconY + 12.f }, { 8.f,8.f }, engine.hud->decals["AtkSpeed"].get(), { 0,0 }, { 512,512 });
+        engine.DrawStringDecal({ 99.f,  IconY + 16.f }, std::to_string((int)unitinfo->fAttackSpeed), olc::WHITE, { 0.4f,0.4f });
+
+        engine.DrawStringDecal({ 66.f,  IconY - 6.f }, unitinfo->sUnitName, olc::BLUE, { 0.4f,0.4f });
+
+        engine.DrawPartialDecal({ 68.f ,IconY }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+        engine.DrawPartialDecal({ 68.f ,IconY }, { 16.f,16.f }, decal, data.head.tl, data.head.sz);
+        engine.DrawPartialDecal({ 66.5f, IconY - 1.5f }, { 18.5f,18.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+
+        engine.DrawPartialDecal({ 64.f, IconY + 17.f }, { 22.f,4.f }, engine.hud->decals["HealthBoxBackground"].get(), { 0,0 }, { 128,32 });
+        engine.DrawPartialDecal({ 64.f, IconY + 17.f }, { 22.f * healthMod,4.f }, engine.hud->decals["Health"].get(), { 0,0 }, { 128,32 });
+        engine.DrawPartialDecal({ 64.f, IconY + 17.f }, { 22.f,4.f }, engine.hud->decals["HealthBox"].get(), { 0,0 }, { 128,32 });
+
+        engine.DrawStringDecal({ 64.f, IconY + 22.f }, std::to_string((int)unitinfo->fHealth) + "/" + std::to_string((int)unitinfo->fMaxHealth), olc::RED, { 0.4f,0.4f });
+        UnitAbilities(unitinfo);
     }
-    float healthMod = unitinfo->fHealth / unitinfo->fMaxHealth;
-    olc::Decal* decal = engine.hud->decals[_refname].get();
-
-    engine.DrawPartialDecal({ 90.f, IconY- 8.f }, { 8.f,8.f }, engine.hud->decals["Attack"].get(), { 0,0 }, { 190,190 });
-    engine.DrawStringDecal({ 99.f,  IconY- 4.f }, std::to_string((int)unitinfo->fAttackDamage), olc::WHITE, { 0.4f,0.4f });
-                                    
-    engine.DrawPartialDecal({ 90.f, IconY+ 2.f }, { 8.f,8.f }, engine.hud->decals["Move"].get(), { 0,0 }, { 32,32 });
-    engine.DrawStringDecal({ 99.f,  IconY+ 6.f }, std::to_string((int)unitinfo->fMoveSpeed), olc::WHITE, { 0.4f,0.4f });
-                                    
-    engine.DrawPartialDecal({ 90.f, IconY+ 12.f }, { 8.f,8.f }, engine.hud->decals["AtkSpeed"].get(), { 0,0 }, { 512,512 });
-    engine.DrawStringDecal({ 99.f,  IconY+ 16.f }, std::to_string((int)unitinfo->fAttackSpeed), olc::WHITE, { 0.4f,0.4f });
-                                    
-    engine.DrawStringDecal({ 66.f,  IconY- 6.f }, unitinfo->sUnitName, olc::BLUE, { 0.4f,0.4f });
-                                    
-    engine.DrawPartialDecal({ 68.f ,IconY }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
-    engine.DrawPartialDecal({ 68.f ,IconY }, { 16.f,16.f }, decal, data.head.tl, data.head.sz);
-    engine.DrawPartialDecal({ 66.5f, IconY - 1.5f }, { 18.5f,18.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
-                                    
-    engine.DrawPartialDecal({ 64.f, IconY+ 17.f }, { 22.f,4.f }, engine.hud->decals["HealthBoxBackground"].get(), { 0,0 }, { 128,32 });
-    engine.DrawPartialDecal({ 64.f, IconY+ 17.f }, { 22.f * healthMod,4.f }, engine.hud->decals["Health"].get(), { 0,0 }, { 128,32 });
-    engine.DrawPartialDecal({ 64.f, IconY+ 17.f }, { 22.f,4.f }, engine.hud->decals["HealthBox"].get(), { 0,0 }, { 128,32 });
-
-    engine.DrawStringDecal({ 64.f, IconY + 22.f }, std::to_string((int)unitinfo->fHealth) + "/" + std::to_string((int)unitinfo->fMaxHealth), olc::RED, { 0.4f,0.4f });
-    UnitAbilities(unitinfo);
 }
 
 void HudManager::UnitsSelected(size_t ucount) {

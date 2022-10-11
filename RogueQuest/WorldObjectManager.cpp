@@ -14,7 +14,6 @@ WorldManager::~WorldManager() {
 	garbageList.clear();
 }
 
-
 void WorldManager::Update(float delta) {//Update last frames
     currentMap->UpdateMap(delta);
     for (auto& object : objectList) {
@@ -39,8 +38,6 @@ void WorldManager::Draw() {//Draw
         object->Draw(&engine.tv);
     }
 }
-
-
 
 void WorldManager::DestroyObject(WorldObject* self) {
     auto me = std::find_if(objectList.begin(), objectList.end(), [&](const auto& obj){ return obj.get() == self; });
@@ -72,10 +69,30 @@ void WorldManager::CollectGarbage() {
             objectList.resize(objectList.size() - len); // slice off the head
             // for(int i=0; i < len; ++i) objectList.pop_back(); // slice off the garbage - resize instead?
         }
-
+       // if(garbageList == engine.unitManager->unitList)
+        std::shared_ptr<Collidable> cppdumbstuff;
+        std::shared_ptr<Unit> lunit;
+        std::shared_ptr<Building> lbuild;
+        for (int i = 0; i < garbageList.size(); i++) {
+            if (cb && cu)
+                continue;
+            if (cppdumbstuff = std::dynamic_pointer_cast<Collidable>(garbageList[i])) {
+                if (cppdumbstuff = std::dynamic_pointer_cast<Unit>(garbageList[i])) {
+                    if(cppdumbstuff->cType == cppdumbstuff->isUnit)
+                        cu = true;
+                }
+                if (cppdumbstuff = std::dynamic_pointer_cast<Building>(garbageList[i])) {
+                    cb = true;
+                }
+            }
+        }
         garbageList.clear();
-        engine.unitManager->CollectGarbage(); // cleanup the unit manager garbage
+       // if(cb)
+            //engine.buildingManager->CollectGarbage(); //cleanup the building manager garbage
+        //if(cu)
+        cb, cu = false;
     }
+            engine.unitManager->CollectGarbage(); // cleanup the unit manager garbage
 
 }
 
@@ -147,7 +164,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
         unit->textureMetadata.insert_or_assign(state, meta);
     }
     unit->bFriendly = true;
-    if (unit->sUnitName == "Goblin" || unit->sUnitName == "Imp")
+    if (unit->sUnitName == "Goblin" )//|| unit->sUnitName == "Imp")
         if (engine.config->GetValue<bool>("Evil") == true) unit->bFriendly = false;
 
     unit->SetMask(Collidable::Mask(unit->Unit_Collision_Radius));
@@ -211,12 +228,14 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
 }
 
 
-std::shared_ptr<Projectile> WorldManager::GenerateProjectile(olc::vf2d start, olc::vf2d Target) {
+std::shared_ptr<Projectile> WorldManager::GenerateProjectile(olc::vf2d start, std::shared_ptr<Collidable> Target) {
     std::shared_ptr<Projectile> proj;
     proj.reset(new Projectile());
-    proj->Position = start; proj->Target = Target;
-    proj->Damage; proj->Velocity;
 
+    proj->cTarget = Target;
+    proj->Position = start; //proj->Target = Target;
+    proj->Damage; proj->Velocity;
+    proj->cType = proj->isProjectile;
     objectList.emplace_back(proj);
     return proj;
 }

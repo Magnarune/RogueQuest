@@ -12,7 +12,11 @@ bool Building::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap
 	return false;
 }
 
-void Building::BuildingBehaviour(){
+void Building::Destroy() {
+	Collidable::Destroy();
+}
+
+void Building::BuildingBehaviour() {
 }
 
 void Building::Stop() {

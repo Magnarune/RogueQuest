@@ -51,8 +51,8 @@ return
 		MoveSpeed = 40,       
 		AttackRange = 50, 
 		AttackDamage = 2,
-		AttackSpeed = 1,
-		SpellCooldown = 1,
+		AttackSpeed = 0.2,
+		SpellCooldown = 0.2,
 		KnockBackResist = 1
 	},
 }

@@ -170,16 +170,30 @@ void UnitManager::addNewUnit(std::weak_ptr<Unit> unit) {
 void UnitManager::Update(float delta) {
 }
 
-// GC do not touch
-void UnitManager::CollectGarbage() {
-    auto it = std::find_if(unitList.begin(), unitList.end(), [](const auto& unit){ return unit.expired(); });
-    if(it++ != unitList.end()){
-        std::vector<std::weak_ptr<Unit>> copyList;
-        for(auto& unit : unitList){
-            if(!unit.expired()) copyList.emplace_back(std::move(unit));
-        }
-        unitList = std::move(copyList);
+// GC do not touch Magnarune ill explain later... ||
+void UnitManager::CollectGarbage() {//edited    
+    //for (int i = 0; i < unitList.size(); i++) {
+    std::erase_if(unitList, [](const auto& unit) {return unit.expired(); });
+  /*  std::vector<std::weak_ptr<Unit>> Newlist;
+    for (auto& unit : unitList) {
+        if (unit.lock())
+            Newlist.push_back(unit);       
     }
+    unitList.swap(Newlist);*/
+    
+
+
+    //auto IsDead = [](const auto& unit) {return unit.expired()};
+    //unitList.erase(std::remove_if(unitList.begin(), unitList.end(), IsDead), unitList.end());
+    //auto it = std::find_if(unitList.begin(), unitList.end(), [](const auto& unit){ return unit.expired(); });
+    //if(it++ != unitList.end()){
+    //    std::vector<std::weak_ptr<Unit>> copyList;
+    //    for(auto& unit : unitList){
+    //        if(!unit.expired()) copyList.emplace_back(std::move(unit));
+    //    }
+    //    unitList = std::move(copyList);
+    //}
+
 }
 
 // Task delegation
@@ -207,13 +221,16 @@ size_t UnitManager::GetUnitCount(const std::string& name) {
 size_t UnitManager::GetSelectedUnitCount() {
     return std::accumulate(unitList.begin(), unitList.end(), 0ULL,
         [&](size_t n, const auto& unit) -> size_t {
-            return n + (unit.lock()->bSelected == true);
+            if(unit.lock())
+                return n + (unit.lock()->bSelected == true);
         });
 }
 
 std::shared_ptr<Unit> UnitManager::GetUnit(const std::string& name, size_t index) {
     size_t n = 0;
     for(auto& _unit : unitList){
+        if (_unit.expired())
+            continue;
         auto unit = _unit.lock();
         if(unit->sUnitName == name && n++ == index){
             return unit;
@@ -235,6 +252,8 @@ std::shared_ptr<Unit> UnitManager::GetUnit(size_t index) {
 // Public method for selecting unit
 void UnitManager::SelectUnit(olc::vf2d mousePos) {
     for (auto& _unit : unitList) {
+        if (_unit.expired())
+            continue;
         auto unit = _unit.lock();
         if(unit->bSelected) continue;
 
@@ -251,6 +270,8 @@ void UnitManager::SelectUnit(olc::vf2d mousePos) {
 // Public method for selecting units
 void UnitManager::SelectUnits(olc::vf2d Initial, olc::vf2d Final) {    
     for (auto& _unit : unitList){
+        if (_unit.expired())
+            continue;
         auto unit = _unit.lock();
         if(unit->bSelected) continue;
 
@@ -340,6 +361,8 @@ void UnitManager::MoveConstructBuilding(const std::string& buildingName, const o
 std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
     auto& engine = Game_Engine::Current();
     for (auto& _unit : unitList) {
+        if (_unit.expired())
+            continue;
         auto unit = _unit.lock();
         const float& r = unit->Unit_Collision_Radius;
         const float r2 = 0; // extra collision distance
@@ -374,6 +397,8 @@ std::vector<std::shared_ptr<Collidable>> UnitManager::FindObjects(olc::vf2d pos,
     testobjects.clear();
     auto& engine = Game_Engine::Current();
     for (auto& _unit : unitList) {
+        if (_unit.expired())
+            continue;
         auto unit = _unit.lock();        
         if ((unit->Position - pos).mag2() < (SearchRadius*SearchRadius)) {
              testobjects.push_back(unit);
@@ -411,6 +436,8 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestObject(olc::vf2d pos, floa
     testobjects.clear();
     for (auto& _unit : unitList) {
         //if(_unit == this)
+        if (_unit.expired())
+            continue;
 
         auto unit = _unit.lock();
         if ((unit->Position - pos).mag2() < (SearchRadius * SearchRadius) && unit->fHealth > 0.f) {
@@ -445,8 +472,11 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestObject(olc::vf2d pos, floa
 
 std::shared_ptr<Unit> UnitManager::This_shared_pointer(olc::vf2d pos) {
     std::shared_ptr<Unit> thisUnit;
-    for (auto& _unit : unitList) {        
+    for (auto& _unit : unitList) {  
+        if (_unit.expired())
+            continue;
         auto unit = _unit.lock();
+
         if (unit->Position == pos) {            
             thisUnit = unit;
         }

@@ -7,6 +7,9 @@
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_TransformedView.h"
 #include "sol/sol.hpp"
+
+#include "WorldObject.h"
+#include "WorldObjectManager.h"
 #include "Building.h"
 #include "BuildingManager.h"
 #include "UserInput.h"
@@ -18,8 +21,6 @@
 #include "Map.h"
 #include "HudManager.h"
 #include "TaskManager.h"
-#include "WorldObject.h"
-#include "WorldObjectManager.h"
 #include "Particles.h"
 #include "Projectiles.h"
 #include "Config.h"

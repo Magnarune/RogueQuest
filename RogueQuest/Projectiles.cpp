@@ -32,11 +32,13 @@ void Projectile::loadImage(const std::string& name, size_t tex_id) {
 
 void Projectile::ImportProjectileAssets() {
     loadImage("Arrow", "Assets/Projectiles/Arrows/arrow.png");
+    //loadImage("Error", "Loaded Files");
 
 }
 
-void Projectile::Destroy() 
-{Collidable::Destroy();}
+void Projectile::Destroy() {
+    Collidable::Destroy();
+}
 
 void Projectile::Update(float fElapsedtime) {
 	m_fTimer += fElapsedtime;
@@ -44,11 +46,11 @@ void Projectile::Update(float fElapsedtime) {
 		m_fTimer -= 0.1f;
 	//	++curFrame %= textureMetadata[Graphic_State].ani_len;
 	}
-    if ((Target.value() - Position).mag2() < 64) {
+    if ((cTarget->Position - Position).mag2() < 64) {
         Destroy();
     }
 
-    direction = (Target.value() - Position).norm();
+    direction = (cTarget->Position - Position).norm();
     Velocity = direction * Arrowspeed;
     Collidable::Update(fElapsedtime);
 }
@@ -58,5 +60,5 @@ void Projectile::Draw(olc::TileTransformedView* gfx) {
 	auto& engine = Game_Engine::Current();
     float angle = std::fmod(2.0f * PI + Velocity.polar().y, 2.0f * PI);
 
-    gfx->DrawPartialRotatedDecal(Position, Pdecals["Arrow"].get(),angle, { 8.5f, 68.5f }, { 0.f,0.f }, {17.f,137.f}, {0.5f,0.5f});
+    gfx->DrawPartialRotatedDecal(Position, engine.projectiles->Pdecals["Arrow"].get(), angle+ PI / 2.f, { 8.5f, 68.5f }, { 0.f,0.f }, {17.f,137.f}, {0.1f,0.1f});
 }
