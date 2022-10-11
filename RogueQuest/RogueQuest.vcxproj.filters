@@ -210,4 +210,7 @@
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Assets\Projectiles\Arrows\arrow.lua" />
+  </ItemGroup>
 </Project>

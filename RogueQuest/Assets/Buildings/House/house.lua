@@ -1,6 +1,6 @@
 return 
 {
-	Name = "House", -- used for Engine::GenerateUnit()
+	Name = "House", -- used for Engine::GenerateBuilding()
 	Icon = {
 		FileName = "Assets/Buildings/House/House_Icon.png",
 		size = {32,32},

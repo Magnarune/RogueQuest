@@ -15,7 +15,7 @@ class Building: public Collidable {
 public:
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
 	void ProduceUnit(const std::string& unit);
-	void SentUnitlocation(olc::vf2d Mouse);
+	void SentUnitlocation(olc::vf2d pos);
 	void SendUnit(std::shared_ptr<Unit> unit);
 	void BuildingBehaviour();
 	void Draw(olc::TileTransformedView* gfx) override;

@@ -165,12 +165,68 @@ void cAssets::LoadBuildingAssets() {
             buildingType.lua_data = std::move(BuildingData);
 
             buildCache.insert_or_assign(name, std::move(buildingType));
-        }
-        catch (std::exception e) {
+        } catch (std::exception e) {
             std::cerr << e.what() << "\n";
         }
     }
 
+}
+
+/* Working On Loading Projectile Assets */
+
+void cAssets::LoadProjectileAssets() {
+    sol::table ProjectileData, FileSets;
+
+    auto to_vi2d = [](sol::table obj) -> olc::vi2d {
+        int32_t x = obj[1],
+            y = obj[2];
+        return { x, y };
+    };
+    const std::vector<std::string> filePaths = { //
+        "Assets/Projectiles/Arrows/arrow.lua"
+    };
+
+    for (const auto& path : filePaths) {
+        try {
+            sol::load_result script = lua_state.load_file(path);
+
+            sol::protected_function_result rcode = script();
+
+            if (!rcode.valid()) {
+                sol::error e = rcode;
+                std::cout << "error: " << e.what() << "\n";
+            }
+            else {
+                ProjectileData = rcode;
+            }
+
+            std::string name = ProjectileData["Name"];
+
+            ProjectileType::TextureMetaData meta;
+
+            ProjectileType projectileType;
+
+            FileSets = ProjectileData["Files"];
+            for (int i = 0; i < FileSets.size(); ++i) {
+                sol::table fileset = FileSets[i + 1];
+                // load the Name : TextureID for the Projectile
+                std::string name = fileset["Name"];
+
+                std::string path = fileset["FileName"];
+                meta.tex_id = TextureCache::GetCache().CreateTexture(path);
+                meta.target_size = to_vi2d(fileset["TargetSize"]);
+                meta.scale = olc::vf2d(meta.target_size);
+
+                projectileType.texture_metadata.insert_or_assign(name, std::move(meta));
+            }
+
+            projectileType.lua_data = std::move(ProjectileData);
+
+            projCache.insert_or_assign(name, std::move(projectileType));
+        } catch (std::exception e) {
+            std::cerr << e.what() << "\n";
+        }
+    }
 }
 
 bool cAssets::ImportCursor(const std::string& name, const std::string& path, const olc::vf2d& size) {
