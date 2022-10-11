@@ -151,7 +151,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
         if (engine.config->GetValue<bool>("Evil") == true) unit->bFriendly = false;
 
     unit->SetMask(Collidable::Mask(unit->Unit_Collision_Radius));
-    unit->cType = unit->isUnit;
+    unit->cType = Collidable::isUnit;
     objectList.emplace_back(unit);
     engine.unitManager->addNewUnit(unit);
     return unit;
@@ -204,19 +204,51 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
         build->textureMetadata.insert_or_assign(state, meta);
     }
     build->SetMask(Collidable::Mask(olc::vf2d(build->Size)));
-    build->cType = build->isBuilding;
+    build->cType = Collidable::isBuilding;
     objectList.emplace_back(build);
     engine.buildingManager->addNewBuilding(build);
     return build;    
 }
 
 
-std::shared_ptr<Projectile> WorldManager::GenerateProjectile(olc::vf2d start, olc::vf2d Target) {
+std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& name, olc::vf2d pos, olc::vf2d Target) {
+    Game_Engine& engine = Game_Engine::Current();
+    auto to_vi2d = [](sol::table obj) -> olc::vi2d {
+        int32_t x = obj[1],
+            y = obj[2];
+        return { x, y };
+    };
+    if (!engine.assetManager->ProjectileExists(name)) return nullptr;
+    const auto& data = engine.assetManager->GetProjectileData(name);
+    // make projectile
     std::shared_ptr<Projectile> proj;
     proj.reset(new Projectile());
-    proj->Position = start; proj->Target = Target;
-    proj->Damage; proj->Velocity;
 
+    proj->predPosition = proj->Position = pos;
+    proj->TargetPos = Target;
+    proj->Damage = data.lua_data["Stats"]["Damage"];
+    proj->Speed = data.lua_data["Stats"]["Speed"];
+
+    // TO DO: implement this part properly
+    /*
+    // make sure to update this when adding new GFXStates - enums don't magically connect to a string
+    static std::map<std::string, Building::GFXState> States = {
+        {"Normal", Projectile::Normal},
+    };
+    */
+
+    // create decals for each texture state
+    for (auto& [name, meta] : data.texture_metadata) {
+        // const Building::GFXState& state = States[name]; // local state ref
+        // load a decal texture and add to decal map
+        std::unique_ptr<olc::Decal> decal;
+        decal.reset(new olc::Decal(TextureCache::GetCache().GetTexture(meta.tex_id)));
+        proj->decals.insert_or_assign(name, std::move(decal)); // TO DO: Use a graphic state
+        // copy texture metadata
+        proj->textureMetadata.insert_or_assign(name, meta);
+    }
+    //proj->SetMask(Collidable::Mask(olc::vf2d(proj->Size))); // TO DO: Figure out what the mask will be / and how to implement it
+    proj->cType = Collidable::isProjectile;
     objectList.emplace_back(proj);
     return proj;
 }

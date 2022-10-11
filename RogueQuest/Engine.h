@@ -82,7 +82,7 @@ public:
 	std::unique_ptr<Options> optionsManager;
 	std::unique_ptr<UserInput> userinputs;
 	std::unique_ptr<UserInputManager> inputmanager;
-	std::unique_ptr<Projectile> projectiles;
+
 	bool ActivityDone;
 	struct Player{
 		olc::vf2d vPOS;

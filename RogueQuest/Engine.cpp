@@ -72,14 +72,14 @@ bool Game_Engine::OnUserCreate() {
     userinputs.reset(new UserInput); //Create user options    
     inputmanager.reset(new UserInputManager);
     particles.reset(new Particles);
-    projectiles.reset(new Projectile);
+
     // Configure Controllers
     assetManager->LoadUnitAssets();     // Load all the Lua files
     assetManager->LoadBuildingAssets(); // Load all the Buildings files
+    assetManager->LoadProjectileAssets(); // Load all Projectile files
     assetManager->LoadCursorAssets();   // Load all the Cursors files
     worldManager->ImportMapData();      // Load all the Lua Map files
     hud->ImportHudAssets();      // Load all the Hud files
-    projectiles->ImportProjectileAssets();
 
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
@@ -126,8 +126,8 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     if(!IsConsoleShowing()){
         unitManager->Update(fElapsedTime);
         worldManager->Update(fElapsedTime);
-        hud->Update(fElapsedTime); // hud update should be last for game updates (I think)
         particles->UpdateParticles(fElapsedTime);
+        hud->Update(fElapsedTime); // hud update should be last for game updates (I think)
     }
     // GC
     worldManager->CollectGarbage();
@@ -184,7 +184,6 @@ bool Game_Engine::OnUserDestroy(){
     inputmanager.reset();
     TextureCache::FreeCache();
     particles.reset();
-    projectiles.reset();
     return true;
 }
 

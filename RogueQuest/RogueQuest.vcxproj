@@ -239,6 +239,9 @@
     <None Include="Assets\Units\Spider\Spider.lua" />
     <None Include="Config.lua" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Assets\Projectiles\Arrows\arrow.lua" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

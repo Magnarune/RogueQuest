@@ -193,7 +193,7 @@ void Unit::PerformAttack() {
 	
 	if (targetUnit) {
 		if (bIsRanged) {
-			engine.worldManager->GenerateProjectile(Position, targetUnit->Position);
+			engine.worldManager->GenerateProjectile("Arrow", Position, targetUnit->Position);
 		}
 		targetUnit->fHealth -= fAttackDamage;
 		engine.particles->CreateParticles(targetUnit->Position);//Blood

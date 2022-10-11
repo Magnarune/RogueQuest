@@ -7,6 +7,7 @@
 #include <exception>
 #include <map>
 #include <vector>
+#include <string>
 #include <assert.h>
 #include "olcPixelGameEngine.h"
 #include "sol/sol.hpp"
@@ -33,6 +34,7 @@ public:
             size_t tex_id;
         } head;
     };
+
     struct BuildingType {
         struct LevelOffset {
             olc::vi2d offset;
@@ -54,6 +56,16 @@ public:
         } icon;
     };
 
+    struct ProjectileType {
+        struct TextureMetaData {
+            size_t tex_id;
+            olc::vi2d target_size;
+            olc::vf2d scale;
+        };
+        std::map<std::string, TextureMetaData> texture_metadata;
+        sol::table lua_data;
+    };
+
 
     struct Cursor {
 		std::unique_ptr<olc::Decal> decal;
@@ -65,6 +77,7 @@ private:
     //Unit name, Unit data
     std::map<std::string, UnitType> unitCache;
     std::map<std::string, BuildingType> buildCache;
+    std::map<std::string, ProjectileType> projCache;
 	
     std::map<std::string, Cursor> assetCursorCache;
 
@@ -79,9 +92,14 @@ public:
 
     inline bool UnitExists(const std::string& name) { return !!unitCache.count(name); }
     inline const UnitType& GetUnitData(const std::string& name) { return unitCache[name]; }
+    
+    inline bool ProjectileExists(const std::string& name) { return !!projCache.count(name); }
+    inline const ProjectileType& GetProjectileData(const std::string& name) { return projCache[name]; }
+
     void LoadUnitAssets();
     void LoadBuildingAssets();
-  
+    void LoadProjectileAssets();
+
     inline Cursor* GetCursor(const std::string& name) { return assetCursorCache.count(name) ? &(assetCursorCache[name]) : nullptr; }
 	bool ImportCursor(const std::string& name, const std::string& path, const olc::vf2d& size = {16.f, 16.f});
     void LoadCursorAssets();

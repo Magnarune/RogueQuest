@@ -1,29 +1,33 @@
 #pragma once
 
-#include "Unit.h"
+#include "Assets.h"
 #include "WorldObject.h"
-#include "WorldObjectManager.h"
 #include <queue>
 
 class Projectile : public Collidable
 {
-	float PI = 3.14159265358f;
-	void loadImage(const std::string& name, const std::string& path);
-	void loadImage(const std::string& name, size_t tex_id);
-	std::map<std::string, std::unique_ptr<olc::Decal>> Pdecals;
-public:
 	Projectile();
-	void ImportProjectileAssets();
+	static inline const float PI = 3.14159265358f;
+public:
+	virtual ~Projectile();
+
 	void Destroy() override;
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override { return false; };
 	void Update(float fElapsedtime) override;
 	void Draw(olc::TileTransformedView* gfx) override;
-virtual ~Projectile();
-olc::vf2d direction;
+	olc::vf2d direction;
+	olc::vf2d TargetPos;
+
 	float Damage; //Damage of projectile
+	float Speed; //Speed of projectile
+
 	bool Spinning;
 	bool Traveling;
-	float Arrowspeed = 20.f;
+	std::string projType = "Normal"; // TO DO: Change to enum and load accordingly - OR remove altogether if deemed unecessary
+
+private:
+	std::map<std::string, std::unique_ptr<olc::Decal>> decals; // multiple textures for different states
+	std::map<std::string, cAssets::ProjectileType::TextureMetaData> textureMetadata;
 
 	friend class WorldManager;
 	friend class TaskManager;

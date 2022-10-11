@@ -100,6 +100,8 @@ public:
 	int	SOSouth = 2;
 	int	SOEast = 3;	
 	std::vector<int> Direction;//Sprite order direction
+
+	std::optional<olc::vf2d>Target {}; // position for unit to move to I assume? This is where this belongs
 	
 	enum UnitLogic {
 		Aggressive, //If you say attack a pos Search and Kill anything within agro-range

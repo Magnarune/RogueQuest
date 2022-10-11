@@ -43,6 +43,10 @@ void Building::ProduceUnit(const std::string& unitName) {
 	}
 }
 
+void Building::SentUnitlocation(olc::vf2d pos) {
+
+}
+
 void Building::SendUnit(std::shared_ptr<Unit> unit) {
 	auto& engine = Game_Engine::Current();
 	if (sentUnitPos.mag2() > 0.f) {
