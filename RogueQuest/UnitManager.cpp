@@ -25,6 +25,7 @@ UnitManager::UnitManager() {
             unit->ActionZone.x = 8.f;
             unit->ActionZone.y = 8.f;
             //unit->Distance = target - unit->Position;
+            unit->Graphic_State = unit->Walking;
             unit->Target = target;
             return true;
         },
@@ -57,7 +58,7 @@ UnitManager::UnitManager() {
          [&](std::shared_ptr<TaskManager::Task> task) -> bool {
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
-             engine.worldManager->GenerateBuilding(unit->buildName, unit->Target.value() - unit->buildingSize / 2.f);
+             engine.worldManager->GenerateBuilding(unit->buildName,unit->Owner, unit->Target.value() - unit->buildingSize / 2.f);
              return true;
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
@@ -95,7 +96,7 @@ UnitManager::UnitManager() {
              // required
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
-             if (unit->repairedbuilding && unit->repairedbuilding->health > unit->repairedbuilding->maxHealth)
+             if (unit->repairedbuilding && unit->repairedbuilding->Health > unit->repairedbuilding->maxHealth)
                  unit->repairedbuilding.reset();
 
              if (!unit->repairedbuilding)
@@ -145,12 +146,12 @@ UnitManager::UnitManager() {
              auto& unit = arguments.first;
              if (!unit->targetBuilding && !unit->targetUnit)
                  return true;
-             if (unit->targetBuilding && unit->targetBuilding->health < 0.f) {
+             if (unit->targetBuilding && unit->targetBuilding->Health < 0.f) {
                  unit->targetBuilding.reset();
                  unit->targetUnit.reset();
                  return true;
              }
-             if (unit->targetUnit && unit->targetUnit->fHealth < 0.f) {
+             if (unit->targetUnit && unit->targetUnit->Health < 0.f) {
                  unit->targetUnit.reset();
                  unit->targetBuilding.reset();                 
                  return true;
@@ -172,7 +173,7 @@ void UnitManager::Update(float delta) {
 
 // GC do not touch Magnarune ill explain later... ||
 void UnitManager::CollectGarbage() {//edited    
-    //for (int i = 0; i < unitList.size(); i++) {
+
     std::erase_if(unitList, [](const auto& unit) {return unit.expired(); });
   /*  std::vector<std::weak_ptr<Unit>> Newlist;
     for (auto& unit : unitList) {
@@ -430,28 +431,52 @@ void UnitManager::ParseObjects(std::vector<std::shared_ptr<Collidable>> objects,
     }
 }
 
-std::shared_ptr<Collidable> UnitManager::SearchClosestObject(olc::vf2d pos, float SearchRadius) {
+std::shared_ptr<Collidable> UnitManager::SearchClosestEnemy(int owner,olc::vf2d pos, float SearchRadius) {
     auto& engine = Game_Engine::Current();
     float Smallest = SearchRadius * SearchRadius;  
     testobjects.clear();
-    for (auto& _unit : unitList) {
-        //if(_unit == this)
+
+    for (auto& _unit : unitList) {       
         if (_unit.expired())
             continue;
-
         auto unit = _unit.lock();
-        if ((unit->Position - pos).mag2() < (SearchRadius * SearchRadius) && unit->fHealth > 0.f) {
+        if ((unit->Position - pos).mag2() < (SearchRadius * SearchRadius) && unit->Health > 0.f ) {
             if ((unit->Position - pos).mag2() < 0.2f) continue;
-            else
-                testobjects.push_back(unit);
+            else {
+                if (owner == 0) {
+                    if(unit->Owner != 0)
+                        testobjects.push_back(unit);
+                    continue;
+                }
+                else {
+
+                    for (int i = 0; i < unit->FriendList.size(); i++) {
+                        if (unit->FriendList[i] == owner || unit->Owner == 0)
+                            if (abs(unit->FriendList[i]) + unit->FriendList[i] == 0)
+                                testobjects.push_back(unit);
+
+                    }
+                }
+            }
+         
         }
     }
     for (auto& _build : engine.buildingManager->BuildingList) {
+        if (_build.expired())
+            continue;
         auto build = _build.lock();
-        if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x) && build->health > 0.f) {
-            testobjects.push_back(build);
+        if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x) && build->Health > 0.f) {
+            if ((build->Position - pos).mag2() < 0.2f) continue;
+            else {
+                for (int i = 0; i < build->FriendList.size(); i++) {
+                    if (build->FriendList[i] == owner)
+                        if (abs(build->FriendList[i]) + build->FriendList[i] == 0)
+                            testobjects.push_back(build);
+                }
+            }
         }
     }
+
     if (testobjects.size()) {
         std::shared_ptr<Collidable> closest;
         closest = testobjects[0];

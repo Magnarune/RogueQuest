@@ -340,6 +340,7 @@ public:
 	void SelectUnit(olc::vf2d Mouse);
     void SelectUnits(olc::vf2d Initial, olc::vf2d Final);
 	//prob a better way
+
 	std::shared_ptr<Collidable> FindObject(olc::vf2d Mouse);
 	void ParseObject(std::shared_ptr<Collidable> object, std::shared_ptr<Building>& build, std::shared_ptr<Unit>& unit );
 	
@@ -348,7 +349,8 @@ public:
 	std::vector<std::shared_ptr<Collidable>> FindObjects(olc::vf2d pos,float Radius);
 	void ParseObjects(std::vector<std::shared_ptr<Collidable>> object, std::queue<std::weak_ptr<Building>>& build, std::queue<std::weak_ptr<Unit>>& unit);
 
-	std::shared_ptr<Collidable> SearchClosestObject(olc::vf2d pos, float Radius);
+	std::shared_ptr<Collidable> SearchClosestEnemy(int owner,olc::vf2d pos, float Radius);
+
 	void ParseSearch(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& build, std::weak_ptr<Unit>& unit);
 
 	void DeselectUnits();

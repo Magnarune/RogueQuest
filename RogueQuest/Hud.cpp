@@ -129,15 +129,14 @@ void Hud::DrawHud(){
 
 
     //Options Icon top left
-    if (engine.GetMousePos().x < 79.5 && engine.GetMousePos().y < 13) {
-        engine.DrawPartialDecal({ 1.f,0.f }, { 79.5,13 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
+    if (engine.GetMousePos().x < 55.5 && engine.GetMousePos().y < 10) {
+        engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
         if (engine.GetMouse(0).bPressed)
             engine.m_nGameMode = engine.MODE_OPTIONS_MENU;
     } else {
-        engine.DrawPartialDecal({ 1.f,0.f }, { 79.5,13 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
+        engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
     }
-    engine.DrawStringDecal({ 13.f,4.f }, "Options Menu", olc::WHITE, { 0.5,0.5 });
-    engine.DrawPartialDecal({ 0.f,0.f }, { 5.f,5.f }, decals["Gui"].get(), engine.GetLocked() ? olc::vf2d(21.f,53.f) : olc::vf2d(21.f,17.f), { 17.f, 17.f });
+    engine.DrawStringDecal({ 9.f,3.f }, "Options", olc::WHITE, { 0.5,0.5 });
     //
 
     
@@ -152,6 +151,29 @@ void Hud::DrawHud(){
    
     if (BuildMode)
         DrawBuild();
+}
+
+void Hud::DrawLeaderHud() {
+    auto& engine = Game_Engine::Current();
+    
+    float SWitdh = (float)engine.ScreenWidth();
+
+    
+    engine.DrawPartialDecal({ 0.f,0.f }, olc::vf2d({ SWitdh, 10.f }), decals["Background"].get(), { 0.f,0.f }, { 512.f,40.f });
+
+    engine.DrawPartialDecal({ SWitdh / 1.5f + 2.f, 1.f }, olc::vf2d({ 13.f, 9.f }), decals["mBox"].get(), { 0.f,0.f }, { 104.f,104.f });
+    engine.DrawPartialDecal({ SWitdh / 1.5f + 22.f, 1.f }, olc::vf2d({ 13.f, 9.f }), decals["mBox"].get(), { 0.f,0.f }, { 104.f,104.f });
+    engine.DrawPartialDecal({ SWitdh / 1.5f + 37.f, 1.f }, olc::vf2d({ 13.f, 9.f }), decals["mBox"].get(), { 0.f,0.f }, { 104.f,104.f });
+    
+    engine.DrawPartialDecal({ SWitdh / 1.5f + 2.f, 0.5f }, olc::vf2d({  13.f, 10.f }), decals["HealthBoxBackground"].get(), { 0.f,0.f }, { 128.f,32.f });
+    engine.DrawPartialDecal({ SWitdh / 1.5f + 22.f, 0.5f }, olc::vf2d({ 13.f, 10.f }), decals["HealthBoxBackground"].get(), { 0.f,0.f }, { 128.f,32.f });
+    engine.DrawPartialDecal({ SWitdh / 1.5f + 37.f, 0.5f }, olc::vf2d({ 13.f, 10.f }), decals["HealthBoxBackground"].get(), { 0.f,0.f }, { 128.f,32.f });
+
+    engine.DrawStringDecal(olc::vf2d({ SWitdh / 1.5f + 10, 4.f }), std::to_string(engine.leaders->LeaderList[1]->Gold), olc::YELLOW, {0.4,0.4});
+    engine.DrawStringDecal(olc::vf2d({ SWitdh / 1.5f + 28.f, 4.f }), std::to_string(engine.leaders->LeaderList[1]->Lumber), olc::GREEN, { 0.4,0.4 });
+    engine.DrawStringDecal(olc::vf2d({ SWitdh / 1.5f + 44.f, 4.f }), std::to_string(engine.leaders->LeaderList[1]->Food ),olc::CYAN, { 0.4,0.4 });
+
+
 }
 
 void Hud::CalculateMiniMap(int x, int y, const Map &cur_map) {

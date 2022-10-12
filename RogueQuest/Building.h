@@ -42,9 +42,11 @@ public:
 	std::vector<std::string> unitproduction;
 	//       stage  offset
 	std::string curStage = "Construction"; // current stage - oof good luck with this
+
+	int Owner;
+	std::vector<int> FriendList;
 	
-	bool bSelected;
-	float health;
+	bool bSelected;	
 	float maxHealth;
 	int Stage;//What stage is this in? lvl 1 house lvl 2 house etc
 	int hurtstage;//if hurt show burning flames effects	

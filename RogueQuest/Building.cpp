@@ -41,7 +41,7 @@ void Building::ProduceUnit(const std::string& unitName) {
 		
 		 
 
-		SendUnit(engine.worldManager->GenerateUnit(unitName, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
+		SendUnit(engine.worldManager->GenerateUnit(unitName,Owner, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
 		building = false;
 		startbuilding = false;
 	}
@@ -71,7 +71,7 @@ void Building::Update(float delta){
 		ProduceUnit(unitproduced);
 		m_fTimer += delta;
 	}
-	if(health < 0)
+	if(Health < 0)
 		Collidable::Destroy();
 
 	Collidable::Update(delta); // Inherit

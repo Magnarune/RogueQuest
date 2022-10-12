@@ -51,13 +51,15 @@ public:
 	void ImportMapData();
 	bool ChangeMap(const std::string& name);
 
+	std::vector<int> InitializeObject(int owner);
+
 	inline const Map& curMap() { assert(currentMap.get() != nullptr); return *currentMap; } // do not store
 
-	std::shared_ptr<Unit> GenerateUnit(const std::string& name, olc::vf2d pos={0.f, 0.f});
+	std::shared_ptr<Unit> GenerateUnit(const std::string& name,  int owner,olc::vf2d pos={0.f, 0.f});
 
-	std::shared_ptr<Building> GenerateBuilding(const std::string& name, olc::vf2d pos = { 0.f,0.f });
+	std::shared_ptr<Building> GenerateBuilding(const std::string& name, int owner, olc::vf2d pos = { 0.f,0.f });
 
-    std::shared_ptr<Projectile> GenerateProjectile(olc::vf2d pos, olc::vf2d trgt);
+	std::shared_ptr<Projectile> GenerateProjectile(const std::string& name, olc::vf2d pos, std::weak_ptr<WorldObject> trgt);
 	
 	friend class WorldObject;
 	friend class Unit;

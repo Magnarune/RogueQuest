@@ -4,7 +4,7 @@
 
 
 Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
-	 fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0), currentTask(HoldTask){
+	 fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0){
 }
 
 Unit::~Unit() {
@@ -43,15 +43,14 @@ void Unit::UnitBehaviour() {
 	case Passive:
 		break;
 	case Neutral:
-		if (fHealth < prevHealth) {
+		if (Health < prevHealth) {
 			ULogic = Aggressive;
 		}
-		prevHealth = fHealth;
+		prevHealth = Health;
 		break;
 	case Aggressive:
 		if(targetBuilding || targetUnit && !Taskpaused){
 			HoldTask = currentTask;//Stop and hunt
-
 			currentTask = engine.unitManager->taskMgr.PrepareTask("Hunting", std::pair<std::shared_ptr<Unit>, std::any>
 						{engine.unitManager->This_shared_pointer(Position), std::pair<std::shared_ptr<Building>, std::shared_ptr<Unit>> {targetBuilding, targetUnit} });
 			currentTask->initTask();
@@ -87,7 +86,7 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 
 void Unit::KnockBack(float damage, olc::vf2d velocity) {
 	HitVelocity += velocity;
-	fHealth -= damage;
+	Health -= damage;
 }
 
 void Unit::Destroy() {
@@ -106,12 +105,13 @@ void Unit::Update(float delta) {
 	}
 	UnitBehaviour();
 
-	if(currentTask && currentTask->checkCompleted() || fHealth < 0){
+	if(currentTask && currentTask->checkCompleted() || Health < 0){
 		//std::shared_ptr<TaskManager::Task> trash;
 		currentTask.reset();//swap(trash);
 		if (Taskpaused == true) {			
-			if (!HoldTask) {
+			if (HoldTask) {
 				currentTask = HoldTask;
+				currentTask->initTask();
 				//std::shared_ptr<TaskManager::Task> trashHold;
 				HoldTask.reset();//swap(trashHold);
 			}
@@ -146,8 +146,8 @@ void Unit::TrytoBuild(const std::string& name,const olc::vf2d& target) {
 
 void Unit::RepairBuilding() {
 	if (repairedbuilding) {
-		repairedbuilding->health += 0.1f;
-		if (repairedbuilding->curStage == "Construction" && repairedbuilding->health >= repairedbuilding->maxHealth) {
+		repairedbuilding->Health += 0.1f;
+		if (repairedbuilding->curStage == "Construction" && repairedbuilding->Health >= repairedbuilding->maxHealth) {
 			repairedbuilding->curStage = "Level one";
 			repairedbuilding.reset();
 
@@ -163,14 +163,14 @@ void Unit::AfterUpdate(float delta) {
 
 void Unit::UnitSearch() {//Target = unit/build.front()
 	auto& engine = Game_Engine::Current();
-	engine.unitManager->ParseObject(engine.unitManager->SearchClosestObject(Position, AgroRange), targetBuilding, targetUnit);
+	engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner,Position, AgroRange), targetBuilding, targetUnit);
 	if (targetBuilding || targetUnit) {
-		if (targetBuilding && !targetBuilding->bFriendly) {
+		if (targetBuilding) {
 			Target = targetBuilding->Position;
 			targetUnit.reset();
 		}
 		else {
-			if(!targetUnit->bFriendly)
+
 			Target = targetUnit->Position;
 			targetBuilding.reset();
 		}		
@@ -193,14 +193,16 @@ void Unit::PerformAttack() {
 	
 	if (targetUnit) {
 		if (bIsRanged) {
-			engine.worldManager->GenerateProjectile(Position, targetUnit->Position);
+			engine.worldManager->GenerateProjectile("ThrowingAxe", Position, targetUnit);
 		}
-		targetUnit->fHealth -= fAttackDamage;
-		engine.particles->CreateParticles(targetUnit->Position);//Blood
+		else {
+			targetUnit->Health -= fAttackDamage;
+			engine.particles->CreateParticles(targetUnit->Position);//Blood
+		}
 		//knockback here
 	}
 	else if (targetBuilding) {
-		targetBuilding->health -= fAttackDamage;
+		targetBuilding->Health -= fAttackDamage;
 	}	
 	fAttackCD = fSpellCooldown; // reset time for next attack
 }
@@ -246,7 +248,7 @@ if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len 
 	if (targetUnit && Velocity.mag2() < 0.1f * 0.1f)
 		bAnimating = true;
 
-	if (fHealth <= 0)
+	if (Health <= 0)
 		Graphic_State = Dead;
 
 	

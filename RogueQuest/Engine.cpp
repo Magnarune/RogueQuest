@@ -72,7 +72,8 @@ bool Game_Engine::OnUserCreate() {
     userinputs.reset(new UserInput); //Create user options    
     inputmanager.reset(new UserInputManager);
     particles.reset(new Particles);
-    projectiles.reset(new Projectile);
+    leaders.reset(new LeaderManager); //Handler for the Leaders in the game
+    
     // Configure Controllers
     assetManager->LoadUnitAssets();     // Load all the Lua files
     assetManager->LoadBuildingAssets(); // Load all the Buildings files
@@ -88,8 +89,10 @@ bool Game_Engine::OnUserCreate() {
     SetPixelMode(olc::Pixel::ALPHA);
     ConsoleCaptureStdOut(true);     
     Clear(olc::Pixel(100,164,44,255));
+    optionsManager->SetGuiMenu("MainMenu");
+    ShowSystemCursor(false); 
 
-    ShowSystemCursor(false); // will this work? let's try and fine out????????
+    leaders->AddLeader(5);
 
     curCursor = assetManager->GetCursor("default");
     SetLocked(true);
@@ -135,7 +138,9 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     worldManager->Draw();
     
     userinputs->DrawUserInput();
+    hud->DrawLeaderHud();
     hud->DrawHud();
+    
     hud->DrawMiniMap();
 
     return true;
@@ -184,6 +189,7 @@ bool Game_Engine::OnUserDestroy(){
     inputmanager.reset();
     TextureCache::FreeCache();
     particles.reset();
+    leaders.reset();
     return true;
 }
 
@@ -194,18 +200,19 @@ const std::map<std::string, CommandFunction> commands = {
             auto& engine = Game_Engine::Current();
             
             std::string name;
-            float x {}, y {}, count = 1;
+            float x {}, y {}, count = 1 , owner = 1;
             ss >> name;
             if(!ss.eof()) ss >> x;
             if(!ss.eof()) ss >> y;
             if(!ss.eof()) ss >> count;
-            for (int i = 0; i < count; i++){
-                auto unit = engine.worldManager->GenerateUnit(name, {x*32 + 15*i, y*32 + i});
-                if (unit) {
-                    unit->bFriendly = true;
-                    if ( unit->sUnitName == "Goblin" || unit->sUnitName == "Imp")
-                        if(engine.config->GetValue<bool>("Evil") == true)unit->bFriendly = false;
-                    std::cout << name << " created at " << x << ", " << y << "\n";
+            if (!ss.eof()) ss >> owner;
+            if (owner < engine.leaders->LeaderList.size()) {
+                for (int i = 0; i < count; i++) {
+                    auto unit = engine.worldManager->GenerateUnit(name, owner, { x * 32 + 15 * i, y * 32 + i });
+                    if (unit) {
+
+                        std::cout << name << " created at " << x << ", " << y << "\n";
+                    }
                 }
             }
         }
@@ -246,9 +253,8 @@ const std::map<std::string, CommandFunction> commands = {
         for(size_t i=0; i < engine.unitManager->GetUnitCount(name); ++i){
             auto unit = engine.unitManager->GetUnit(name, i);
             if(unit) {
-                unit->fHealth -= 1000.f;
-                engine.particles->CreateParticles(unit->Position);
-                // unit->Destroy();
+                unit->Health -= 1000.f;
+                engine.particles->CreateParticles(unit->Position);            
                 std::cout << name << " #" << i << " destroyed\n";
             }
         }
@@ -294,7 +300,7 @@ const std::map<std::string, CommandFunction> commands = {
         if (!ss.eof()) ss >> x;
         if (!ss.eof()) ss >> y;
 
-        if (engine.worldManager->GenerateBuilding(name, {x*32.f,y*32.f})) {
+        if (engine.worldManager->GenerateBuilding(name,1, {x*32.f,y*32.f})) {
             std::cout << "Building Made\n";
         }
     }},

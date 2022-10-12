@@ -38,6 +38,7 @@ public:
 	const cAssets::UnitType& unitType; // internal unit type reference
 
 	//Testing Some Build Logic Gates
+	
 	olc::vf2d buildlocation;//Where is the building going to be made
 	olc::vf2d buildingSize; //Size of Building | Given by construct
 	std::string buildName; //Name of what Im building
@@ -46,18 +47,27 @@ public:
 	std::shared_ptr<Building> targetBuilding;//parsing pointer
 	std::shared_ptr<Unit> targetUnit;//parsing pointer
 	std::queue<std::shared_ptr<TaskManager::Task>> taskQueue; // queue of tasks
-	std::shared_ptr<TaskManager::Task> &currentTask; // current task
+	std::shared_ptr<TaskManager::Task> currentTask; // current task
 	std::weak_ptr<TaskManager::Task> trashtask;
-	bool Taskpaused;
 	std::shared_ptr<TaskManager::Task> HoldTask;
+	bool Taskpaused;
 	
+
+
 	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both
 	//End of Testing
 	// Data
 	Clock execTimeout; //Delay In unit thinking time
 	std::string sUnitName; //Name
 	bool bFriendly;		//Will i attack the Player?
-	bool bOwnership;	//Does the player own me
+
+	// Who Owns me,   Who are my friends;
+
+	int Owner;
+	 std::vector<int> FriendList;
+	 //These could be a map? maybe that is wasteful
+
+
 	bool bSelected;		//Did the player select me?
 	bool bIsRanged;		// Am i Ranged?
 	bool bIsAttackable; //Can you Attack me
@@ -75,8 +85,7 @@ public:
 	// Parameters
 	float Unit_Collision_Radius;//How big is my collision circle?
 
-	// Stats
-	float fHealth;		 // How much health do i have?
+	// Stats	
 	float fMaxHealth;	 // Whats my max health?
 	float fMana;		 // mana
 	float fMaxMana;		 // maximum mana

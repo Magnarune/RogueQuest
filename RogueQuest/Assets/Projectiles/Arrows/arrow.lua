@@ -15,7 +15,8 @@ return
 	},
 	Stats =
 	{
-		Damage = 0,
-		Speed = 1
+		Spin = false,
+		Damage = 5,
+		Speed = 60
 	},
 }

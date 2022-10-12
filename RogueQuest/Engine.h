@@ -26,6 +26,8 @@
 #include "Config.h"
 #include "Options.h"
 #include "clock.h"
+#include "Leaders.h"
+#include "LeaderManager.h"
 
 
 extern std::string StringifyObject(sol::object val);
@@ -83,13 +85,14 @@ public:
 	std::unique_ptr<Options> optionsManager;
 	std::unique_ptr<UserInput> userinputs;
 	std::unique_ptr<UserInputManager> inputmanager;
+	std::unique_ptr<LeaderManager> leaders;
 
 	bool ActivityDone;
-	struct Player{
+	struct Cam{
 		olc::vf2d vPOS;
 		olc::vf2d vVel;		
 	};
-	Player Camera;
+	Cam Camera;
 	std::weak_ptr<Unit> followUnit;
 
 	inline void ChangeCursor(const std::string& name) { auto c = assetManager->GetCursor(name); curCursor = c == nullptr ? curCursor : c; }
@@ -100,5 +103,7 @@ public:
 	bool OnConsoleCommand(const std::string& stext) override;
 	friend class Hud;
 	friend class Projectile;
+	friend class Leaders;
+	friend class LeaderManager;
 	
 };

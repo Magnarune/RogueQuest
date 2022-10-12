@@ -111,7 +111,7 @@ bool WorldManager::IterateObjects(std::function<bool(std::shared_ptr<WorldObject
 
 /* Factory Function */
 
-std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::vf2d pos) {
+std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int owner, olc::vf2d pos) {
     Game_Engine& engine = Game_Engine::Current();
 
     if(!engine.assetManager->UnitExists(name)) return nullptr;
@@ -135,7 +135,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     unit->Unit_Collision_Radius = data.lua_data["Parameters"]["CollisionRadius"]; //I'm not in stats section of .lua
     unit->bIsRanged = data.lua_data["Parameters"]["Ranged"];
     // Load Stats
-    unit->fHealth = data.lua_data["Stats"]["Health"]; unit->fMaxHealth = data.lua_data["Stats"]["MaxHealth"];
+    unit->Health = data.lua_data["Stats"]["Health"]; unit->fMaxHealth = data.lua_data["Stats"]["MaxHealth"];
     unit->fMana = data.lua_data["Stats"]["Mana"];     unit->fMaxMana = data.lua_data["Stats"]["MaxMana"];
     unit->fAmmo = data.lua_data["Stats"]["Ammo"];     unit->fMaxAmmo = data.lua_data["Stats"]["MaxAmmo"];
     unit->fMoveSpeed = data.lua_data["Stats"]["MoveSpeed"];
@@ -144,6 +144,8 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     unit->fAttackSpeed = data.lua_data["Stats"]["AttackSpeed"];
     unit->fSpellCooldown = data.lua_data["Stats"]["SpellCooldown"];
     unit->fKnockBackResist = data.lua_data["Stats"]["KnockBackResist"];   
+    unit->Owner = owner;
+    unit->FriendList = InitializeObject(owner);
     
     // make sure to update this when adding new GFXStates - enums don't magically connect to a string
     static std::map<std::string, Unit::GFXState> States = {
@@ -174,7 +176,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, olc::v
     return unit;
 }
 
-std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name, olc::vf2d pos) {
+std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name, int owner,olc::vf2d pos ) {
     Game_Engine& engine = Game_Engine::Current();
     auto to_vi2d = [](sol::table obj) -> olc::vi2d {
         int32_t x = obj[1],
@@ -195,10 +197,12 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
 
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];
-    build->health = 0.1f;    
+    build->Health = 0.1f;    
    // build->health = data.lua_data["Stats"]["Health"];
-    build->health = 0.4f;
+    build->Health = 0.4f;
     build->maxHealth = data.lua_data["Stats"]["MaxHealth"];
+    build->Owner = owner;
+    build->FriendList = InitializeObject(owner);
 
     sol::table UnitProduction = data.lua_data["Production"]["Units"];
     for (int i = 0; i < UnitProduction.size(); i++) {
@@ -227,12 +231,48 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     return build;    
 }
 
-
-std::shared_ptr<Projectile> WorldManager::GenerateProjectile(olc::vf2d start, olc::vf2d Target) {
+std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& name, olc::vf2d pos, std::weak_ptr<WorldObject> Target) {
+    Game_Engine& engine = Game_Engine::Current();
+    auto to_vi2d = [](sol::table obj) -> olc::vi2d {
+        int32_t x = obj[1],
+            y = obj[2];
+        return { x, y };
+    };
+    if (!engine.assetManager->ProjectileExists(name)) return nullptr;
+    const auto& data = engine.assetManager->GetProjectileData(name);
+    // make projectile
     std::shared_ptr<Projectile> proj;
     proj.reset(new Projectile());
-    proj->Position = start; proj->Target = Target;
-    proj->Damage; proj->Velocity;
+    proj->predPosition = proj->Position = pos;
+    proj->TargetPos = Target;
+    proj->Damage = data.lua_data["Stats"]["Damage"];
+    proj->PSpeed = data.lua_data["Stats"]["Speed"];
+    proj->Spinning = data.lua_data["Stats"]["Spin"];
+
+    // TO DO: implement this part properly
+    /*
+    // make sure to update this when adding new GFXStates - enums don't magically connect to a string
+    static std::map<std::string, Building::GFXState> States = {
+        {"Normal", Projectile::Normal},
+    };
+    */
+
+    //if (name == "ThrowingAxe")
+    //    proj->projType = "Axe";
+    
+    // create decals for each texture state
+    for (auto& [name, meta] : data.texture_metadata) {
+        // const Building::GFXState& state = States[name]; // local state ref
+        // load a decal texture and add to decal map
+        proj->projType = name;
+        std::unique_ptr<olc::Decal> decal;
+        decal.reset(new olc::Decal(TextureCache::GetCache().GetTexture(meta.tex_id)));
+        proj->decals.insert_or_assign(name, std::move(decal)); // TO DO: Use a graphic state
+        // copy texture metadata
+        proj->textureMetadata.insert_or_assign(name, meta);
+    }
+    //proj->SetMask(Collidable::Mask(olc::vf2d(proj->Size))); // TO DO: Figure out what the mask will be / and how to implement it
+    proj->cType = Collidable::isProjectile;
 
     objectList.emplace_back(proj);
     return proj;
@@ -259,4 +299,9 @@ bool WorldManager::ChangeMap(const std::string& name) {
     }
     currentMap = *it;
     return true;
+}
+
+std::vector<int> WorldManager::InitializeObject(int owner) {
+    auto& engine = Game_Engine::Current();
+    return engine.leaders->LeaderList[owner]->Allies[owner];
 }

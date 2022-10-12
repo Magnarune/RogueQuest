@@ -20,7 +20,7 @@ public:
 	void CalculateMiniMap(int x, int y, const Map& current_map);
 	void DrawMiniMap();
 	void DrawHud();
-
+	void DrawLeaderHud();
 	void DrawBuild();
 	bool BuildMode;
 	std::string Object;
