@@ -98,10 +98,9 @@ void Unit::Update(float delta) {
 	if(fAttackCD > 0)
 		fAttackCD -= delta;
 	if (ULogic == Aggressive) {
-		//if (execTimeout.getMilliseconds() > 50) {
+		
 		UnitSearch();
-		//	execTimeout.restart();
-	//}
+
 	}
 	UnitBehaviour();
 
@@ -150,14 +149,12 @@ void Unit::RepairBuilding() {
 		if (repairedbuilding->curStage == "Construction" && repairedbuilding->Health >= repairedbuilding->maxHealth) {
 			repairedbuilding->curStage = "Level one";
 			repairedbuilding.reset();
-
 		}
 	}
 }
 
 void Unit::AfterUpdate(float delta) {
 	UnitGraphicUpdate(delta);
-
 	Collidable::AfterUpdate(delta);// inherit
 }
 
@@ -170,7 +167,6 @@ void Unit::UnitSearch() {//Target = unit/build.front()
 			targetUnit.reset();
 		}
 		else {
-
 			Target = targetUnit->Position;
 			targetBuilding.reset();
 		}		

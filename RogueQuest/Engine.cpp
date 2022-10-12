@@ -124,6 +124,7 @@ bool Game_Engine::OnUserUpdate(float fElapsedTime) {
 }
 
 bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
+
     userinputs->GetUserInput();
     // Game Updates
     if(!IsConsoleShowing()){
@@ -142,7 +143,7 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     hud->DrawHud();
     
     hud->DrawMiniMap();
-
+ 
     return true;
 };
 

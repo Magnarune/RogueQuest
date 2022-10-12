@@ -365,5 +365,6 @@ public:
 
     friend class WorldManager;
 	friend class TaskManager;
-
+	friend class LeaderManager;
+	friend class Game_Engine;
 };

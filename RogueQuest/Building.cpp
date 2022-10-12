@@ -37,10 +37,9 @@ void Building::ProduceUnit(const std::string& unitName) {
 	}
 
 	if (m_fTimer > productiontime) {
-		if (!productionQue.empty()) productionQue.pop();
-		
+		if (!productionQue.empty()) productionQue.pop();		
 		 
-
+		
 		SendUnit(engine.worldManager->GenerateUnit(unitName,Owner, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
 		building = false;
 		startbuilding = false;
@@ -54,8 +53,8 @@ void Building::SentUnitlocation(olc::vf2d pos) {
 void Building::SendUnit(std::shared_ptr<Unit> unit) {
 	auto& engine = Game_Engine::Current();
 	if (sentUnitPos.mag2() > 0.f) {
-
 		//unit->Target = sentUnitPos;
+		engine.leaders->Gold(Owner, -unit->cost);
 		unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {sentUnitPos, false} }));
 	}
 }

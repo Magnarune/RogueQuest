@@ -37,6 +37,7 @@ void WorldManager::Draw() {//Draw
         if (object == nullptr) continue;
         object->Draw(&engine.tv);
     }
+    
 }
 
 void WorldManager::DestroyObject(WorldObject* self) {
@@ -134,6 +135,8 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     // Load Parameters
     unit->Unit_Collision_Radius = data.lua_data["Parameters"]["CollisionRadius"]; //I'm not in stats section of .lua
     unit->bIsRanged = data.lua_data["Parameters"]["Ranged"];
+    unit->cost = data.lua_data["Parameters"]["Cost"];
+    unit->food = data.lua_data["Parameters"]["Food"];
     // Load Stats
     unit->Health = data.lua_data["Stats"]["Health"]; unit->fMaxHealth = data.lua_data["Stats"]["MaxHealth"];
     unit->fMana = data.lua_data["Stats"]["Mana"];     unit->fMaxMana = data.lua_data["Stats"]["MaxMana"];

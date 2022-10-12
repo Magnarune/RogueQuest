@@ -42,6 +42,8 @@ return
 		}
 	},
 	Parameters = {
+		Food = 5,
+		Cost = 12,
 		Ranged = false,
 		CollisionRadius = 10,
 		Abilities = {

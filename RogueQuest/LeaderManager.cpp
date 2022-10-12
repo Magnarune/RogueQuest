@@ -64,3 +64,24 @@ void LeaderManager::RemoveEnemy(std::shared_ptr<Leader> lead, int allignment) {
 			i++;
 	}
 }
+
+void LeaderManager::Gold(int owner, int cost) {
+	LeaderList[owner]->Gold += cost;
+}
+
+void LeaderManager::Food(int owner, int cost) {
+	LeaderList[owner]->Food += cost;
+}
+
+void LeaderManager::FoodMaintenance( std::vector<std::weak_ptr<Unit>> unilist) {
+
+
+	for (int i = 0; i < LeaderList.size(); i++) {
+		int fos = 0;
+		for (int j = 0; j < unilist.size(); j++) {
+			if (i == unilist[j].lock()->Owner)
+				fos += unilist[j].lock()->food;
+		}
+		LeaderList[i]->Food = fos;
+	}
+}

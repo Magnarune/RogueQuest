@@ -66,7 +66,8 @@ public:
 	int Owner;
 	 std::vector<int> FriendList;
 	 //These could be a map? maybe that is wasteful
-
+	 int food;
+	 int cost;
 
 	bool bSelected;		//Did the player select me?
 	bool bIsRanged;		// Am i Ranged?
