@@ -165,7 +165,7 @@ void Unit::AfterUpdate(float delta) {
 
 void Unit::UnitSearch() {//Target = unit/build.front()
 	auto& engine = Game_Engine::Current();
-	engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner,Position, AgroRange), targetBuilding, targetUnit);
+	engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner,Position,AgroRange), targetBuilding, targetUnit);
 	if (targetBuilding.lock() || targetUnit.lock()) {
 		if (targetBuilding.lock()) {
 			Target = targetBuilding.lock()->Position + olc::vf2d(targetBuilding.lock()->Size) / 2.f;

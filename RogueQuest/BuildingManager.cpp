@@ -85,7 +85,20 @@ std::shared_ptr<Building> BuildingManager::GetBuilding(size_t index) {
         }
     }
     return nullptr;
-}/*
+}
+
+bool BuildingManager::IterateAllBuildings(std::function<bool(std::shared_ptr<Building>)> cb) {
+    for(auto& build : BuildingList) {
+        if(build.expired()) continue;
+        if(!cb(build.lock())){
+            return false; // user abort
+        }
+    }
+    return true; // iterate completed successfully
+}
+
+
+/*
     Building Manager Tasks For Selected Units - Will eventually be migrated into TaskManager
 */
 

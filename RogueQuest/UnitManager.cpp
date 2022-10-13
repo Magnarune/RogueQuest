@@ -180,7 +180,7 @@ void UnitManager::Update(float delta) {
 // GC do not touch Magnarune ill explain later... ||
 void UnitManager::CollectGarbage() {//edited    
 
-    std::erase_if(unitList, [](const auto& unit) {return unit.expired(); });
+    std::erase_if(unitList, [](const auto& unit) { return unit.expired(); });
   /*  std::vector<std::weak_ptr<Unit>> Newlist;
     for (auto& unit : unitList) {
         if (unit.lock())
@@ -345,7 +345,7 @@ void UnitManager::MoveUnits(olc::vf2d Target, bool attackstate) {
         if (_unit.expired()) continue;
         auto unit = _unit.lock();
         if (unit->bFriendly == true) {
-            unit->ULogic = attackstate ? unit->Aggressive : unit->Neutral;
+            unit->ULogic = attackstate ? Unit::Aggressive : Unit::Neutral;
             //unit->MarchingtoTarget(Target);
         }
     }
@@ -358,7 +358,7 @@ void UnitManager::MoveConstructBuilding(const std::string& buildingName, const o
         if (_unit.expired()) continue;
         auto unit = _unit.lock();
         if (unit->bFriendly == true) {
-            unit->ULogic = unit->Neutral;
+            unit->ULogic = Unit::Neutral;
             //unit->MarchingtoTarget(Target);
         }
     }
@@ -386,19 +386,16 @@ std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
     }  
     return {};
 }
+
 void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit) {
-    std::shared_ptr<Unit> unit;
-    if (unit = std::dynamic_pointer_cast<Unit>(object)) {
+    if (auto unit = std::dynamic_pointer_cast<Unit>(object)) {
         _unit = unit;
-        //_unit = std::move(unit);
-    }else
-        _unit.reset();
-    std::shared_ptr<Building> build;
-    if (build = std::dynamic_pointer_cast<Building>(object)) {
+        return;
+    }
+    if (auto build = std::dynamic_pointer_cast<Building>(object)) {
         _build = build;
-        //_build = std::move(build);
-    }else
-        _build.reset();
+        return;
+    }
 }
 
 
@@ -444,52 +441,41 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestEnemy(int owner,olc::vf2d 
     float Smallest = SearchRadius * SearchRadius;  
     testobjects.clear();
 
-    for (auto& _unit : unitList) {       
-        if (_unit.expired())
-            continue;
-        auto unit = _unit.lock();
+    IterateAllUnits([&](std::shared_ptr<Unit> unit) -> bool {
         if ((unit->Position - pos).mag2() < (SearchRadius * SearchRadius) && unit->Health > 0.f ) {
-            if ((unit->Position - pos).mag2() < 0.2f) continue;
-            else {
-                if (owner == 0) {
-                    if(unit->Owner != 0)
-                        testobjects.push_back(unit);
-                    continue;
+            if ((unit->Position - pos).mag2() < 0.2f) return true; // continue
+            if (owner == 0) {
+                if(unit->Owner != 0)
+                    testobjects.push_back(unit);
+                return true; // continue
+            } else {
+                for (int i = 0; i < unit->FriendList.size(); i++) {
+                    if (unit->FriendList[i] == owner || unit->Owner == 0)
+                        if (abs(unit->FriendList[i]) + unit->FriendList[i] == 0)
+                            testobjects.push_back(unit);
                 }
-                else {
+            }
+        }
+        return true; // continue
+    });
 
-                    for (int i = 0; i < unit->FriendList.size(); i++) {
-                        if (unit->FriendList[i] == owner || unit->Owner == 0)
-                            if (abs(unit->FriendList[i]) + unit->FriendList[i] == 0)
-                                testobjects.push_back(unit);
-                    }
-                }
-            }
-         
-        }
-    }
-    for (auto& _build : engine.buildingManager->BuildingList) {
-        if (_build.expired())
-            continue;
-        auto build = _build.lock();
+    engine.buildingManager->IterateAllBuildings([&](std::shared_ptr<Building> build) -> bool {
         if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x) && build->Health > 0.f) {
-            if ((build->Position - pos).mag2() < 0.2f) continue;
-            else {
-                if (owner == 0) {
-                    if (build->Owner != 0)
-                        testobjects.push_back(build);
-                    continue;
-                }
-                else {
-                    for (int i = 0; i < build->FriendList.size(); i++) {
-                        if (build->FriendList[i] == owner || build->Owner == 0)
-                            if (abs(build->FriendList[i]) + build->FriendList[i] == 0)
-                                testobjects.push_back(build);
-                    }
+            if ((build->Position - pos).mag2() < 0.2f) return true; // continue
+            if (owner == 0) {
+                if (build->Owner != 0)
+                    testobjects.push_back(build);
+                return true; // continue
+            } else {
+                for (int i = 0; i < build->FriendList.size(); i++) {
+                    if (build->FriendList[i] == owner || build->Owner == 0)
+                        if (abs(build->FriendList[i]) + build->FriendList[i] == 0)
+                            testobjects.push_back(build);
                 }
             }
         }
-    }
+        return true;
+    });
 
     if (testobjects.size()) {
         std::shared_ptr<Collidable> closest;
