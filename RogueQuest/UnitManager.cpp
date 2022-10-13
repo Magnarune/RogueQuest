@@ -228,8 +228,7 @@ size_t UnitManager::GetUnitCount(const std::string& name) {
 size_t UnitManager::GetSelectedUnitCount() {
     return std::accumulate(unitList.begin(), unitList.end(), 0ULL,
         [&](size_t n, const auto& unit) -> size_t {
-            if(unit.lock())
-                return n + (unit.lock()->bSelected == true);
+            return n + (!unit.expired() && unit.lock()->bSelected);
         });
 }
 

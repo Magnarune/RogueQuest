@@ -203,7 +203,9 @@ const std::map<std::string, CommandFunction> commands = {
             auto& engine = Game_Engine::Current();
             
             std::string name;
-            float x {}, y {}, count = 1 , owner = 1;
+            float x {}, y {};
+            int count = 1, owner = 1;
+
             ss >> name;
             if(!ss.eof()) ss >> x;
             if(!ss.eof()) ss >> y;
@@ -310,11 +312,10 @@ const std::map<std::string, CommandFunction> commands = {
     { "Crush", [](std::stringstream& ss) {
     auto& engine = Game_Engine::Current();
     std::string name;
-    float x{}, y{};
+    size_t index {};
     ss >> name;
-    if (!ss.eof()) ss >> x;
-    if (!ss.eof()) ss >> y;
-    auto Building = engine.buildingManager->GetBuilding(name, x);
+    if (!ss.eof()) ss >> index;
+    auto Building = engine.buildingManager->GetBuilding(name, index);
     if (Building) {
         Building->Destroy();
         std::cout << "Building Crushed\n";

@@ -14,6 +14,13 @@ public:
 	void ImportEffectsAssets();
 	std::map<std::string, std::unique_ptr<olc::Decal>> Effectdecals;//All the Effects Png
 	float m_ftimer {};
+
+	/*
+		This is convoluted / redundant
+		Why do you have 3 separated vectors to define the existance of particles when you already have an *Effect* class that already contains the lifetime, position, name, etc?
+		This should all be removed and instead use the vector of Effect (do not use smart pointers)
+	*/
+
 	//					Timer		Type
 	std::vector<std::pair<float, std::string>> Instance; //.size() # of effects in game
 
@@ -35,9 +42,6 @@ public:
 	}
 
 
-
-	void RemoveEffect();
-
 	void GenerateEffect(std::string Effectname, olc::vf2d position, olc::vf2d Size);
 	void GenerateEffect(std::string Effectname, std::shared_ptr<Collidable> Object);
 
@@ -45,7 +49,7 @@ public:
 	void GenerateBlood(olc::vf2d Spawn);
 	void UpdateParticles(float delta);
 	void DrawParticles();
-	void Destroy(std::weak_ptr<Effect> eff);
+	void Destroy();
 
 	float lastCreationTime = 0;
 	std::vector<Smoke> smokeParticles;

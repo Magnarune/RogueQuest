@@ -61,8 +61,7 @@ void BuildingManager::DeselectBuildings() {
 size_t BuildingManager::GetSelectedBuildingCount() {
     return std::accumulate(BuildingList.begin(), BuildingList.end(), 0ULL,
         [&](size_t n, const auto& build) -> size_t {
-            if(build.lock())
-                return n + (build.lock()->bSelected == true);
+            return n + size_t(!build.expired() && build.lock()->bSelected);
         });
 }
 

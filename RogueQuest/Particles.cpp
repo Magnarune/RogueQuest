@@ -88,7 +88,6 @@ void Particles::GenerateBlood(olc::vf2d spawn) {
 }
 
 void Particles::UpdateParticles(float delta) {
-	//Destroy();
 	auto& engine = Game_Engine::Current();
 
 	for (int i = 0; i < Instance.size(); i++) {
@@ -113,13 +112,11 @@ void Particles::UpdateParticles(float delta) {
 				effects[i].lock()->frame %= (effects[i].lock()->animationlength - 1);
 				delta = 0.f;
 			}
+		} else {
+			Destroy();
 		}
-		else
-			Destroy(effects[i]);
 	}
-			
-		
-	
+
 }
 
 void Particles::DrawParticles() {
@@ -139,10 +136,6 @@ void Particles::DrawParticles() {
 		
 	}
 
-	
-
-
-
 	for (int j = 0; j < effects.size(); j++) {
 		for (int i = 0; i < effects[j].lock()->Positions.size(); i++) {
 			engine.tv.DrawPartialDecal(effects[j].lock()->Positions[i], { 32.f,12.f }, Effectdecals["Fire"].get(), { 24.f * (float)effects[j].lock()->frame,0.f }, { 64.f,24.f });
@@ -150,7 +143,7 @@ void Particles::DrawParticles() {
 	}
 }
 
-void Particles::Destroy(std::weak_ptr<Effect> eff) {
+void Particles::Destroy() {
 	for (int j = 0; j < Instance.size(); j++) {
 		if (Instance[j].second == "Blood") {
 			if (Instance[j].first < 0.15f) {
@@ -159,10 +152,10 @@ void Particles::Destroy(std::weak_ptr<Effect> eff) {
 				Instance.pop_back();
 				EffectPositions.erase(EffectPositions.begin(), EffectPositions.begin() + 15);
 			}
-		}
-		else
+		} else {
 			if (Instance[j].second == "Smoke") {
 
 			}
+		}
 	}
 }
