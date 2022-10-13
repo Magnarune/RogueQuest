@@ -98,9 +98,7 @@ void Unit::Update(float delta) {
 	if(fAttackCD > 0)
 		fAttackCD -= delta;
 	if (ULogic == Aggressive) {
-		
 		UnitSearch();
-
 	}
 	UnitBehaviour();
 

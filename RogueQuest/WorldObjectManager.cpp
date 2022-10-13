@@ -79,7 +79,7 @@ void WorldManager::CollectGarbage() {
                 continue;
             if (cppdumbstuff = std::dynamic_pointer_cast<Collidable>(garbageList[i])) {
                 if (cppdumbstuff = std::dynamic_pointer_cast<Unit>(garbageList[i])) {
-                    if(cppdumbstuff->cType == cppdumbstuff->isUnit)
+                    if(cppdumbstuff->cType == Collidable::isUnit)
                         cu = true;
                 }
                 if (cppdumbstuff = std::dynamic_pointer_cast<Building>(garbageList[i])) {

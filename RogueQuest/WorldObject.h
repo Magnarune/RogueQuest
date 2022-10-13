@@ -49,7 +49,7 @@ public:
 		isUnit,
 		isBuilding,
 		isProjectile
-	}cType;
+	} cType;
 	olc::vf2d predPosition;
 
 	Collidable();

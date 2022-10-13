@@ -101,7 +101,7 @@ public:
 	float fKnockBackResist;
 
 	float m_fKnockBackTimer; //KnockBack
-	float fKBPower;			 //How much knockBack This unit will incure	
+	float fKBPower;			 //How much knockBack This unit will incure
 	
 	
 	int	SONorth = 0;

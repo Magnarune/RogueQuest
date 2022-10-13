@@ -21,11 +21,11 @@ UnitManager::UnitManager() {
             const olc::vf2d& target = params.first;
             const bool& attackstate = params.second;
             // action code            
-            unit->ULogic = attackstate ? unit->Aggressive : unit->Neutral;
+            unit->ULogic = attackstate ? Unit::Aggressive : Unit::Neutral;
             unit->ActionZone.x = 8.f;
             unit->ActionZone.y = 8.f;
             //unit->Distance = target - unit->Position;
-            unit->Graphic_State = unit->Walking;
+            unit->Graphic_State = Unit::Walking;
             unit->Target = target;
             return true;
         },
@@ -135,10 +135,10 @@ UnitManager::UnitManager() {
                 return false;
             }
             else {
-                unit->Graphic_State = unit->Attacking;
+                unit->Graphic_State = Unit::Attacking;
                 if (unit->curFrame == unit->textureMetadata[unit->Graphic_State].ani_len - 1) {
                     unit->PerformAttack();
-                   // unit->Graphic_State = unit->Walking;
+                   // unit->Graphic_State = Unit::Walking;
                 }
                 return true;
             }  
