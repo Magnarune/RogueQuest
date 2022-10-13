@@ -1,6 +1,6 @@
 #include "Building.h"
 #include "Engine.h"
-
+#include "clock.h"
 
 Building::Building(): Collidable() {
 }
@@ -17,6 +17,20 @@ void Building::Destroy() {
 }
 
 void Building::BuildingBehaviour() {
+	auto& engine = Game_Engine::Current();
+	if (execTimeout.getMilliseconds() > 400) {
+		engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner, Position + olc::vf2d(Size)/2.f, 120.f), BuildTarget, UnitTarget);
+		execTimeout.restart();
+	}
+	if (BuildTarget.lock() && AttackCD <0.f) {
+		engine.worldManager->GenerateProjectile("ThrowingAxe", Position + olc::vf2d(Size) / 2.f, BuildTarget);
+		AttackCD = AttackSpeed;
+	}
+	if (UnitTarget.lock() && AttackCD <= 0.f) {
+		engine.worldManager->GenerateProjectile("ThrowingAxe", Position + olc::vf2d(Size) / 2.f, UnitTarget);
+		AttackCD = AttackSpeed;
+	}
+
 }
 
 void Building::Stop() {
@@ -38,8 +52,6 @@ void Building::ProduceUnit(const std::string& unitName) {
 
 	if (m_fTimer > productiontime) {
 		if (!productionQue.empty()) productionQue.pop();		
-		 
-		
 		SendUnit(engine.worldManager->GenerateUnit(unitName,Owner, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
 		building = false;
 		startbuilding = false;
@@ -60,6 +72,10 @@ void Building::SendUnit(std::shared_ptr<Unit> unit) {
 }
 
 void Building::Update(float delta){
+	if (AttackCD > 0)
+		AttackCD -= delta;
+	BuildingBehaviour();
+
 	if (Health < maxHealth) {
 		BuildingEffect();
 	}

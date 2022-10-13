@@ -39,7 +39,7 @@ void Projectile::Draw(olc::TileTransformedView* gfx) {
     WorldObject::Draw(gfx);
     auto& engine = Game_Engine::Current();
     float angle = std::fmod(2.0f * PI + Velocity.polar().y, 2.0f * PI);
-    if(Spinning = false)
+    if(Spinning == false)
         gfx->DrawPartialRotatedDecal(Position, decals[projType].get(), angle + PI/2.f, { 8.5f, 68.5f }, { 0.f,0.f }, { 17.f,137.f }, { 0.1f,0.1f });
     else
         gfx->DrawPartialRotatedDecal(Position, decals[projType].get(),  spincounter + PI / 2.f, { 7.f, 16.f }, { 0.f,0.f }, { 14.f,32.f }, { 0.5f,0.5f });

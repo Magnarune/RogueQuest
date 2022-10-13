@@ -36,13 +36,21 @@ public:
 	int buildtime;
 	// building development vars
 	float buildProgress = 0.f;
+	float AttackSpeed;
+	float AttackCD;
+	bool CanAttack;
+	std::weak_ptr<Unit> UnitTarget;
+	std::weak_ptr<Building> BuildTarget;
 
 	std::queue<std::string> productionQue;
 	std::string unitproduced;
 	std::vector<std::string> unitproduction;
+	std::vector<std::string> AttackTypes;
 	//       stage  offset
-	std::string curStage = "Construction"; // current stage - oof good luck with this
 
+	//std::vector<std::string> Stage;
+	std::string curStage = "Construction"; // current stage - oof good luck with this
+	Clock execTimeout;
 	int Owner;
 	std::vector<int> FriendList;
 	

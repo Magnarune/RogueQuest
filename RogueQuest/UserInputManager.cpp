@@ -78,7 +78,7 @@ void UserInputManager::GetBuildModeUserInput() {
         engine.ActivityDone = true;
         engine.hud->BuildMode=false;
         engine.unitManager->DelegateTask("Build",
-            std::make_pair(std::string("House"), engine.tv.ScreenToWorld(engine.GetMousePos())));
+            std::make_pair(std::string("StoneTower"), engine.tv.ScreenToWorld(engine.GetMousePos())));
     }
 }
 

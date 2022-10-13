@@ -55,12 +55,6 @@ void Particles::GenerateSmoke(olc::vf2d position, olc::vf2d Size, bool dust) {//
 	//Instance.push_back({ 2.f, "Smoke" });
 }
 
-
-
-
-
-
-
 void Particles::GenerateEffect(std::string Effectname, std::shared_ptr<Collidable> Object) {
 	auto& engine = Game_Engine::Current();	
 	std::weak_ptr<Building> tbuild;
@@ -84,21 +78,23 @@ void Particles::GenerateBlood(olc::vf2d spawn) {
 		olc::vf2d Rand{ float(rand() % 4 - 2), float(rand() % 4 - 2) + 3.f };
 		EffectPositions.push_back(spawn + Rand);
 	}
-	//Instance.push_back({ 0.25f, "Blood" });
+	Instance.push_back(0.25f);
 }
 
 void Particles::UpdateParticles(float delta) {
 	auto& engine = Game_Engine::Current();
 
 	for (int i = 0; i < Instance.size(); i++) {
-		if (Instance[i].second == "Blood") {
-			for (int i = 0; i < 15; i++) {
-				EffectPositions[i].x += rand() % 5 - 2.f;
-				EffectPositions[i].y += (rand() % 2) * 0.4f;
-			}
-			Instance[i].first -= Instance[i].first * delta;
+
+		for (int i = 0; i < 15; i++) {
+			EffectPositions[i].x += rand() % 5 - 2.f;
+			EffectPositions[i].y += (rand() % 2) * 0.4f;
 		}
+		Instance[i] -= Instance[i] * delta;
 	}
+	
+	
+
 	for (int i = 0; i < smokeParticles.size(); i++) {
 		smokeParticles[i].update(delta);
 		if (smokeParticles[i].expired()) {
@@ -113,23 +109,21 @@ void Particles::UpdateParticles(float delta) {
 				delta = 0.f;
 			}
 		} else {
-			Destroy();
+			
 		}
 	}
+	Destroy();
 
 }
 
 void Particles::DrawParticles() {
 	auto& engine = Game_Engine::Current();
-	for (int j = 0; j < Instance.size(); j++) {
-		if (Instance[j].second == "Blood") {
-			if (Instance[j].first > 0.15f) {
-				for (int i = 0; i < EffectPositions.size(); i++) {
-					engine.tv.DrawDecal(EffectPositions[i], engine.hud->decals["Pixel"].get(), { 1.f,1.f }, olc::PixelF(1.f, 0, 0, Instance[j].first / 0.25f));
-				}
-			}
-		}
+	for (int j = 0; j < Instance.size(); j++) {	
+		for (int i = 0; i < EffectPositions.size(); i++) {
+			engine.tv.DrawDecal(EffectPositions[i], engine.hud->decals["Pixel"].get(), { 1.f,1.f }, olc::PixelF(1.f, 0, 0, Instance[j] / 0.25f));
+		}		
 	}
+
 	for (int i = 0; i < smokeParticles.size(); i++) {			
 			engine.tv.DrawWarpedDecal(Effectdecals["Smoke"].get(), { {smokeParticles[i].pos.x,smokeParticles[i].pos.y},{smokeParticles[i].pos.x,smokeParticles[i].pos2.y},
 				{smokeParticles[i].pos2.x,smokeParticles[i].pos2.y},{smokeParticles[i].pos2.x,smokeParticles[i].pos.y} },smokeParticles[i].Dusty ? smokeParticles[i].col : smokeParticles[i].colD);
@@ -144,18 +138,12 @@ void Particles::DrawParticles() {
 }
 
 void Particles::Destroy() {
-	for (int j = 0; j < Instance.size(); j++) {
-		if (Instance[j].second == "Blood") {
-			if (Instance[j].first < 0.15f) {
-				if (Instance.size() > 1)
-					std::swap(Instance.front(), Instance.back());
-				Instance.pop_back();
-				EffectPositions.erase(EffectPositions.begin(), EffectPositions.begin() + 15);
-			}
-		} else {
-			if (Instance[j].second == "Smoke") {
-
-			}
+	for (int j = 0; j < Instance.size(); j++) {		
+		if (Instance[j] < 0.15f) {
+			if (Instance.size() > 1)
+				std::swap(Instance.front(), Instance.back());
+			Instance.pop_back();
+			EffectPositions.erase(EffectPositions.begin(), EffectPositions.begin() + 15);
 		}
-	}
+	}	
 }

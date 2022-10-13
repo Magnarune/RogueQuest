@@ -204,14 +204,20 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
    // build->health = data.lua_data["Stats"]["Health"];
     build->Health = 0.4f;
     build->maxHealth = data.lua_data["Stats"]["MaxHealth"];
+    build->AttackSpeed = data.lua_data["Stats"]["AttackSpeed"];
     build->Owner = owner;
     build->FriendList = InitializeObject(owner);
 
-    sol::table UnitProduction = data.lua_data["Production"]["Units"];
-    for (int i = 0; i < UnitProduction.size(); i++) {
-        build->unitproduction.push_back(UnitProduction[i + 1]);
-    }
-
+   if( sol::table UnitProduction = data.lua_data["Production"]["Units"])
+       for (int i = 0; i < UnitProduction.size(); i++) {
+           build->unitproduction.push_back(UnitProduction[i + 1]);
+       }
+   if (sol::table Attacktypes = data.lua_data["Projectiles"]) {
+       for (int i = 0; i < Attacktypes.size(); i++) {
+           build->AttackTypes.push_back(Attacktypes[i + 1]);
+       }
+       build->CanAttack = true;
+   }
     // make sure to update this when adding new GFXStates - enums don't magically connect to a string
     static std::map<std::string, Building::GFXState> States = {
         {"Normal", Building::Normal},
@@ -262,6 +268,7 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
 
     //if (name == "ThrowingAxe")
     //    proj->projType = "Axe";
+  //  proj->projType = name;
     
     // create decals for each texture state
     for (auto& [name, meta] : data.texture_metadata) {

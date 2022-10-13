@@ -87,6 +87,9 @@
     <ClCompile Include="Effects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tempParticles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -194,6 +197,9 @@
     <ClInclude Include="Effects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tempParticles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Units\Mage\Mage.lua">
@@ -230,6 +236,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="Assets\Projectiles\Axe\ThrowAxe.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Buildings\Stone_Tower\Stone_Tower.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Units\Archer\Archer.lua">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

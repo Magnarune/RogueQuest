@@ -24,7 +24,8 @@ void cAssets::LoadUnitAssets(){
         "Assets/Units/Goblin/goblin.lua",
         "Assets/Units/Imp/imp.lua",
         "Assets/Units/Sara/sara.lua",
-        "Assets/Units/Builder/builder.lua"
+        "Assets/Units/Builder/builder.lua",
+        "Assets/Units/Archer/Archer.lua"
     };
 
     /*
@@ -108,7 +109,8 @@ void cAssets::LoadBuildingAssets() {
         return { x, y };
     };
     const std::vector<std::string> filePaths = { //
-        "Assets/Buildings/House/house.lua"
+        "Assets/Buildings/House/house.lua",
+        "Assets/Buildings/Stone_Tower/Stone_Tower.lua"
     };
 
     for (const auto& path : filePaths) {

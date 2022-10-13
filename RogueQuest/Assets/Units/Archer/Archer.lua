@@ -1,6 +1,6 @@
 return 
 {
-	Name = "Builder", -- used for Engine::GenerateUnit()
+	Name = "Archer", -- used for Engine::GenerateUnit()
 	SpriteOrder= { 0 , 1 , 2 , 3 },--1 = North, 2 = South , 3 =East , 4 = West
 	Files = 
 	{
@@ -10,7 +10,7 @@ return
 			TargetSize = { 32, 32 },
 			SpriteSize = {576 , 256 },
 			AnimationLength = math.floor(576 / 64), 
-			FileName = "Assets/Units/Builder/Walk.png",
+			FileName = "Assets/Units/Archer/Walk.png",
 			HeadImage = {
 				tl = {16,136},
 				size = {32,32}
@@ -22,7 +22,7 @@ return
 			TargetSize = { 32, 32 },
 			SpriteSize = {448, 256 },
 			AnimationLength = math.floor(384 / 64),
-			FileName = "Assets/Units/Builder/Attack.png"
+			FileName = "Assets/Units/Archer/Attack.png"
 		},
 		{
 			Name = "Dead",
@@ -30,22 +30,16 @@ return
 			TargetSize = { 32, 32 },
 			SpriteSize = { 384 , 64 },
 			AnimationLength = math.floor(384 / 64),
-			FileName = "Assets/Units/Builder/Dead.png"
+			FileName = "Assets/Units/Archer/Dead.png"
 		},
-		{
-		Name = "Build",
-			TileSize = { 64 , 64 },
-			TargetSize = { 32, 32 },
-			SpriteSize = {448, 256 },
-			AnimationLength = math.floor(384 / 64),
-			FileName = "Assets/Units/Builder/Build.png"
-		}
 	},
 	Parameters = {
+		Food = 5,
+		Cost = 12,
+		Ranged = true,
 		CollisionRadius = 10,
 		Abilities = {
-			Tasks = {"Move", "Build", "Attack","Repair", "Gather"}, -- task names allowed to be delegated to this unit
-			Buildables = {"House"},
+			Tasks = {"Move", "Attack"} -- task names allowed to be delegated to this unit			
 		}
 	},
 	Stats =
@@ -57,7 +51,7 @@ return
 		Ammo = 0, 
 		MaxAmmo = 0,
 		MoveSpeed = 40,       
-		AttackRange = 21, 
+		AttackRange = 80, 
 		AttackDamage = 2,
 		AttackSpeed = 1,
 		SpellCooldown = 5,

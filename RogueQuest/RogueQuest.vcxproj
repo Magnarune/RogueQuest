@@ -188,6 +188,7 @@
     <ClCompile Include="Particles.cpp" />
     <ClCompile Include="Projectiles.cpp" />
     <ClCompile Include="TaskManager.cpp" />
+    <ClCompile Include="tempParticles.cpp" />
     <ClCompile Include="Unit.cpp" />
     <ClCompile Include="UnitManager.cpp" />
     <ClCompile Include="UserInput.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="Particles.h" />
     <ClInclude Include="Projectiles.h" />
     <ClInclude Include="TaskManager.h" />
+    <ClInclude Include="tempParticles.h" />
     <ClInclude Include="Unit.h" />
     <ClInclude Include="UnitManager.h" />
     <ClInclude Include="UserInput.h" />
@@ -234,10 +236,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Buildings\House\house.lua" />
+    <None Include="Assets\Buildings\Stone_Tower\Stone_Tower.lua" />
     <None Include="Assets\Gui\cursors.lua" />
     <None Include="Assets\Maps\BasicMap.lua" />
     <None Include="Assets\Maps\TerraProject2.lua" />
     <None Include="Assets\Projectiles\Axe\ThrowAxe.lua" />
+    <None Include="Assets\Units\Archer\Archer.lua" />
     <None Include="Assets\Units\Builder\builder.lua" />
     <None Include="Assets\Units\Goblin\goblin.lua" />
     <None Include="Assets\Units\Imp\imp.lua" />

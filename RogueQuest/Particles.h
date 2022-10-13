@@ -22,7 +22,7 @@ public:
 	*/
 
 	//					Timer		Type
-	std::vector<std::pair<float, std::string>> Instance; //.size() # of effects in game
+	std::vector<float> Instance; //.size() # of effects in game
 
 	std::vector<olc::vf2d> EffectPositions; //List of all effect location
 

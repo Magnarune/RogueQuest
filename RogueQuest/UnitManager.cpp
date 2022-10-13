@@ -377,6 +377,8 @@ std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
         }
     }
     for (auto& _build : engine.buildingManager->BuildingList) {
+        if (_build.expired())
+            continue;
         auto build = _build.lock();
         const float& sz = (build->Size.x + build->Size.y) / 2.f;
         const float r2 = 0;

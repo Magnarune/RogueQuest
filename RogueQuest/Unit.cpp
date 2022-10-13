@@ -145,7 +145,7 @@ void Unit::RepairBuilding() {
 	auto& engine = Game_Engine::Current();
 	if (repairedbuilding.lock()) {
 		repairedbuilding.lock()->Health += 0.2f;
-		if (execTimeout.getMilliseconds() > 50) {
+		if (execTimeout.getMilliseconds() > 400) {
 			engine.particles->GenerateSmoke(repairedbuilding.lock()->Position, olc::vf2d(repairedbuilding.lock()->Size), true);			
 			execTimeout.restart();
 		}
@@ -192,7 +192,7 @@ void Unit::PerformAttack() {
 	
 	if (targetUnit.lock()) {
 		if (bIsRanged) {
-			engine.worldManager->GenerateProjectile("ThrowingAxe", Position, targetUnit);
+			engine.worldManager->GenerateProjectile("Arrow", Position, targetUnit);
 		}
 		else {
 			targetUnit.lock()->Health -= fAttackDamage;
