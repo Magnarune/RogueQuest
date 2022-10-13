@@ -42,10 +42,10 @@ public:
 	olc::vf2d buildlocation;//Where is the building going to be made
 	olc::vf2d buildingSize; //Size of Building | Given by construct
 	std::string buildName; //Name of what Im building
-	std::shared_ptr<Building> repairedbuilding; //pointer to building being repaired
+	std::weak_ptr<Building> repairedbuilding; //pointer to building being repaired
 	//Searched units
-	std::shared_ptr<Building> targetBuilding;//parsing pointer
-	std::shared_ptr<Unit> targetUnit;//parsing pointer
+	std::weak_ptr<Building> targetBuilding;//parsing pointer
+	std::weak_ptr<Unit> targetUnit;//parsing pointer
 	std::queue<std::shared_ptr<TaskManager::Task>> taskQueue; // queue of tasks
 	std::shared_ptr<TaskManager::Task> currentTask; // current task
 	std::weak_ptr<TaskManager::Task> trashtask;

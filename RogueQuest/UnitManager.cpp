@@ -76,10 +76,10 @@ UnitManager::UnitManager() {
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;
             // customizable parameters
-            const auto& params = std::any_cast<std::pair<std::shared_ptr<Building>, olc::vf2d>>(arguments.second);            
-            const std::shared_ptr<Building> &build = params.first;
+            const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, olc::vf2d>>(arguments.second);            
+            const std::weak_ptr<Building> &build = params.first;
             const olc::vf2d& target = params.second;
-            unit->Target = build->Position + unit->buildingSize / 2.f;
+            unit->Target = build.lock()->Position + unit->buildingSize / 2.f;
             unit->ActionZone = olc::vf2d(32.f, 32.f);
             unit->repairedbuilding = build;
             return true;
@@ -88,7 +88,7 @@ UnitManager::UnitManager() {
         [&](std::shared_ptr<TaskManager::Task> task) -> bool {
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;
-            if (unit->repairedbuilding)
+            if (unit->repairedbuilding.lock())
                 unit->RepairBuilding();
             return true;            
          },
@@ -96,10 +96,10 @@ UnitManager::UnitManager() {
              // required
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
-             if (unit->repairedbuilding && unit->repairedbuilding->Health > unit->repairedbuilding->maxHealth)
+             if (unit->repairedbuilding.lock() && unit->repairedbuilding.lock()->Health > unit->repairedbuilding.lock()->maxHealth)
                  unit->repairedbuilding.reset();
 
-             if (!unit->repairedbuilding)
+             if (!unit->repairedbuilding.lock())
                  return true;
              else
                  return false;             
@@ -110,32 +110,34 @@ UnitManager::UnitManager() {
         { [&](std::shared_ptr<TaskManager::Task> task) -> bool {//Initiate Task
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;           // customizable parameters
-            const auto& params = std::any_cast<std::pair<std::shared_ptr<Building>, std::shared_ptr<Unit>>>(arguments.second);
-            const std::shared_ptr<Building> &HBuild = params.first;
-            const std::shared_ptr<Unit> &HUnit = params.second;
-            if (HBuild) {
-                unit->Target = HBuild->Position + olc::vf2d(HBuild->Size) / 2.f; //center of building
-                unit->ActionZone.x = unit->fAttackRange + (float)HBuild->Size.x/ 2.f;
-                unit->ActionZone.y = unit->fAttackRange + (float)HBuild->Size.y / 2.f;
+            const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, std::weak_ptr<Unit>>>(arguments.second);
+            const std::weak_ptr<Building> &HBuild = params.first;
+            const std::weak_ptr<Unit> &HUnit = params.second;
+            if (HBuild.lock()) {
+                unit->Target = HBuild.lock()->Position + olc::vf2d(HBuild.lock()->Size) / 2.f; //center of building
+                unit->ActionZone.x = unit->fAttackRange + (float)HBuild.lock()->Size.x/ 2.f;
+                unit->ActionZone.y = unit->fAttackRange + (float)HBuild.lock()->Size.y / 2.f;
             }
-            if (HUnit) {
-                unit->Target = olc::vf2d(HUnit->Position.x + HUnit->Unit_Collision_Radius * 1.414f,
-                                         HUnit->Position.y + HUnit->Unit_Collision_Radius * 1.414f);
-                unit->ActionZone.x = unit->fAttackRange + HUnit->Unit_Collision_Radius * 1.414f;
-                unit->ActionZone.y = unit->fAttackRange + HUnit->Unit_Collision_Radius * 1.414f;
+            if (HUnit.lock()) {
+                unit->Target = olc::vf2d(HUnit.lock()->Position.x + HUnit.lock()->Unit_Collision_Radius * 1.414f,
+                                         HUnit.lock()->Position.y + HUnit.lock()->Unit_Collision_Radius * 1.414f);
+                unit->ActionZone.x = unit->fAttackRange + HUnit.lock()->Unit_Collision_Radius * 1.414f;
+                unit->ActionZone.y = unit->fAttackRange + HUnit.lock()->Unit_Collision_Radius * 1.414f;
             }            
              return true;
          },
         [&](std::shared_ptr<TaskManager::Task> task) -> bool {//Preform Task
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;//ATTACK
-            if (unit->fAttackCD > 0 || !unit->targetBuilding && !unit->targetUnit) {//if can't attack or target is dead
+            if (unit->fAttackCD > 0 || (!unit->targetBuilding.lock() && !unit->targetUnit.lock())) {//if can't attack or target is dead
                 return false;
             }
             else {
                 unit->Graphic_State = unit->Attacking;
-                if(unit->curFrame == unit->textureMetadata[unit->Graphic_State].ani_len - 1)
+                if (unit->curFrame == unit->textureMetadata[unit->Graphic_State].ani_len - 1) {
                     unit->PerformAttack();
+                   // unit->Graphic_State = unit->Walking;
+                }
                 return true;
             }  
             return true;
@@ -144,14 +146,14 @@ UnitManager::UnitManager() {
              // required
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
-             if (!unit->targetBuilding && !unit->targetUnit)
+             if (!unit->targetBuilding.lock() && !unit->targetUnit.lock())
                  return true;
-             if (unit->targetBuilding && unit->targetBuilding->Health < 0.f) {
+             if (unit->targetBuilding.lock() && unit->targetBuilding.lock()->Health < 0.f) {
                  unit->targetBuilding.reset();
                  unit->targetUnit.reset();
                  return true;
              }
-             if (unit->targetUnit && unit->targetUnit->Health < 0.f) {
+             if (unit->targetUnit.lock() && unit->targetUnit.lock()->Health < 0.f) {
                  unit->targetUnit.reset();
                  unit->targetBuilding.reset();                 
                  return true;
@@ -383,15 +385,17 @@ std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
     }  
     return {};
 }
-void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::shared_ptr<Building>& _build, std::shared_ptr<Unit>& _unit) {
+void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit) {
     std::shared_ptr<Unit> unit;
     if (unit = std::dynamic_pointer_cast<Unit>(object)) {
-        _unit = std::move(unit);
+        _unit = unit;
+        //_unit = std::move(unit);
     }else
         _unit.reset();
     std::shared_ptr<Building> build;
     if (build = std::dynamic_pointer_cast<Building>(object)) {
-         _build = std::move(build);
+        _build = build;
+        //_build = std::move(build);
     }else
         _build.reset();
 }
@@ -456,7 +460,6 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestEnemy(int owner,olc::vf2d 
                         if (unit->FriendList[i] == owner || unit->Owner == 0)
                             if (abs(unit->FriendList[i]) + unit->FriendList[i] == 0)
                                 testobjects.push_back(unit);
-
                     }
                 }
             }
@@ -470,10 +473,17 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestEnemy(int owner,olc::vf2d 
         if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x) && build->Health > 0.f) {
             if ((build->Position - pos).mag2() < 0.2f) continue;
             else {
-                for (int i = 0; i < build->FriendList.size(); i++) {
-                    if (build->FriendList[i] == owner)
-                        if (abs(build->FriendList[i]) + build->FriendList[i] == 0)
-                            testobjects.push_back(build);
+                if (owner == 0) {
+                    if (build->Owner != 0)
+                        testobjects.push_back(build);
+                    continue;
+                }
+                else {
+                    for (int i = 0; i < build->FriendList.size(); i++) {
+                        if (build->FriendList[i] == owner || build->Owner == 0)
+                            if (abs(build->FriendList[i]) + build->FriendList[i] == 0)
+                                testobjects.push_back(build);
+                    }
                 }
             }
         }
@@ -491,7 +501,6 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestEnemy(int owner,olc::vf2d 
             }
         }
         return closest;
-
     }
     else
         return {};    

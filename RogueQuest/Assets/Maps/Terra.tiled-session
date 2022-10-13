@@ -5,8 +5,8 @@
     },
     "activeFile": "TerraProsject.tmx",
     "expandedProjectPaths": [
-        ".",
-        "Map-Tiles"
+        "Map-Tiles",
+        "."
     ],
     "fileStates": {
         "Map-Tiles/Dirt (Non-Winter).tsx": {
@@ -54,11 +54,11 @@
             "scaleInEditor": 1
         },
         "TerraProsject.tmx": {
-            "scale": 0.015625,
+            "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 2208,
-                "y": 8160
+                "x": 2554.6666666666665,
+                "y": 2748.6666666666665
             }
         },
         "Trees, Pine.tsx": {

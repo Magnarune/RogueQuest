@@ -59,7 +59,7 @@ void UserInputManager::StandardUserInput() {
     if (engine.GetKey(olc::R).bPressed) {
   
         engine.unitManager->ParseObject(engine.unitManager->FindObject(engine.tv.ScreenToWorld(engine.GetMousePos())), build, unit);   
-        if (build)
+        if (build.lock())
             engine.unitManager->DelegateTask("Repair",
                 std::make_pair(build, engine.tv.ScreenToWorld(engine.GetMousePos())));    
     }

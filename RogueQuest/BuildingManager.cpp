@@ -25,7 +25,9 @@ void  BuildingManager::CollectGarbage() {
 
 void BuildingManager::SelectBuilding(olc::vf2d Mouse) {
     for (auto& _build : BuildingList) {
+        if (_build.expired()) continue;
         auto build = _build.lock();
+        
         if (build->bSelected) continue;
         const float& r = (build->Size.x /2.f);
         const float r2 = 0.55f;
@@ -59,7 +61,8 @@ void BuildingManager::DeselectBuildings() {
 size_t BuildingManager::GetSelectedBuildingCount() {
     return std::accumulate(BuildingList.begin(), BuildingList.end(), 0ULL,
         [&](size_t n, const auto& build) -> size_t {
-            return n + (build.lock()->bSelected == true);
+            if(build.lock())
+                return n + (build.lock()->bSelected == true);
         });
 }
 

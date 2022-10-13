@@ -15,9 +15,9 @@ Unit::~Unit() {
 	std::queue<std::shared_ptr<TaskManager::Task>> cq;
 	if (!taskQueue.empty())
 		cq.swap(taskQueue);
-	if(targetBuilding)
+	if(targetBuilding.lock())
 		targetBuilding.reset();
-	if(targetUnit)
+	if(targetUnit.lock())
 		targetUnit.reset();
 	//Direction.clear();
 }
@@ -49,10 +49,10 @@ void Unit::UnitBehaviour() {
 		prevHealth = Health;
 		break;
 	case Aggressive:
-		if(targetBuilding || targetUnit && !Taskpaused){
+		if (!Taskpaused && (targetBuilding.lock() || targetUnit.lock())) {
 			HoldTask = currentTask;//Stop and hunt
 			currentTask = engine.unitManager->taskMgr.PrepareTask("Hunting", std::pair<std::shared_ptr<Unit>, std::any>
-						{engine.unitManager->This_shared_pointer(Position), std::pair<std::shared_ptr<Building>, std::shared_ptr<Unit>> {targetBuilding, targetUnit} });
+						{engine.unitManager->This_shared_pointer(Position), std::pair<std::weak_ptr<Building>, std::weak_ptr<Unit>> {targetBuilding, targetUnit} });
 			currentTask->initTask();
 			Taskpaused = true;
 		}
@@ -104,7 +104,7 @@ void Unit::Update(float delta) {
 	}
 	UnitBehaviour();
 
-	if(currentTask && currentTask->checkCompleted() || Health < 0){
+	if((currentTask && currentTask->checkCompleted()) || Health < 0){
 		//std::shared_ptr<TaskManager::Task> trash;
 		currentTask.reset();//swap(trash);
 		if (Taskpaused == true) {			
@@ -144,10 +144,10 @@ void Unit::TrytoBuild(const std::string& name,const olc::vf2d& target) {
 }
 
 void Unit::RepairBuilding() {
-	if (repairedbuilding) {
-		repairedbuilding->Health += 0.1f;
-		if (repairedbuilding->curStage == "Construction" && repairedbuilding->Health >= repairedbuilding->maxHealth) {
-			repairedbuilding->curStage = "Level one";
+	if (repairedbuilding.lock()) {
+		repairedbuilding.lock()->Health += 0.1f;
+		if (repairedbuilding.lock()->curStage == "Construction" && repairedbuilding.lock()->Health >= repairedbuilding.lock()->maxHealth) {
+			repairedbuilding.lock()->curStage = "Level one";
 			repairedbuilding.reset();
 		}
 	}
@@ -161,13 +161,13 @@ void Unit::AfterUpdate(float delta) {
 void Unit::UnitSearch() {//Target = unit/build.front()
 	auto& engine = Game_Engine::Current();
 	engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner,Position, AgroRange), targetBuilding, targetUnit);
-	if (targetBuilding || targetUnit) {
-		if (targetBuilding) {
-			Target = targetBuilding->Position;
+	if (targetBuilding.lock() || targetUnit.lock()) {
+		if (targetBuilding.lock()) {
+			Target = targetBuilding.lock()->Position + olc::vf2d(targetBuilding.lock()->Size) / 2.f;
 			targetUnit.reset();
 		}
 		else {
-			Target = targetUnit->Position;
+			Target = targetUnit.lock()->Position;
 			targetBuilding.reset();
 		}		
 		UnitHunting();
@@ -175,32 +175,38 @@ void Unit::UnitSearch() {//Target = unit/build.front()
 }
 
 void Unit::UnitHunting() {
-	if (targetBuilding) {
-		Target = targetBuilding->Position + olc::vf2d(targetBuilding->Size) / 2.f;
+	if (targetBuilding.lock()) {
+		Target = targetBuilding.lock()->Position + olc::vf2d(targetBuilding.lock()->Size) / 2.f;
 	}
-	if (targetUnit) {
-		Target = targetUnit->Position + olc::vf2d(targetUnit->Unit_Collision_Radius * 1.414f,
-			targetUnit->Unit_Collision_Radius * 1.414f);
+	if (targetUnit.lock()) {
+		Target = targetUnit.lock()->Position + olc::vf2d(targetUnit.lock()->Unit_Collision_Radius * 1.414f,
+			targetUnit.lock()->Unit_Collision_Radius * 1.414f);
 	}
 }
 
 void Unit::PerformAttack() {
 	auto& engine = Game_Engine::Current();
 	
-	if (targetUnit) {
+	if (targetUnit.lock()) {
 		if (bIsRanged) {
 			engine.worldManager->GenerateProjectile("ThrowingAxe", Position, targetUnit);
 		}
 		else {
-			targetUnit->Health -= fAttackDamage;
-			engine.particles->CreateParticles(targetUnit->Position);//Blood
+			targetUnit.lock()->Health -= fAttackDamage;
+			engine.particles->CreateParticles(targetUnit.lock()->Position);//Blood
 		}
 		//knockback here
 	}
-	else if (targetBuilding) {
-		targetBuilding->Health -= fAttackDamage;
+	else if (targetBuilding.lock()) {
+		if (bIsRanged) {
+			engine.worldManager->GenerateProjectile("ThrowingAxe", Position, targetBuilding);
+		}
+		else {
+			targetUnit.lock()->Health -= fAttackDamage;
+			engine.particles->CreateParticles(targetUnit.lock()->Position);//Blood
+		}
 	}	
-	fAttackCD = fSpellCooldown; // reset time for next attack
+	fAttackCD = fAttackSpeed; // reset time for next attack
 }
 
 void Unit::UpdatePosition(float delta) {
@@ -239,14 +245,17 @@ if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len 
 	else
 		Graphic_State = Walking;
 
-	if (repairedbuilding && Velocity.mag2() < 0.1f * 0.1f)
+	if (repairedbuilding.lock() && Velocity.mag2() < 0.1f * 0.1f)
 		bAnimating = true;
-	if (targetUnit && Velocity.mag2() < 0.1f * 0.1f)
+	if (targetUnit.lock() && Velocity.mag2() < 0.1f * 0.1f)
+		bAnimating = true;
+	if (targetBuilding.lock() && Velocity.mag2() < 0.1f * 0.1f)
 		bAnimating = true;
 
-	if (Health <= 0)
+	if (Health <= 0) {
 		Graphic_State = Dead;
-
+		Stop();
+	}
 	
 
 	if (Last_State != Graphic_State) {
