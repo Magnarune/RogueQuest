@@ -3,6 +3,9 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+
+
+
 Particles::Particles() {}
 
 Particles::~Particles() {
@@ -51,11 +54,6 @@ void Particles::GenerateSmoke(olc::vf2d position, olc::vf2d Size, bool dust) {//
 	}
 	//Instance.push_back({ 2.f, "Smoke" });
 }
-
-
-
-
-
 
 
 

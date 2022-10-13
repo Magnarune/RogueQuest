@@ -4,16 +4,12 @@
 #include "WorldObject.h"
 #include <queue>
 
-class Projectile : public Collidable
-{
-
-
+class Projectile : public Collidable {
 
 	Projectile();
 	static inline const float PI = 3.14159265358f;
 public:
 	virtual ~Projectile();
-
 
 	void Destroy() override;
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override { return false; };
@@ -22,15 +18,15 @@ public:
 
 	olc::vf2d direction;
 	std::weak_ptr<WorldObject> TargetPos;
-	float Damage; //Damage of projectile
-	float Speed; //Speed of projectile
-	float spincounter;
-	bool Spinning;
-	bool Traveling;
-	float PSpeed; //Speed of projectile
-	std::map<std::string, std::string> projectType
-	{{ "Arrow","Normal" },{"Axe","ThrowAxe"}
+	float Damage {}; //Damage of projectile
+	float Speed {}; //Speed of projectile
+	float spincounter {};
+	bool Spinning {};
+	bool Traveling {};
+	float PSpeed {}; //Speed of projectile
 
+	std::map<std::string, std::string> projectType {
+		{ "Arrow","Normal" }, {"Axe","ThrowAxe"}
 	};
 
 	std::string projType = "Normal"; // TO DO: Change to enum and load accordingly - OR remove altogether if deemed unecessary

@@ -13,7 +13,7 @@ class Particles {
 public:
 	void ImportEffectsAssets();
 	std::map<std::string, std::unique_ptr<olc::Decal>> Effectdecals;//All the Effects Png
-	float m_ftimer;
+	float m_ftimer {};
 	//					Timer		Type
 	std::vector<std::pair<float, std::string>> Instance; //.size() # of effects in game
 
@@ -56,32 +56,27 @@ public:
 
 
 
-#include <algorithm>
-
-using namespace olc;
 
 class Smoke {
 	friend class Particles;
 public:
-    Pixel col = Pixel(128, 128, 128, 128); //Pefect "Building"/ "Dust" colour;
-	Pixel colD = Pixel(80, 80, 80, 128);
-    vf2d size;
-    vf2d pos;
-    vf2d pos2;
+    olc::Pixel col = olc::Pixel(128, 128, 128, 128); //Pefect "Building"/ "Dust" colour;
+	olc::Pixel colD = olc::Pixel(80, 80, 80, 128);
+    olc::vf2d size;
+    olc::vf2d pos;
+    olc::vf2d pos2;
     float riseSpd;
     float fadeSpd = 1; //How much alpha to drop down per second.
 	bool Dusty;
     int freq = rand() % 2 + 1;
     float alpha = 128;
-    Smoke(vf2d size, vf2d pos, float riseSpd, float fadeSpd, bool Dusty)
-        :size(size), riseSpd(riseSpd), fadeSpd(fadeSpd), pos(pos), Dusty(Dusty) {
-        pos2 = pos + size / 8;
-    };
+    Smoke(olc::vf2d size, olc::vf2d pos, float riseSpd, float fadeSpd, bool Dusty):
+		size(size), riseSpd(riseSpd), fadeSpd(fadeSpd), pos(pos), pos2(pos + size / 8.f), Dusty(Dusty) {}
 
     void update(float fElapsedTime) {
         alpha = std::clamp(alpha - fadeSpd * fElapsedTime, 0.f, 255.f);
-        pos.y -= (riseSpd + rand() % 1000 / 1000.0F * riseSpd * 4) * fElapsedTime;
-        pos2.y -= (riseSpd + rand() % 1000 / 1000.0F * riseSpd * 3.5) * fElapsedTime;
+        pos.y -= (riseSpd + float(rand() % 1000) / 1000.0f * riseSpd * 4.f) * fElapsedTime;
+        pos2.y -= (riseSpd + float(rand() % 1000) / 1000.0f * riseSpd * 3.5f) * fElapsedTime;
         col.a = (int)alpha;
     }
 

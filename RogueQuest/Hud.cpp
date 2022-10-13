@@ -161,17 +161,17 @@ void Hud::DrawLeaderHud() {
     
     engine.DrawPartialDecal({ 0.f,0.f }, olc::vf2d({ SWitdh, 10.f }), decals["Background"].get(), { 0.f,0.f }, { 512.f,40.f });
 
-    engine.DrawPartialDecal({ SWitdh / 1.5f + 2.f, 1.f }, olc::vf2d({ 13.f, 9.f }), decals["mBox"].get(), { 0.f,0.f }, { 104.f,104.f });
-    engine.DrawPartialDecal({ SWitdh / 1.5f + 22.f, 1.f }, olc::vf2d({ 13.f, 9.f }), decals["mBox"].get(), { 0.f,0.f }, { 104.f,104.f });
-    engine.DrawPartialDecal({ SWitdh / 1.5f + 37.f, 1.f }, olc::vf2d({ 13.f, 9.f }), decals["mBox"].get(), { 0.f,0.f }, { 104.f,104.f });
-    
-    engine.DrawPartialDecal({ SWitdh / 1.5f + 2.f, 0.5f }, olc::vf2d({  13.f, 10.f }), decals["HealthBoxBackground"].get(), { 0.f,0.f }, { 128.f,32.f });
-    engine.DrawPartialDecal({ SWitdh / 1.5f + 22.f, 0.5f }, olc::vf2d({ 13.f, 10.f }), decals["HealthBoxBackground"].get(), { 0.f,0.f }, { 128.f,32.f });
-    engine.DrawPartialDecal({ SWitdh / 1.5f + 37.f, 0.5f }, olc::vf2d({ 13.f, 10.f }), decals["HealthBoxBackground"].get(), { 0.f,0.f }, { 128.f,32.f });
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 2.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 22.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 37.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
 
-    engine.DrawStringDecal(olc::vf2d({ SWitdh / 1.5f + 10, 4.f }), std::to_string(engine.leaders->LeaderList[1]->Gold), olc::YELLOW, {0.4,0.4});
-    engine.DrawStringDecal(olc::vf2d({ SWitdh / 1.5f + 28.f, 4.f }), std::to_string(engine.leaders->LeaderList[1]->Lumber), olc::GREEN, { 0.4,0.4 });
-    engine.DrawStringDecal(olc::vf2d({ SWitdh / 1.5f + 44.f, 4.f }), std::to_string(engine.leaders->LeaderList[1]->Food ),olc::CYAN, { 0.4,0.4 });
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 2.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 22.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 37.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
+
+    engine.DrawStringDecal(olc::vf2d(SWitdh / 1.5f + 10.f, 4.f), std::to_string(engine.leaders->LeaderList[1]->Gold), olc::YELLOW, {0.4f,0.4f});
+    engine.DrawStringDecal(olc::vf2d(SWitdh / 1.5f + 28.f, 4.f), std::to_string(engine.leaders->LeaderList[1]->Lumber), olc::GREEN, {0.4f,0.4f});
+    engine.DrawStringDecal(olc::vf2d(SWitdh / 1.5f + 44.f, 4.f), std::to_string(engine.leaders->LeaderList[1]->Food ),olc::CYAN, {0.4f,0.4f});
 
 
 }

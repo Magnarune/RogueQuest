@@ -32,7 +32,7 @@ public:
         struct {
             olc::vi2d tl, sz;
             size_t tex_id;
-        } head;
+        } head = {};
     };
 
     struct BuildingType {
@@ -53,7 +53,7 @@ public:
             olc::vi2d sz;
             olc::vi2d fsz;
             size_t tex_id;
-        } icon;
+        } icon = {};
     };
 
     struct ProjectileType {
