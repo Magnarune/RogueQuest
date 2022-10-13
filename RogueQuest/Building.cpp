@@ -60,6 +60,9 @@ void Building::SendUnit(std::shared_ptr<Unit> unit) {
 }
 
 void Building::Update(float delta){
+	if (Health < maxHealth) {
+		BuildingEffect();
+	}
 
 	if (productionQue.size() > 0 && !startbuilding) {
 		startbuilding = true;
@@ -74,6 +77,14 @@ void Building::Update(float delta){
 		Collidable::Destroy();
 
 	Collidable::Update(delta); // Inherit
+}
+
+void Building::BuildingEffect() {
+	auto& engine = Game_Engine::Current();
+	if (!fire) {
+		
+		fire = true;
+	}
 }
 
 void Building::Draw(olc::TileTransformedView* gfx){

@@ -81,18 +81,20 @@ bool Game_Engine::OnUserCreate() {
     assetManager->LoadCursorAssets();   // Load all the Cursors files
     worldManager->ImportMapData();      // Load all the Lua Map files
     hud->ImportHudAssets();      // Load all the Hud files
-
+    particles->ImportEffectsAssets();
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
 
-    worldManager->ChangeMap("Basic");
+    worldManager->ChangeMap("Terra");
     SetPixelMode(olc::Pixel::ALPHA);
     ConsoleCaptureStdOut(true);     
     Clear(olc::Pixel(100,164,44,255));
     optionsManager->SetGuiMenu("MainMenu");
     ShowSystemCursor(false); 
 
-    leaders->AddLeader(5);
+    leaders->AddLeader(5);//add Main Menu
+    Camera.vPOS = { 30.f,30.f };
+    tv.SetWorldOffset(Camera.vPOS);
 
     curCursor = assetManager->GetCursor("default");
     SetLocked(true);
@@ -255,7 +257,7 @@ const std::map<std::string, CommandFunction> commands = {
             auto unit = engine.unitManager->GetUnit(name, i);
             if(unit) {
                 unit->Health -= 1000.f;
-                engine.particles->CreateParticles(unit->Position);            
+                engine.particles->GenerateBlood(unit->Position);            
                 std::cout << name << " #" << i << " destroyed\n";
             }
         }

@@ -144,8 +144,13 @@ void Unit::TrytoBuild(const std::string& name,const olc::vf2d& target) {
 }
 
 void Unit::RepairBuilding() {
+	auto& engine = Game_Engine::Current();
 	if (repairedbuilding.lock()) {
-		repairedbuilding.lock()->Health += 0.1f;
+		repairedbuilding.lock()->Health += 0.2f;
+		if (execTimeout.getMilliseconds() > 50) {
+			engine.particles->GenerateSmoke(repairedbuilding.lock()->Position, olc::vf2d(repairedbuilding.lock()->Size), true);			
+			execTimeout.restart();
+		}
 		if (repairedbuilding.lock()->curStage == "Construction" && repairedbuilding.lock()->Health >= repairedbuilding.lock()->maxHealth) {
 			repairedbuilding.lock()->curStage = "Level one";
 			repairedbuilding.reset();
@@ -193,7 +198,7 @@ void Unit::PerformAttack() {
 		}
 		else {
 			targetUnit.lock()->Health -= fAttackDamage;
-			engine.particles->CreateParticles(targetUnit.lock()->Position);//Blood
+			engine.particles->GenerateBlood(targetUnit.lock()->Position);//Blood
 		}
 		//knockback here
 	}
@@ -202,8 +207,8 @@ void Unit::PerformAttack() {
 			engine.worldManager->GenerateProjectile("ThrowingAxe", Position, targetBuilding);
 		}
 		else {
-			targetUnit.lock()->Health -= fAttackDamage;
-			engine.particles->CreateParticles(targetUnit.lock()->Position);//Blood
+			targetBuilding.lock()->Health -= fAttackDamage;
+			engine.particles->GenerateSmoke(targetBuilding.lock()->Position, olc::vf2d(targetBuilding.lock()->Size), false);//Blood
 		}
 	}	
 	fAttackCD = fAttackSpeed; // reset time for next attack

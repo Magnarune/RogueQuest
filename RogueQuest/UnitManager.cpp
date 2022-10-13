@@ -59,6 +59,8 @@ UnitManager::UnitManager() {
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
              engine.worldManager->GenerateBuilding(unit->buildName,unit->Owner, unit->Target.value() - unit->buildingSize / 2.f);
+             engine.particles->GenerateSmoke(unit->Target.value() - unit->buildingSize / 2.f, unit->buildingSize, true);
+             engine.particles->GenerateSmoke(unit->Target.value() - unit->buildingSize / 2.f, unit->buildingSize, true);
              return true;
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
@@ -399,6 +401,7 @@ void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<
     }else
         _build.reset();
 }
+
 
 std::vector<std::shared_ptr<Collidable>> UnitManager::FindObjects(olc::vf2d pos, float SearchRadius) {
     testobjects.clear();

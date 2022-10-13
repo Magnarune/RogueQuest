@@ -98,3 +98,17 @@ void BuildingManager::StopBuilding() {
         building->Stop();
     }
 }
+
+std::shared_ptr<Building> BuildingManager::This_Building(olc::vf2d pos) {
+    std::shared_ptr<Building> thisBuild;
+    for (auto& _build: BuildingList) {
+        if (_build.expired())
+            continue;
+        auto build = _build.lock();
+
+        if (build->Position == pos) {
+            thisBuild = build;
+        }
+    }
+    return thisBuild;
+}

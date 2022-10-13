@@ -23,7 +23,7 @@ void Projectile::Update(float fElapsedtime) {
     if (TargetPos.lock()) {
         if ((TargetPos.lock()->Position - Position).mag2() < 64) {
             TargetPos.lock()->Health -= Damage;
-            engine.particles->CreateParticles(TargetPos.lock()->Position);
+            engine.particles->GenerateBlood(TargetPos.lock()->Position);
             Destroy();
         }
     }

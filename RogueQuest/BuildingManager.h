@@ -24,6 +24,9 @@ public:
     void Update(float delta);
     void CollectGarbage();
 
+
+
+    std::shared_ptr<Building> This_Building(olc::vf2d Pos);
     void StopBuilding();
     //void MoveUnits(olc::vf2d Target, bool Attackstate);
     void SelectBuilding(olc::vf2d Mouse);

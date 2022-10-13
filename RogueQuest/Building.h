@@ -22,7 +22,7 @@ public:
 	void Update(float delta) override;
 	void Destroy() override;
 	void Stop();
-
+	void BuildingEffect();
 	virtual ~Building();
 	bool bFriendly;
 	std::string name;
@@ -46,6 +46,9 @@ public:
 	int Owner;
 	std::vector<int> FriendList;
 	
+	bool fire;
+	bool effect;
+
 	bool bSelected;	
 	float maxHealth;
 	int Stage;//What stage is this in? lvl 1 house lvl 2 house etc

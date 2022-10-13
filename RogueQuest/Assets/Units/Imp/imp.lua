@@ -45,8 +45,8 @@ return
 	},
 	Stats =
 	{
-		Health = 100,
-		MaxHealth = 100,
+		Health = 500,
+		MaxHealth = 500,
 		Mana = 20,
 		MaxMana = 20,
 		Ammo = 0, 

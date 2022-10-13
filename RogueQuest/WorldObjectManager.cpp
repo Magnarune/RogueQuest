@@ -32,11 +32,11 @@ void WorldManager::Draw() {//Draw
     Game_Engine& engine = Game_Engine::Current();
 
     currentMap->DrawMap(&engine.tv);
-    engine.particles->DrawDestroyParticles();
     for (auto& object : objectList) {
         if (object == nullptr) continue;
         object->Draw(&engine.tv);
     }
+    engine.particles->DrawParticles();
     
 }
 
