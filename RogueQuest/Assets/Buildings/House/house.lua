@@ -48,8 +48,8 @@ return
 	},
 	Stats =
 	{
-		Health = 550,
-		MaxHealth = 550,      
+		Health = 120,
+		MaxHealth = 120,      
 		AttackRange = 0, 
 		AttackDamage = 0,
 		AttackSpeed = 1

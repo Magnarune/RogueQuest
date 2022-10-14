@@ -169,8 +169,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
         unit->textureMetadata.insert_or_assign(state, meta);
     }
     unit->bFriendly = true;
-    if (unit->sUnitName == "Goblin" )//|| unit->sUnitName == "Imp")
-        if (engine.config->GetValue<bool>("Evil") == true) unit->bFriendly = false;
+   
 
     unit->SetMask(Collidable::Mask(unit->Unit_Collision_Radius));
     unit->cType = Collidable::isUnit;
@@ -179,7 +178,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     return unit;
 }
 
-std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name, int owner,olc::vf2d pos ) {
+std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name, int owner, olc::vf2d pos) {
     Game_Engine& engine = Game_Engine::Current();
     auto to_vi2d = [](sol::table obj) -> olc::vi2d {
         int32_t x = obj[1],
@@ -194,9 +193,10 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
 
     if (pos == olc::vf2d(0.f, 0.f))
         pos = { 10.f,10.f };
-	build->predPosition = build->Position = pos;
+    build->predPosition = build->Position = pos;
     build->name = data.lua_data["Name"];
-  
+
+    
 
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];
@@ -227,6 +227,11 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     for(auto& [ name, meta ] : data.texture_metadata){
         const Building::GFXState& state = States[name]; // local state ref
         // load a decal texture and add to decal map
+
+        if (meta.level_offsets.size() < build->Level.size()) {
+            build->Level.erase(std::prev(build->Level.end()));
+        }
+
         std::unique_ptr<olc::Decal> decal;
         decal.reset(new olc::Decal(TextureCache::GetCache().GetTexture(meta.tex_id)));
         build->decals.insert_or_assign(state, std::move(decal));

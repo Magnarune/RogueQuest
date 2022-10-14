@@ -149,8 +149,7 @@ void Unit::RepairBuilding() {
 			engine.particles->GenerateSmoke(repairedbuilding.lock()->Position, olc::vf2d(repairedbuilding.lock()->Size), true);			
 			execTimeout.restart();
 		}
-		if (repairedbuilding.lock()->curStage == "Construction" && repairedbuilding.lock()->Health >= repairedbuilding.lock()->maxHealth) {
-			repairedbuilding.lock()->curStage = "Level one";
+		if (repairedbuilding.lock()->curStage == 0 && repairedbuilding.lock()->Health >= repairedbuilding.lock()->maxHealth) {
 			repairedbuilding.reset();
 		}
 	}
@@ -223,7 +222,8 @@ void Unit::UpdatePosition(float delta) {
 				currentTask->performTask();
 			Velocity = { 0.f,0.f };
 		}
-	}
+	}else
+		Velocity = { 0.f,0.f };
 	//HitVelocity *= std::pow(0.05f, delta);
 	//if (HitVelocity.mag2() < 4.f)
 	//	HitVelocity = { 0.f, 0.f };

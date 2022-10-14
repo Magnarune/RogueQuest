@@ -122,4 +122,5 @@ public:
     size_t CreateTexture(const std::string& path); // create texture and load from file
     olc::Sprite* GetTexture(size_t texid); // get the sprite from the texture id
     friend class Building;
+    friend class WorldManager;
 };

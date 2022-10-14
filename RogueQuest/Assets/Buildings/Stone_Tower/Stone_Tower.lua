@@ -10,7 +10,7 @@ return
 	{
 		{
 			Name = "Normal",
-			TargetSize = { 64, 64 },--Size of Building
+			TargetSize = { 32, 64 },--Size of Building
 			FileName = "Assets/Buildings/Stone_Tower/Stone_Tower.png",
 			LevelOffsets = {
 				{
@@ -26,19 +26,19 @@ return
 				{
 					Name = "Level two",
 					Offset = {491, 200},
-					TileSize = {251, 481}
+					TileSize = {231, 481}
 				},
 				{
 					Name = "Level three",
-					Offset = {729, 0},
-					TileSize = {139, 681}
+					Offset = {724, 0},
+					TileSize = {200, 681}
 				}
 			},
 		},
 	},
 	Parameters =
 	{
-		CollisionSize = {64,64},
+		CollisionSize = {32,64},
 		BuildTime = 10
 	},
 	Stats =

@@ -14,6 +14,9 @@ class Building: public Collidable {
 	Building();
 public:
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
+
+	void UpgradeBuilding();
+
 	void ProduceUnit(const std::string& unit);
 	void SentUnitlocation(olc::vf2d pos);
 	void SendUnit(std::shared_ptr<Unit> unit);
@@ -49,7 +52,15 @@ public:
 	//       stage  offset
 
 	//std::vector<std::string> Stage;
-	std::string curStage = "Construction"; // current stage - oof good luck with this
+	std::map<int, std::string> Level{
+		{0,"Construction"},
+		{1, "Level one"},
+		{2, "Level two"},
+		{3, "Level three"},
+		{4, "Level four"}
+	};
+	int curStage = 0; // current stage - oof good luck with this
+
 	Clock execTimeout;
 	int Owner;
 	std::vector<int> FriendList;

@@ -12,6 +12,11 @@ bool Building::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap
 	return false;
 }
 
+void Building::UpgradeBuilding() {
+	if(curStage < Level.size())
+		curStage += 1;
+}
+
 void Building::Destroy() {
 	Collidable::Destroy();
 }
@@ -80,6 +85,12 @@ void Building::Update(float delta){
 		BuildingEffect();
 	}
 
+	if (Health > maxHealth) {
+		UpgradeBuilding();
+		Health = maxHealth;
+		Health -= 10;
+	}
+
 	if (productionQue.size() > 0 && !startbuilding) {
 		startbuilding = true;
 		m_fTimer = 0.f;
@@ -105,7 +116,7 @@ void Building::BuildingEffect() {
 
 void Building::Draw(olc::TileTransformedView* gfx){
 	const auto& meta = textureMetadata.at(Graphic_State);
-	const auto& stage = meta.level_offsets.at(curStage);
+	const auto& stage = meta.level_offsets.at(Level[curStage]);
 	Collidable::Draw(gfx); // inherit
-	gfx->DrawPartialDecal(Position, Size, decals[Graphic_State].get(), stage.offset, stage.tile_size, bSelected ? olc::WHITE : olc::GREY);
+	gfx->DrawPartialDecal(Position, meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size, bSelected ? olc::WHITE : olc::GREY);
 }

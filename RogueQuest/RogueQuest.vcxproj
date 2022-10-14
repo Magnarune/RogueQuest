@@ -235,6 +235,7 @@
     <ClInclude Include="WorldObjectManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Buildings\Castle\Castle.lua" />
     <None Include="Assets\Buildings\House\house.lua" />
     <None Include="Assets\Buildings\Stone_Tower\Stone_Tower.lua" />
     <None Include="Assets\Gui\cursors.lua" />

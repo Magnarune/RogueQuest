@@ -61,12 +61,7 @@ void HudManager::UnitsSelected(size_t ucount) {
         if (!_types.count(unit->sUnitName)) _types.insert_or_assign(unit->sUnitName, 0);
         ++_types[unit->sUnitName];
         return true;
-
-
-
-        });
-
-  
+        });  
         int i = 0;
         const size_t max_units = 30;
     for (const auto& [name, count] : _types) {
@@ -195,12 +190,12 @@ void HudManager::BuildingAbilities(std::shared_ptr<Building> building) {
             engine.hud->loadImage(_refname, data.head.tex_id);
         }
         olc::Decal* decal = engine.hud->decals[_refname].get();
-        float yoffset = i < 3 ? 0 : (i < 20 ? 16.f : 32.f);
+        float yoffset = i < 3 ? 0 : (i < 6 ? 16.f : 32.f);
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.f,16.f }, decal, data.head.tl, data.head.sz);
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
 
-        if (engine.inputmanager->Button({ 186.f + 16.f * (i % 3), IconY - 12.f + 0 }, engine.GetMousePos(), { 16,16 })) {
+        if (engine.inputmanager->Button({ 186.f + 16.f * (i % 3), IconY - 12.f + yoffset }, engine.GetMousePos(), { 16,16 })) {
             building->productionQue.push(building->unitproduction[i]); 
         }
     }
