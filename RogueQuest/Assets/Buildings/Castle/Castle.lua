@@ -54,5 +54,5 @@ return
 		Units = {"Mage", "Sara", "Builder", "Archer","Goblin","Imp","Spider"},
 		Research = {"Armor", "Weapon", "Boots"}
 	},
-	Projectiles ={""}
+	Projectiles ={"","Arrow","ThrowingAxe","Bolt"}
 }

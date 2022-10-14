@@ -187,7 +187,8 @@ void cAssets::LoadProjectileAssets() {
     };
     const std::vector<std::string> filePaths = { //
         "Assets/Projectiles/Arrows/arrow.lua",
-        "Assets/Projectiles/Axe/ThrowAxe.lua"
+        "Assets/Projectiles/Axe/ThrowAxe.lua",
+        "Assets/Projectiles/Bolt/Bolt.lua"
     };
 
     for (const auto& path : filePaths) {

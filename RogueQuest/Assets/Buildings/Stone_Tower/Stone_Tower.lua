@@ -38,7 +38,7 @@ return
 	},
 	Parameters =
 	{
-		CollisionSize = {32,64},
+		CollisionSize = {32,32},
 		BuildTime = 10
 	},
 	Stats =
@@ -53,5 +53,5 @@ return
 	{
 		Units = {""}
 	},
-	Projectiles = {"Arrow","Axe","Bolt"	}
+	Projectiles = {"","Arrow","ThrowingAxe","Bolt"	}
 }

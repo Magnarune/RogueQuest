@@ -13,7 +13,7 @@ bool Building::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap
 }
 
 void Building::UpgradeBuilding() {
-	if(curStage < Level.size())
+	if(curStage < Level.size()-1)
 		curStage += 1;
 }
 
@@ -28,11 +28,11 @@ void Building::BuildingBehaviour() {
 		execTimeout.restart();
 	}
 	if (BuildTarget.lock() && AttackCD <0.f) {
-		engine.worldManager->GenerateProjectile("ThrowingAxe", Position + olc::vf2d(Size) / 2.f, BuildTarget);
+		engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position + olc::vf2d(Size) / 2.f, BuildTarget);
 		AttackCD = AttackSpeed;
 	}
 	if (UnitTarget.lock() && AttackCD <= 0.f) {
-		engine.worldManager->GenerateProjectile("ThrowingAxe", Position + olc::vf2d(Size) / 2.f, UnitTarget);
+		engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position + olc::vf2d(Size) / 2.f, UnitTarget);
 		AttackCD = AttackSpeed;
 	}
 
@@ -57,7 +57,7 @@ void Building::ProduceUnit(const std::string& unitName) {
 
 	if (m_fTimer > productiontime) {
 		if (!productionQue.empty()) productionQue.pop();		
-		SendUnit(engine.worldManager->GenerateUnit(unitName,Owner, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
+		SendUnit(engine.worldManager->GenerateUnit(unitName, Owner, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
 		building = false;
 		startbuilding = false;
 	}
@@ -116,7 +116,7 @@ void Building::BuildingEffect() {
 
 void Building::Draw(olc::TileTransformedView* gfx){
 	const auto& meta = textureMetadata.at(Graphic_State);
-	const auto& stage = meta.level_offsets.at(Level[curStage]);
+	const auto& stage = meta.level_offsets.at(Level.at(curStage));
 	Collidable::Draw(gfx); // inherit
 	gfx->DrawPartialDecal(Position, meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size, bSelected ? olc::WHITE : olc::GREY);
 }

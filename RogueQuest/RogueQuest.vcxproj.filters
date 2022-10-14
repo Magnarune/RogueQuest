@@ -247,6 +247,9 @@
     <None Include="Assets\Buildings\Castle\Castle.lua">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="Assets\Projectiles\Bolt\Bolt.lua">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Assets\Projectiles\Arrows\arrow.lua">

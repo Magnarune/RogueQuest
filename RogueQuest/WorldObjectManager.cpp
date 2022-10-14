@@ -229,7 +229,8 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
         // load a decal texture and add to decal map
 
         if (meta.level_offsets.size() < build->Level.size()) {
-            build->Level.erase(std::prev(build->Level.end()));
+            //build->Level.erase(std::prev(build->Level.end()));
+            build->Level.erase((*++build->Level.rend()).first);
         }
 
         std::unique_ptr<olc::Decal> decal;
