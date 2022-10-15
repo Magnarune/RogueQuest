@@ -12,6 +12,11 @@
 #include <queue>
 #include <iostream>
 #include "Projectiles.h"
+#include "Utilities.h"
+
+
+
+
 class Unit : public Collidable  {
 
 
@@ -28,10 +33,14 @@ class Unit : public Collidable  {
 	void UpdatePosition(float felapstedtime);
 	void Stop();//fine
 	
+	void Gather();
+	void Deliver();
+
 	void Update(float fElapsedTime) override; //remake
 	void AfterUpdate(float delta) override;
 	void Draw(olc::TileTransformedView* gfx) override;//good
-
+	//void FillCircleDecal(olc::vf2d pos, float radius, olc::Pixel col = olc::WHITE,);
+	void DrawCircleDecal(olc::vf2d pos, float radius, olc::Pixel col,olc::TileTransformedView * gfx);
 public:
 	Unit(const cAssets::UnitType& unitType);
 	virtual ~Unit();
@@ -52,6 +61,14 @@ public:
 	std::shared_ptr<TaskManager::Task> HoldTask;
 	bool Taskpaused;
 	
+	//circle for debugging will be moved soon :)
+
+
+
+
+	int Gold;
+	std::weak_ptr<Building> HomeBase;
+	std::weak_ptr<Building> MineTarget;
 
 
 	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both

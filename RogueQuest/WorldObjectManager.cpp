@@ -200,10 +200,17 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
 
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];
-    build->Health = 0.1f;    
+    build->Interactable = data.lua_data["Parameters"]["Interactable"];
+    
    // build->health = data.lua_data["Stats"]["Health"];
     build->Health = 0.4f;
     build->maxHealth = data.lua_data["Stats"]["MaxHealth"];
+    if (build->Interactable) 
+        build->Health = build->maxHealth;      
+    
+    build->isMine = data.lua_data["Stats"]["isMine"];
+    if(build->isMine == true)
+        build->Gold = data.lua_data["Production"]["Gold"];
     build->AttackSpeed = data.lua_data["Stats"]["AttackSpeed"];
     build->Owner = owner;
     build->FriendList = InitializeObject(owner);

@@ -45,5 +45,5 @@ public:
 
     friend class WorldManager;
     friend class TaskManager;
-    friend class UnitManager;
+   // friend class UnitManager;
 };

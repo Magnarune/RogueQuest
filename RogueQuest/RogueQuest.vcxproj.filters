@@ -90,6 +90,9 @@
     <ClCompile Include="tempParticles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -200,6 +203,9 @@
     <ClInclude Include="tempParticles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Units\Mage\Mage.lua">
@@ -249,6 +255,9 @@
     </None>
     <None Include="Assets\Projectiles\Bolt\Bolt.lua">
       <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Buildings\Mine\GoldMine.lua">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -60,6 +60,17 @@ void Unit::UnitBehaviour() {
 	}
 }
 
+void Unit::Gather() {
+	MineTarget.lock()->Gold -= 25;
+	Gold += 25;
+}
+
+void Unit::Deliver() {
+	auto& engine = Game_Engine::Current();
+	engine.leaders->LeaderList[Owner]->Gold += 25;
+	Gold -= 25;
+}
+
 bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 
 	if (other.get() == this) return true; // act as a continue
@@ -201,7 +212,7 @@ void Unit::PerformAttack() {
 	}
 	else if (targetBuilding.lock()) {
 		if (bIsRanged) {
-			engine.worldManager->GenerateProjectile("ThrowingAxe", Position, targetBuilding);
+			engine.worldManager->GenerateProjectile("Arrow", Position, targetBuilding);
 		}
 		else {
 			targetBuilding.lock()->Health -= fAttackDamage;
@@ -318,23 +329,69 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 	}
 	gfx->DrawPartialDecal((Position - Origin), decals[Graphic_State].get(),
 		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, bSelected ? olc::WHITE : olc::GREY);
-	if (bSelected == true) {
+	
+	if (bSelected == true) {//Debug Selection
+		static Circle debugCircle{ 512.f };
 
-		//gfx->DrawLineDecal((Position)+olc::vf2d(-AgroRange, 0), (Position)+olc::vf2d(AgroRange, 0), olc::RED);//AggroRange
-		//gfx->DrawLineDecal((Position)+olc::vf2d(0, -AgroRange), (Position)+olc::vf2d(0, AgroRange), olc::RED);
-		//gfx->DrawLineDecal((Position)+olc::vf2d(AgroRange, -AgroRange) * sqrtf(2) / 2, (Position)+olc::vf2d(-AgroRange, AgroRange) * sqrtf(2) / 2, olc::RED);
-		//gfx->DrawLineDecal((Position)+olc::vf2d(-AgroRange, -AgroRange) * sqrtf(2) / 2, (Position)+olc::vf2d(AgroRange, AgroRange) * sqrtf(2) / 2, olc::RED);
+		debugCircle.position = Position;
+		debugCircle.radius = olc::vf2d(AgroRange,AgroRange);		
+		debugCircle.Draw();
 
-		//gfx->DrawLineDecal((Position)+olc::vf2d(-fAttackRange, 0), (Position)+olc::vf2d(fAttackRange, 0), olc::BLUE);//Attack Range
-		//gfx->DrawLineDecal((Position)+olc::vf2d(0, -fAttackRange), (Position)+olc::vf2d(0, fAttackRange), olc::BLUE);
-		//gfx->DrawLineDecal((Position)+olc::vf2d(fAttackRange, -fAttackRange) * sqrtf(2) / 2, (Position)+olc::vf2d(-fAttackRange, fAttackRange) * sqrtf(2) / 2, olc::BLUE);
-		//gfx->DrawLineDecal((Position)+olc::vf2d(-fAttackRange, -fAttackRange) * sqrtf(2) / 2, (Position)+olc::vf2d(fAttackRange, fAttackRange) * sqrtf(2) / 2, olc::BLUE);
+		debugCircle.radius = olc::vf2d(Unit_Collision_Radius, Unit_Collision_Radius);
+		debugCircle.col =olc::Pixel(0x700F0AAA);
+		debugCircle.Draw();
 
-		//gfx->DrawLineDecal((Position)+olc::vf2d(-Unit_Collision_Radius, 0), (Position)+olc::vf2d(Unit_Collision_Radius, 0), olc::GREY);//Collision Radius
-		//gfx->DrawLineDecal((Position)+olc::vf2d(0, -Unit_Collision_Radius), (Position)+olc::vf2d(0, Unit_Collision_Radius), olc::GREY);
-		//gfx->DrawLineDecal((Position)+olc::vf2d(Unit_Collision_Radius, -Unit_Collision_Radius) * sqrtf(2) / 2, (Position)+olc::vf2d(-Unit_Collision_Radius, Unit_Collision_Radius) * sqrtf(2) / 2, olc::GREY);
-		//gfx->DrawLineDecal((Position)+olc::vf2d(-Unit_Collision_Radius, -Unit_Collision_Radius) * sqrtf(2) / 2, (Position)+olc::vf2d(Unit_Collision_Radius, Unit_Collision_Radius) * sqrtf(2) / 2, olc::GREY);
 
+		DrawCircleDecal(Position, AgroRange, olc::DARK_RED, gfx);
+		DrawCircleDecal(Position, Unit_Collision_Radius, olc::GREEN, gfx);
+		
+		
+		
+		
+		//DrawCircleDecal(Position, fAttackRange, olc::BLACK, gfx);
+		if (Target.has_value()){
+			gfx->DrawLineDecal(Position, Target.value());
+		
+			if (ActionZone > olc::vf2d(0.f, 0.f)) {
+				
+				DrawCircleDecal(Target.value(), ActionZone.mag(), olc::WHITE, gfx);
+				//gfx->DrawLineDecal({Target.value().x- ActionZone.mag(), Target.value().y}, {Target.value().x+ActionZone.mag() ,Target.value().y});
+				//gfx->DrawLineDecal({ Target.value().x, Target.value().y - ActionZone.mag() }, { Target.value().x , Target.value().y+ ActionZone.mag()});
+
+			}
+		}
 
 	}
 }
+
+int CIRCLE_PRECISION = 32;
+void Unit::DrawCircleDecal(olc::vf2d pos, float radius, olc::Pixel col, olc::TileTransformedView* gfx) {
+	auto& engine = Game_Engine::Current();
+	std::vector<olc::vf2d> poly;
+	std::vector<olc::vf2d> uvs;
+	for (int i = 0; i < CIRCLE_PRECISION; i++) {
+		poly.push_back({ pos.x + sinf(2 * 3.14159f / CIRCLE_PRECISION * i) * radius,pos.y + cosf(2 * 3.14159f / CIRCLE_PRECISION * i) * radius });
+		uvs.push_back({ 0,0 });
+	}
+	poly.push_back(poly[0]);
+	uvs.push_back({ 0,0 });
+	engine.SetDecalStructure(olc::DecalStructure::LINE);
+	engine.SetDecalMode(olc::DecalMode::WIREFRAME);
+	gfx->DrawPolygonDecal(nullptr, poly, uvs, col);
+	engine.SetDecalMode(olc::DecalMode::NORMAL);
+	engine.SetDecalStructure(olc::DecalStructure::FAN);
+}
+
+//void Unit::FillCircleDecal(vf2d pos, float radius, Pixel col = WHITE) {
+//	std::vector<vf2d> poly;
+//	std::vector<vf2d> uvs;
+//	poly.push_back(pos);
+//	uvs.push_back({ 0,0 });
+//	for (int i = 0; i < CIRCLE_PRECISION; i++) {
+//		poly.push_back({ pos.x + sinf(2 * M_PI / CIRCLE_PRECISION * i) * radius,pos.y + cosf(2 * M_PI / CIRCLE_PRECISION * i) * radius });
+//		uvs.push_back({ 0,0 });
+//	}
+//	poly.push_back(poly[1]);
+//	uvs.push_back({ 0,0 });
+//	DrawPolygonDecal(nullptr, poly, uvs, col);
+//}

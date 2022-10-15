@@ -24,18 +24,19 @@ void Building::Destroy() {
 void Building::BuildingBehaviour() {
 	auto& engine = Game_Engine::Current();
 	if (execTimeout.getMilliseconds() > 400) {
-		engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner, Position + olc::vf2d(Size)/2.f, 120.f), BuildTarget, UnitTarget);
+		engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner, Position + olc::vf2d(Size) / 2.f, 120.f), BuildTarget, UnitTarget);
 		execTimeout.restart();
 	}
-	if (BuildTarget.lock() && AttackCD <0.f) {
-		engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position + olc::vf2d(Size) / 2.f, BuildTarget);
-		AttackCD = AttackSpeed;
+	if (AttackTypes.size() > 1){
+		if (BuildTarget.lock() && AttackCD < 0.f) {
+			engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position + olc::vf2d(Size) / 2.f, BuildTarget);
+			AttackCD = AttackSpeed;
+		}
+		if (UnitTarget.lock() && AttackCD <= 0.f) {
+			engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position + olc::vf2d(Size) / 2.f, UnitTarget);
+			AttackCD = AttackSpeed;
+		}
 	}
-	if (UnitTarget.lock() && AttackCD <= 0.f) {
-		engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position + olc::vf2d(Size) / 2.f, UnitTarget);
-		AttackCD = AttackSpeed;
-	}
-
 }
 
 void Building::Stop() {
@@ -119,4 +120,10 @@ void Building::Draw(olc::TileTransformedView* gfx){
 	const auto& stage = meta.level_offsets.at(Level.at(curStage));
 	Collidable::Draw(gfx); // inherit
 	gfx->DrawPartialDecal(Position, meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size, bSelected ? olc::WHITE : olc::GREY);
+	
+	gfx->DrawLineDecal(Position, { Position.x + Size .x,Position.y });//collision box
+	gfx->DrawLineDecal(Position, { Position.x ,Position.y + Size.y });
+	gfx->DrawLineDecal(Position + Size, { Position.x,Position.y + Size.y });
+	gfx->DrawLineDecal(Position + Size, { Position.x + Size.x,Position.y  });
+
 }

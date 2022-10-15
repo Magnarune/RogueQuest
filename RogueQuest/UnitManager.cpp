@@ -52,7 +52,7 @@ UnitManager::UnitManager() {
             const std::string& buildingname = params.first;// Only allowed two >.<
             const olc::vf2d& target = params.second;
             unit->TrytoBuild(buildingname, target);
-            unit->ActionZone = olc::vf2d(32.f, 32.f);//Fix this
+            unit->ActionZone = olc::vf2d(std::max(unit->buildingSize.x, unit->buildingSize.y), std::max(unit->buildingSize.x, unit->buildingSize.y)) * 0.707;
              return true;
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool {
@@ -81,8 +81,9 @@ UnitManager::UnitManager() {
             const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, olc::vf2d>>(arguments.second);            
             const std::weak_ptr<Building> &build = params.first;
             const olc::vf2d& target = params.second;
-            unit->Target = build.lock()->Position + unit->buildingSize / 2.f;
-            unit->ActionZone = olc::vf2d(32.f, 32.f);
+            
+            unit->Target = build.lock()->Position + olc::vf2d(build.lock()->Size) / 2.f;
+            unit->ActionZone = olc::vf2d(std::max(build.lock()->Size.x, build.lock()->Size.y), std::max(build.lock()->Size.x, build.lock()->Size.y)) * 0.707f;
             unit->repairedbuilding = build;
             return true;
          },
@@ -163,6 +164,62 @@ UnitManager::UnitManager() {
              return false;
          }
          , 0, olc::Key::A });
+
+        taskMgr.RegisterTask("Gather",
+        { [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+            // required
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;
+            if (!FindHomeBase(unit))//If their is no home base you cant Mine
+                return false;
+            // customizable parameters
+            const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, olc::vf2d>>(arguments.second);
+            const std::weak_ptr<Building>& build = params.first;
+            if (!build.lock()->isMine)//If this building selected is not a mine you cant mine
+                return false;
+            const olc::vf2d& target = params.second;
+            unit->MineTarget = build;
+            unit->ActionZone = olc::vf2d(32.f, 32.f);//This is Wrong fix later
+            unit->Target = build.lock()->Position + olc::vf2d(build.lock()->Size) / 2.f;
+            if(unit->Gold > 0)
+                unit->currentTask->performTask();
+            return true;
+         },
+
+        [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+            auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+            auto& unit = arguments.first;
+            if (unit->Gold == 0) {//Go some Gather animations here
+                unit->Gather();
+            }
+            
+            if (unit->Gold > 0 && unit->Target !=  unit->HomeBase.lock()->Position + unit->HomeBase.lock()->Size / 2.f) {//Change Take to Delivery
+                unit->Target = unit->HomeBase.lock()->Position + olc::vf2d(unit->HomeBase.lock()->Size) / 2.f;
+                unit->ActionZone = olc::vf2d(std::max(unit->HomeBase.lock()->Size.x, unit->HomeBase.lock()->Size.y), 
+                                            std::max(unit->HomeBase.lock()->Size.x, unit->HomeBase.lock()->Size.y)) * 0.707f;
+                return true;//This is Dangerous but will work for now
+
+           }
+            if (unit->Gold > 0) {//If I have gold and have triggered preform task
+                unit->Deliver();
+
+                unit->ActionZone = olc::vf2d(32.f, 32.f);//Restart Gather
+                unit->Target = unit->MineTarget.lock()->Position + olc::vf2d(unit->MineTarget.lock()->Size) / 2.f;
+            }
+
+
+            return true;
+         },
+         [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
+             // required
+             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+             auto& unit = arguments.first;
+             if (unit->MineTarget.expired() || unit->MineTarget.lock()->Gold < 0) {
+                 return true;
+            }
+             return false;
+         }
+         , 0, olc::Key::R }); // metadata , hotkey
 
 }
 
@@ -376,17 +433,19 @@ std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
             return unit;
         }
     }
-    for (auto& _build : engine.buildingManager->BuildingList) {
-        if (_build.expired())
-            continue;
-        auto build = _build.lock();
+
+    std::shared_ptr<Collidable> testBuild;
+    engine.buildingManager->IterateAllBuildings([&](std::shared_ptr<Building> build) -> bool {
         const float& sz = (build->Size.x + build->Size.y) / 2.f;
         const float r2 = 0;
         if ((build->Position - Mouse).mag2() < (sz * sz + r2 * r2)) {
-            return build;
+           testBuild = build;
+            return false;
         }
-    }  
-    return {};
+        return true;
+    });
+   
+    return testBuild;//I hole this works
 }
 
 void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit) {
@@ -412,12 +471,14 @@ std::vector<std::shared_ptr<Collidable>> UnitManager::FindObjects(olc::vf2d pos,
              testobjects.push_back(unit);
         }
     }
-    for (auto& _build : engine.buildingManager->BuildingList) {
-        auto build = _build.lock();
+
+    engine.buildingManager->IterateAllBuildings([&](std::shared_ptr<Building> build) -> bool {
         if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x)) {
             testobjects.push_back(build);
-        }
-    }
+        }       
+        return true;
+    });
+    
     return testobjects;
 }
 
@@ -508,4 +569,19 @@ std::shared_ptr<Unit> UnitManager::This_shared_pointer(olc::vf2d pos) {
         }
     }
     return thisUnit;
+}
+
+bool UnitManager::FindHomeBase(std::shared_ptr<Unit>& unit) {
+    auto& engine = Game_Engine::Current();
+
+    engine.buildingManager->IterateAllBuildings([&](std::shared_ptr<Building> build) -> bool {
+        if  (build->Owner == unit->Owner) {
+            if (build->name == "Castle") {            
+                unit->HomeBase = build;
+                return false;
+            }
+        }
+        return true;
+    });
+    return !unit->HomeBase.expired();
 }

@@ -355,6 +355,8 @@ public:
 
 	void DeselectUnits();
 
+	bool FindHomeBase(std::shared_ptr<Unit>& unit);
+
 	size_t GetSelectedUnitCount();
     size_t GetUnitCount(const std::string& name="");
     std::shared_ptr<Unit> GetUnit(const std::string& name, size_t index=0);

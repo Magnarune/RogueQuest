@@ -111,7 +111,9 @@ void cAssets::LoadBuildingAssets() {
     const std::vector<std::string> filePaths = { //
         "Assets/Buildings/House/house.lua",
         "Assets/Buildings/Stone_Tower/Stone_Tower.lua",
-        "Assets/Buildings/Castle/Castle.lua"
+        "Assets/Buildings/Castle/Castle.lua",
+        "Assets/Buildings/Mine/GoldMine.lua"
+
     };
 
     for (const auto& path : filePaths) {

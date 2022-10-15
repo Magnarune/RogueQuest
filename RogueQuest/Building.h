@@ -60,11 +60,12 @@ public:
 		{4, "Level four"}
 	};
 	int curStage = 0; // current stage - oof good luck with this
-
+	bool isMine;
+	bool Interactable;
 	Clock execTimeout;
 	int Owner;
 	std::vector<int> FriendList;
-	
+	int Gold;
 	bool fire;
 	bool effect;
 

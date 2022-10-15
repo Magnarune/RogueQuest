@@ -164,7 +164,7 @@ olc::vi2d Map::GetTile(int id) {
 }
 
 
- // Do Not Touch <<Please>>
+ // Do Not Touch <<Please>> Magnarune
 Map::TileSet Map::GetTileSet(int id) {
     for (int i = 1; i <= tileSetsSize; ++i) {
         if ( id < vFirstGid[i - 1]) return TileSet{ decals[i - 2].get(), vFirstGid[i - 2] };

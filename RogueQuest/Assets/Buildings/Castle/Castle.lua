@@ -38,11 +38,13 @@ return
 	},
 	Parameters =
 	{
+		Interactable = false,
 		CollisionSize = {128,128},
 		BuildTime = 10
 	},
 	Stats =
 	{
+		isMine = false,
 		Health = 550,
 		MaxHealth = 550,      
 		AttackRange = 0, 

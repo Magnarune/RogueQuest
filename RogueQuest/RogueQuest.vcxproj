@@ -193,6 +193,7 @@
     <ClCompile Include="UnitManager.cpp" />
     <ClCompile Include="UserInput.cpp" />
     <ClCompile Include="UserInputManager.cpp" />
+    <ClCompile Include="Utilities.cpp" />
     <ClCompile Include="WorldObject.cpp" />
     <ClCompile Include="WorldObjectManager.cpp" />
   </ItemGroup>
@@ -231,12 +232,14 @@
     <ClInclude Include="UnitManager.h" />
     <ClInclude Include="UserInput.h" />
     <ClInclude Include="UserInputManager.h" />
+    <ClInclude Include="Utilities.h" />
     <ClInclude Include="WorldObject.h" />
     <ClInclude Include="WorldObjectManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Buildings\Castle\Castle.lua" />
     <None Include="Assets\Buildings\House\house.lua" />
+    <None Include="Assets\Buildings\Mine\GoldMine.lua" />
     <None Include="Assets\Buildings\Stone_Tower\Stone_Tower.lua" />
     <None Include="Assets\Gui\cursors.lua" />
     <None Include="Assets\Maps\BasicMap.lua" />
