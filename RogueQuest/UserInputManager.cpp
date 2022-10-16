@@ -35,20 +35,30 @@ void UserInputManager::StandardUserInput() {
 
         engine.buildingManager->SelectBuilding(Final);
     }
+
     if (engine.GetMouse(1).bPressed) {
         if (!engine.ActivityDone) {
             if (!engine.GetKey(olc::SHIFT).bHeld)
                 engine.unitManager->StopUnits();
-
-            // this is what delegating a task will look similar to
-            engine.unitManager->DelegateTask("Move",
-                std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld));
-
-            //engine.unitManager->MoveUnits(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld);
+            DecideUnitAction();
             engine.buildingManager->SentUnitslocation(engine.tv.ScreenToWorld(engine.GetMousePos()));
-        }
-        else engine.ActivityDone = false;
+        } else
+            engine.ActivityDone = false;
     }
+        //if (engine.GetMouse(1).bPressed) {
+    //    if (!engine.ActivityDone) {
+    //        if (!engine.GetKey(olc::SHIFT).bHeld)
+    //            engine.unitManager->StopUnits();
+
+    //        // this is what delegating a task will look similar to
+    //        engine.unitManager->DelegateTask("Move",
+    //            std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld));
+
+    //        //engine.unitManager->MoveUnits(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld);
+    //        //
+    //    }
+    //    else engine.ActivityDone = false;
+    //}
     
 
     if (engine.GetKey(olc::SPACE).bPressed) {
@@ -82,6 +92,14 @@ void UserInputManager::GetBuildModeUserInput() {
         engine.unitManager->DelegateTask("Build",
             std::make_pair(engine.hud->Object, engine.tv.ScreenToWorld(engine.GetMousePos())));
     }
+}
+
+void UserInputManager::DecideUnitAction() {
+    auto& engine = Game_Engine::Current();
+   
+    engine.unitManager->CheckTaskAbility(engine.unitManager->FindObject(engine.tv.ScreenToWorld(engine.GetMousePos())),engine.GetKey(olc::A).bHeld);
+    
+   
 }
 
 bool UserInputManager::Button(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size) {

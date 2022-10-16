@@ -77,7 +77,7 @@ public:
 	Clock execTimeout; //Delay In unit thinking time
 	std::string sUnitName; //Name
 	bool bFriendly;		//Will i attack the Player?
-
+	bool ActionMode;//Square if true circle if false
 	// Who Owns me,   Who are my friends;
 
 	int Owner;

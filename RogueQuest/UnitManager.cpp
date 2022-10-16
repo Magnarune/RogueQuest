@@ -21,6 +21,7 @@ UnitManager::UnitManager() {
             const olc::vf2d& target = params.first;
             const bool& attackstate = params.second;
             // action code            
+            unit->ActionMode = true;
             unit->ULogic = attackstate ? Unit::Aggressive : Unit::Neutral;
             unit->ActionZone.x = 8.f;
             unit->ActionZone.y = 8.f;
@@ -51,8 +52,9 @@ UnitManager::UnitManager() {
             const auto& params = std::any_cast<std::pair<std::string, olc::vf2d>>(arguments.second);
             const std::string& buildingname = params.first;// Only allowed two >.<
             const olc::vf2d& target = params.second;
+            unit->ActionMode = false;
             unit->TrytoBuild(buildingname, target);
-            unit->ActionZone = olc::vf2d(std::max(unit->buildingSize.x, unit->buildingSize.y), std::max(unit->buildingSize.x, unit->buildingSize.y)) * 0.707;
+            unit->ActionZone = olc::vf2d(unit->buildingSize / 2.f) + olc::vf2d(12, 12);
              return true;
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool {
@@ -68,7 +70,7 @@ UnitManager::UnitManager() {
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
              if (!unit->Target.has_value()) return true;
-             return unit->Distance.mag2() <= unit->ActionZone.mag2();
+             return (std::abs(unit->Distance.x) < unit->ActionZone.x && std::abs(unit->Distance.y) < unit->ActionZone.y);
          }
          , 0, olc::Key::B }); // metadata , hotkey
 
@@ -81,9 +83,9 @@ UnitManager::UnitManager() {
             const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, olc::vf2d>>(arguments.second);            
             const std::weak_ptr<Building> &build = params.first;
             const olc::vf2d& target = params.second;
-            
+            unit->ActionMode = false;
             unit->Target = build.lock()->Position + olc::vf2d(build.lock()->Size) / 2.f;
-            unit->ActionZone = olc::vf2d(std::max(build.lock()->Size.x, build.lock()->Size.y), std::max(build.lock()->Size.x, build.lock()->Size.y)) * 0.707f;
+            unit->ActionZone = olc::vf2d(build.lock()->Size /2.f) + olc::vf2d(12, 12);
             unit->repairedbuilding = build;
             return true;
          },
@@ -93,6 +95,7 @@ UnitManager::UnitManager() {
             auto& unit = arguments.first;
             if (unit->repairedbuilding.lock())
                 unit->RepairBuilding();
+           
             return true;            
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
@@ -116,6 +119,7 @@ UnitManager::UnitManager() {
             const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, std::weak_ptr<Unit>>>(arguments.second);
             const std::weak_ptr<Building> &HBuild = params.first;
             const std::weak_ptr<Unit> &HUnit = params.second;
+            unit->ActionMode = true;
             if (HBuild.lock()) {
                 unit->Target = HBuild.lock()->Position + olc::vf2d(HBuild.lock()->Size) / 2.f; //center of building
                 unit->ActionZone.x = unit->fAttackRange + (float)HBuild.lock()->Size.x/ 2.f;
@@ -178,8 +182,9 @@ UnitManager::UnitManager() {
             if (!build.lock()->isMine)//If this building selected is not a mine you cant mine
                 return false;
             const olc::vf2d& target = params.second;
+            unit->ActionMode = false;
             unit->MineTarget = build;
-            unit->ActionZone = olc::vf2d(32.f, 32.f);//This is Wrong fix later
+            unit->ActionZone =( olc::vf2d(unit->MineTarget.lock()->Size /2.f ) + olc::vf2d(12, 12.f));
             unit->Target = build.lock()->Position + olc::vf2d(build.lock()->Size) / 2.f;
             if(unit->Gold > 0)
                 unit->currentTask->performTask();
@@ -195,15 +200,14 @@ UnitManager::UnitManager() {
             
             if (unit->Gold > 0 && unit->Target !=  unit->HomeBase.lock()->Position + unit->HomeBase.lock()->Size / 2.f) {//Change Take to Delivery
                 unit->Target = unit->HomeBase.lock()->Position + olc::vf2d(unit->HomeBase.lock()->Size) / 2.f;
-                unit->ActionZone = olc::vf2d(std::max(unit->HomeBase.lock()->Size.x, unit->HomeBase.lock()->Size.y), 
-                                            std::max(unit->HomeBase.lock()->Size.x, unit->HomeBase.lock()->Size.y)) * 0.707f;
+                unit->ActionZone = olc::vf2d(unit->HomeBase.lock()->Size /2.f ) +olc::vf2d(12.f, 12.f);
                 return true;//This is Dangerous but will work for now
 
            }
             if (unit->Gold > 0) {//If I have gold and have triggered preform task
                 unit->Deliver();
 
-                unit->ActionZone = olc::vf2d(32.f, 32.f);//Restart Gather
+                unit->ActionZone = olc::vf2d(unit->MineTarget.lock()->Size /2.f) + olc::vf2d(12.f, 12.f);//Restart Gather
                 unit->Target = unit->MineTarget.lock()->Position + olc::vf2d(unit->MineTarget.lock()->Size) / 2.f;
             }
 
@@ -272,6 +276,61 @@ void UnitManager::DelegateTask(const std::string& name, const std::any& data) {
 		}
 	}
 }
+//Step One 
+bool UnitManager::ConditionedDelegateTask(int Owner, const std::string& name, const std::any& data) {
+    for (auto& _unit : selectedUnits) {
+        
+        if (_unit.expired()) continue;
+        auto unit = _unit.lock();
+        const auto& abilities = unit->unitType.task_abilities;
+        if (std::find(abilities.begin(), abilities.end(), name) == abilities.end()) continue;
+      
+    }
+    return true;
+}
+
+void UnitManager::CheckTaskAbility(std::shared_ptr<Collidable> object, bool A_Click) {
+    auto& engine = Game_Engine::Current();
+    std::weak_ptr<Unit> testunit;
+    std::weak_ptr<Building> testbuilding;
+    ParseObject(object,testbuilding,testunit);
+    for (auto& _unit : selectedUnits) {
+        if (_unit.expired()) continue;
+        auto unit = _unit.lock();
+        const auto& abilities = unit->unitType.task_abilities;
+  
+        if (!object) {
+            if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
+                engine.unitManager->DelegateTask("Move",
+                    std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), A_Click));
+            continue;
+        }
+        if (testbuilding.lock()) {
+            if (testbuilding.lock()->Owner == unit->Owner) {//If it was an ally
+                if (!A_Click) {
+                    if (std::find(abilities.begin(), abilities.end(), "Gather") != abilities.end() && testbuilding.lock()->isMine)
+                        engine.unitManager->DelegateTask("Gather",
+                            std::make_pair(testbuilding, engine.tv.ScreenToWorld(engine.GetMousePos())));
+                    else
+                        if (std::find(abilities.begin(), abilities.end(), "Repair") != abilities.end())
+                            engine.unitManager->DelegateTask("Repair",
+                                std::make_pair(testbuilding, engine.tv.ScreenToWorld(engine.GetMousePos())));
+                        else
+                            if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
+                                engine.unitManager->DelegateTask("Move",
+                                    std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), A_Click));
+
+                }
+
+            } else
+                if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
+                    engine.unitManager->DelegateTask("Move",
+                        std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), true));
+        }
+    }
+}
+
+
 
 // Get methods
 size_t UnitManager::GetUnitCount(const std::string& name) {
@@ -449,6 +508,10 @@ std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
 }
 
 void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit) {
+    _build.reset();
+    _unit.reset();
+    if (!object)
+        return;
     if (auto unit = std::dynamic_pointer_cast<Unit>(object)) {
         _unit = unit;
         return;

@@ -18,6 +18,7 @@ public:
 	void Update(float delta);
 	void RefreshMiniMap();
 	void CalculateMiniMap(int x, int y, const Map& current_map);
+	void DrawCenteredStringDecal(olc::vf2d pos, std::string str, olc::Pixel col = olc::WHITE, olc::vf2d scale = { 1,1 });
 	void DrawMiniMap();
 	void DrawHud();
 	void DrawLeaderHud();

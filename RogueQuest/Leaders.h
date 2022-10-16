@@ -1,11 +1,13 @@
 #pragma once
 #include "olcPixelGameEngine.h"
-
+#include"Building.h"
 class Leader {
 public:
 	Leader();
 	virtual ~Leader();
 
+	std::weak_ptr<Building> HomeBase;
+	std::vector<std::string> ResearchUpgrades;
 	int Gold;
 	int Lumber;
 	int Food;

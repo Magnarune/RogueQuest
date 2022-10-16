@@ -61,7 +61,8 @@ void Unit::UnitBehaviour() {
 }
 
 void Unit::Gather() {
-	MineTarget.lock()->Gold -= 25;
+	if(MineTarget.lock())
+		MineTarget.lock()->Gold -= 25;
 	Gold += 25;
 }
 
@@ -224,17 +225,35 @@ void Unit::PerformAttack() {
 
 void Unit::UpdatePosition(float delta) {
 	auto& engine = Game_Engine::Current();//UnitBehaviour();
-	if (Target.has_value()) {
-		Distance = Target.value() - Position;
-		olc::vf2d direction = (Target.value() - Position).norm();
-		Velocity = direction * fMoveSpeed;
-		if (Distance.mag2() < ActionZone.mag2()) {
-			if(currentTask)
-				currentTask->performTask();
-			Velocity = { 0.f,0.f };
-		}
+	if (Target.has_value()) {		
+			Distance = Target.value() - Position;//distance from target location
+			olc::vf2d direction = (Target.value() - Position).norm(); //direction to target
+			Velocity = direction * fMoveSpeed;//Velocity toward that direction * move speed
+			if (ActionMode) {
+				if (Distance.mag2() < ActionZone.mag2()) {//If action zone is a circle do if inside circle
+					if (currentTask)
+						currentTask->performTask();
+					Velocity = { 0.f,0.f };
+				}
+			} else{
+				//if (Distance.x > ActionZone.x && Distance.y >ActionZone.y 
+				//&& Distance.x  < ActionZone.x + buildingSize.x 
+				//&& Distance.y  < ActionZone.y + buildingSize.y) {//if Distance is less then square???
+				Distance = Target.value() - Position;
+				if (   std::abs(Distance.x) < ActionZone.x 
+					&& std::abs(Distance.y) < ActionZone.y  ) {
+					if (currentTask)
+						currentTask->performTask();
+					Velocity = { 0.f,0.f };
+				}
+				
+			}
+			
 	}else
 		Velocity = { 0.f,0.f };
+	//Down here somewhere is Pos += Velocity * felapsedtime;
+	//velocity = {0.f,0.f}; dont forget to zero it out after XD or they slide
+
 	//HitVelocity *= std::pow(0.05f, delta);
 	//if (HitVelocity.mag2() < 4.f)
 	//	HitVelocity = { 0.f, 0.f };
@@ -333,34 +352,48 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 	if (bSelected == true) {//Debug Selection
 		static Circle debugCircle{ 512.f };
 
-		debugCircle.position = Position;
-		debugCircle.radius = olc::vf2d(AgroRange,AgroRange);		
+	/*	debugCircle.position = Position;
+		debugCircle.radius = olc::vf2d(AgroRange, AgroRange);
 		debugCircle.Draw();
 
 		debugCircle.radius = olc::vf2d(Unit_Collision_Radius, Unit_Collision_Radius);
-		debugCircle.col =olc::Pixel(0x700F0AAA);
-		debugCircle.Draw();
+		debugCircle.col = olc::Pixel(0x700F0AAA);
+		debugCircle.Draw();*/
 
 
-		DrawCircleDecal(Position, AgroRange, olc::DARK_RED, gfx);
-		DrawCircleDecal(Position, Unit_Collision_Radius, olc::GREEN, gfx);
-		
-		
-		
-		
+		//DrawCircleDecal(Position, AgroRange, olc::DARK_RED, gfx);
+		//DrawCircleDecal(Position, Unit_Collision_Radius, olc::GREEN, gfx);
+
+
+
+
 		//DrawCircleDecal(Position, fAttackRange, olc::BLACK, gfx);
-		if (Target.has_value()){
+		if (Target.has_value()) {
 			gfx->DrawLineDecal(Position, Target.value());
-		
+
 			if (ActionZone > olc::vf2d(0.f, 0.f)) {
-				
-				DrawCircleDecal(Target.value(), ActionZone.mag(), olc::WHITE, gfx);
-				//gfx->DrawLineDecal({Target.value().x- ActionZone.mag(), Target.value().y}, {Target.value().x+ActionZone.mag() ,Target.value().y});
-				//gfx->DrawLineDecal({ Target.value().x, Target.value().y - ActionZone.mag() }, { Target.value().x , Target.value().y+ ActionZone.mag()});
+				if (ActionMode)
+					DrawCircleDecal(Target.value(), ActionZone.mag(), olc::WHITE, gfx);
+				else {
+					if (MineTarget.lock() && Target != HomeBase.lock()->Position + HomeBase.lock()->Size / 2.f) {
+						gfx->DrawLineDecal(MineTarget.lock()->Position - ActionZone + MineTarget.lock()->Size / 2.f, olc::vf2d({ MineTarget.lock()->Position.x + MineTarget.lock()->Size.x / 2.f + ActionZone.x, MineTarget.lock()->Position.y - ActionZone.y + MineTarget.lock()->Size.x / 2.f }));
+						gfx->DrawLineDecal(MineTarget.lock()->Position - ActionZone + MineTarget.lock()->Size / 2.f, olc::vf2d({ MineTarget.lock()->Position.x - ActionZone.x + MineTarget.lock()->Size.x / 2.f  ,MineTarget.lock()->Position.y + ActionZone.y + MineTarget.lock()->Size.y / 2.f }));
+						gfx->DrawLineDecal(MineTarget.lock()->Position + ActionZone + MineTarget.lock()->Size / 2.f, olc::vf2d({ MineTarget.lock()->Position.x + ActionZone.x + MineTarget.lock()->Size.x / 2.f  ,MineTarget.lock()->Position.y - ActionZone.y + MineTarget.lock()->Size.y / 2.f }));
+						gfx->DrawLineDecal(MineTarget.lock()->Position + ActionZone + MineTarget.lock()->Size / 2.f, olc::vf2d({ MineTarget.lock()->Position.x - ActionZone.x + MineTarget.lock()->Size.x / 2.f ,MineTarget.lock()->Position.y + ActionZone.y + MineTarget.lock()->Size.x / 2.f }));
+					}
+					else
+						if (HomeBase.lock()) {
+							gfx->DrawLineDecal(HomeBase.lock()->Position - ActionZone + HomeBase.lock()->Size / 2.f, olc::vf2d({HomeBase.lock()->Position.x + HomeBase.lock()->Size.x / 2.f + ActionZone.x, HomeBase.lock()->Position.y - ActionZone.y + HomeBase.lock()->Size.x / 2.f }));
+							gfx->DrawLineDecal(HomeBase.lock()->Position - ActionZone + HomeBase.lock()->Size / 2.f, olc::vf2d({HomeBase.lock()->Position.x - ActionZone.x + HomeBase.lock()->Size.x / 2.f  ,HomeBase.lock()->Position.y + ActionZone.y + HomeBase.lock()->Size.y / 2.f }));
+							gfx->DrawLineDecal(HomeBase.lock()->Position + ActionZone + HomeBase.lock()->Size / 2.f, olc::vf2d({HomeBase.lock()->Position.x + ActionZone.x + HomeBase.lock()->Size.x / 2.f  ,HomeBase.lock()->Position.y - ActionZone.y + HomeBase.lock()->Size.y / 2.f }));
+							gfx->DrawLineDecal(HomeBase.lock()->Position + ActionZone + HomeBase.lock()->Size / 2.f, olc::vf2d({HomeBase.lock()->Position.x - ActionZone.x + HomeBase.lock()->Size.x / 2.f ,HomeBase.lock()->Position.y + ActionZone.y + HomeBase.lock()->Size.x / 2.f }));
 
+					}
+
+				}
 			}
-		}
 
+		}
 	}
 }
 

@@ -52,7 +52,10 @@ void Hud::ImportHudAssets() {
     loadImage("MiniMap", "Assets/Gui/Minimap.png");
 
     loadImage("flag","Assets/Gui/flag.png");
-
+    loadImage("TopBorder", "Assets/Gui/TopBorder.png");
+    loadImage("Food", "Assets/Gui/Food.png");
+    loadImage("Tree", "Assets/Gui/Tree.png");
+    loadImage("Gold", "Assets/Gui/Goldicon.png");
 }
 
 void Hud::Update(float delta) {
@@ -136,8 +139,8 @@ void Hud::DrawHud(){
     } else {
         engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
     }
-    engine.DrawStringDecal({ 9.f,3.f }, "Options", olc::WHITE, { 0.5,0.5 });
-    //
+    DrawCenteredStringDecal({ 24.f,5.f }, "Options", olc::WHITE, { 0.5,0.5 });
+    
 
     
     if (ucount == 1) //If you select one unit
@@ -160,18 +163,26 @@ void Hud::DrawLeaderHud() {
 
     
     engine.DrawPartialDecal({ 0.f,0.f }, olc::vf2d({ SWitdh, 10.f }), decals["Background"].get(), { 0.f,0.f }, { 512.f,40.f });
+    engine.DrawPartialDecal(olc::vf2d(0.f, 9.f), olc::vf2d(engine.ScreenWidth(), 2.f), decals["TopBorder"].get(), {0.f,0.f}, {90.f,16.f});
 
     engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 2.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 22.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 37.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 25.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 46.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
 
     engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 2.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 22.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 37.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 16.f, 1.f), olc::vf2d(8.f, 8.f), decals["Gold"].get(), { 0.f,0.f }, { 16.f,16.f });
 
-    engine.DrawStringDecal(olc::vf2d(SWitdh / 1.5f + 10.f, 4.f), std::to_string(engine.leaders->LeaderList[1]->Gold), olc::YELLOW, {0.4f,0.4f});
-    engine.DrawStringDecal(olc::vf2d(SWitdh / 1.5f + 28.f, 4.f), std::to_string(engine.leaders->LeaderList[1]->Lumber), olc::GREEN, {0.4f,0.4f});
-    engine.DrawStringDecal(olc::vf2d(SWitdh / 1.5f + 44.f, 4.f), std::to_string(engine.leaders->LeaderList[1]->Food ),olc::CYAN, {0.4f,0.4f});
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 25.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 35.5f, 0.f), olc::vf2d(10.f, 10.f), decals["Tree"].get(), { 0.f,0.f }, { 46.f,46.f });
+
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 46.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
+
+    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 59.f, 0.2f), olc::vf2d(12.f, 12.f), decals["Food"].get(), { 0.f,0.f }, { 48.f,48.f });
+
+
+    DrawCenteredStringDecal(olc::vf2d(SWitdh / 1.5f + 9.f, 6.f), std::to_string(engine.leaders->LeaderList[1]->Gold), olc::YELLOW, {0.4f,0.4f});
+    DrawCenteredStringDecal(olc::vf2d(SWitdh / 1.5f + 32.f, 6.f), std::to_string(engine.leaders->LeaderList[1]->Lumber), olc::GREEN, {0.4f,0.4f});
+    DrawCenteredStringDecal(olc::vf2d(SWitdh / 1.5f + 52.f, 6.f), std::to_string(engine.leaders->LeaderList[1]->Food ),olc::RED, {0.4f,0.4f});
 
 
 }
@@ -200,4 +211,11 @@ void Hud::DrawBuild() {
     olc::Decal* decal = engine.hud->decals[_refname].get();
     olc::vf2d Center = olc::vf2d(engine.GetMousePos()) - olc::vf2d((float)data.icon.sz.x , (float)data.icon.sz.y );
     engine.DrawPartialDecal( ((Center)), {64,64}, decal, {0,0}, data.icon.fsz, olc::PixelF(0.f, 255.f, 0.f, 0.7f));
+}
+
+
+void Hud::DrawCenteredStringDecal(olc::vf2d pos, std::string str, olc::Pixel col, olc::vf2d scale) {
+    auto& engine = Game_Engine::Current();
+    olc::vf2d textOffset = olc::vf2d(engine.GetTextSize(str)) / 2 * scale;
+    engine.DrawStringDecal(pos - textOffset, str, col, scale);
 }

@@ -333,6 +333,11 @@ public:
 	TaskManager taskMgr;
 
 	void DelegateTask(const std::string& name, const std::any& data);
+
+	bool ConditionedDelegateTask(int Owner, const std::string& name, const std::any& data);
+
+	void CheckTaskAbility(std::shared_ptr<Collidable> object , bool A_Click);
+
 	std::shared_ptr<Unit> This_shared_pointer(olc::vf2d pos);
 	void StopUnits();
 	void MoveConstructBuilding(const std::string& buildingName, const olc::vf2d& Target);

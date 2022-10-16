@@ -71,13 +71,14 @@ void Building::SentUnitlocation(olc::vf2d pos) {
 void Building::SendUnit(std::shared_ptr<Unit> unit) {
 	auto& engine = Game_Engine::Current();
 	if (sentUnitPos.mag2() > 0.f) {
-		//unit->Target = sentUnitPos;
+		
 		engine.leaders->Gold(Owner, -unit->cost);
 		unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {sentUnitPos, false} }));
 	}
 }
 
 void Building::Update(float delta){
+	auto& engine = Game_Engine::Current();
 	if (AttackCD > 0)
 		AttackCD -= delta;
 	BuildingBehaviour();
@@ -97,7 +98,7 @@ void Building::Update(float delta){
 		m_fTimer = 0.f;
 		ProduceUnit(productionQue.front());		
 	}
-	if (building) {
+	if (building&& engine.leaders->LeaderList[Owner]->Gold > 12) {
 		ProduceUnit(unitproduced);
 		m_fTimer += delta;
 	}
@@ -121,9 +122,9 @@ void Building::Draw(olc::TileTransformedView* gfx){
 	Collidable::Draw(gfx); // inherit
 	gfx->DrawPartialDecal(Position, meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size, bSelected ? olc::WHITE : olc::GREY);
 	
-	gfx->DrawLineDecal(Position, { Position.x + Size .x,Position.y });//collision box
-	gfx->DrawLineDecal(Position, { Position.x ,Position.y + Size.y });
-	gfx->DrawLineDecal(Position + Size, { Position.x,Position.y + Size.y });
-	gfx->DrawLineDecal(Position + Size, { Position.x + Size.x,Position.y  });
+	//gfx->DrawLineDecal(Position, { Position.x + Size .x,Position.y });//collision box
+	//gfx->DrawLineDecal(Position, { Position.x ,Position.y + Size.y });
+	//gfx->DrawLineDecal(Position + Size, { Position.x,Position.y + Size.y });
+	//gfx->DrawLineDecal(Position + Size, { Position.x + Size.x,Position.y  });
 
 }
