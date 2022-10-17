@@ -1,6 +1,6 @@
 #include "Assets.h"
 
-cAssets::cAssets(){
+cAssets::cAssets() {
     lua_state.open_libraries(sol::lib::base);
     lua_state.open_libraries(sol::lib::math);
     lua_state.open_libraries(sol::lib::package);

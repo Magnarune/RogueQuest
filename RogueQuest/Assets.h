@@ -86,7 +86,7 @@ public:
 	~cAssets();
 
 	olc::vi2d vTileSize;
-    int Animation;
+    int Animation {};
     inline bool BuildingExists(const std::string& name) { return !!buildCache.count(name); }
     inline const BuildingType& GetBuildingData(const std::string& name) { return buildCache.at(name); }
 

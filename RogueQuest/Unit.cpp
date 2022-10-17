@@ -368,18 +368,20 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 				if (ActionMode)
 					DrawCircleDecal(Target.value(), ActionZone.mag(), olc::WHITE, gfx);
 				else {
-					if (MineTarget.lock() && Target != HomeBase.lock()->Position + HomeBase.lock()->Size / 2.f) {
-						gfx->DrawLineDecal(MineTarget.lock()->Position - ActionZone + MineTarget.lock()->Size / 2.f, olc::vf2d({ MineTarget.lock()->Position.x + MineTarget.lock()->Size.x / 2.f + ActionZone.x, MineTarget.lock()->Position.y - ActionZone.y + MineTarget.lock()->Size.x / 2.f }));
-						gfx->DrawLineDecal(MineTarget.lock()->Position - ActionZone + MineTarget.lock()->Size / 2.f, olc::vf2d({ MineTarget.lock()->Position.x - ActionZone.x + MineTarget.lock()->Size.x / 2.f  ,MineTarget.lock()->Position.y + ActionZone.y + MineTarget.lock()->Size.y / 2.f }));
-						gfx->DrawLineDecal(MineTarget.lock()->Position + ActionZone + MineTarget.lock()->Size / 2.f, olc::vf2d({ MineTarget.lock()->Position.x + ActionZone.x + MineTarget.lock()->Size.x / 2.f  ,MineTarget.lock()->Position.y - ActionZone.y + MineTarget.lock()->Size.y / 2.f }));
-						gfx->DrawLineDecal(MineTarget.lock()->Position + ActionZone + MineTarget.lock()->Size / 2.f, olc::vf2d({ MineTarget.lock()->Position.x - ActionZone.x + MineTarget.lock()->Size.x / 2.f ,MineTarget.lock()->Position.y + ActionZone.y + MineTarget.lock()->Size.x / 2.f }));
+					auto homebase = HomeBase.lock();
+					auto minetarget = MineTarget.lock();
+					if (MineTarget.lock() && Target != homebase->Position + olc::vf2d(homebase->Size) / 2.f) {
+						gfx->DrawLineDecal(minetarget->Position - ActionZone + olc::vf2d(minetarget->Size) / 2.f, olc::vf2d({ minetarget->Position.x + float(minetarget->Size.x) / 2.f + ActionZone.x, minetarget->Position.y - ActionZone.y + float(minetarget->Size.x) / 2.f }));
+						gfx->DrawLineDecal(minetarget->Position - ActionZone + olc::vf2d(minetarget->Size) / 2.f, olc::vf2d({ minetarget->Position.x - ActionZone.x + float(minetarget->Size.x) / 2.f  ,minetarget->Position.y + ActionZone.y + float(minetarget->Size.y) / 2.f }));
+						gfx->DrawLineDecal(minetarget->Position + ActionZone + olc::vf2d(minetarget->Size) / 2.f, olc::vf2d({ minetarget->Position.x + ActionZone.x + float(minetarget->Size.x) / 2.f  ,minetarget->Position.y - ActionZone.y + float(minetarget->Size.y) / 2.f }));
+						gfx->DrawLineDecal(minetarget->Position + ActionZone + olc::vf2d(minetarget->Size) / 2.f, olc::vf2d({ minetarget->Position.x - ActionZone.x + float(minetarget->Size.x) / 2.f ,minetarget->Position.y + ActionZone.y + float(minetarget->Size.x) / 2.f }));
 					}
 					else
-						if (HomeBase.lock()) {
-							gfx->DrawLineDecal(HomeBase.lock()->Position - ActionZone + HomeBase.lock()->Size / 2.f, olc::vf2d({HomeBase.lock()->Position.x + HomeBase.lock()->Size.x / 2.f + ActionZone.x, HomeBase.lock()->Position.y - ActionZone.y + HomeBase.lock()->Size.x / 2.f }));
-							gfx->DrawLineDecal(HomeBase.lock()->Position - ActionZone + HomeBase.lock()->Size / 2.f, olc::vf2d({HomeBase.lock()->Position.x - ActionZone.x + HomeBase.lock()->Size.x / 2.f  ,HomeBase.lock()->Position.y + ActionZone.y + HomeBase.lock()->Size.y / 2.f }));
-							gfx->DrawLineDecal(HomeBase.lock()->Position + ActionZone + HomeBase.lock()->Size / 2.f, olc::vf2d({HomeBase.lock()->Position.x + ActionZone.x + HomeBase.lock()->Size.x / 2.f  ,HomeBase.lock()->Position.y - ActionZone.y + HomeBase.lock()->Size.y / 2.f }));
-							gfx->DrawLineDecal(HomeBase.lock()->Position + ActionZone + HomeBase.lock()->Size / 2.f, olc::vf2d({HomeBase.lock()->Position.x - ActionZone.x + HomeBase.lock()->Size.x / 2.f ,HomeBase.lock()->Position.y + ActionZone.y + HomeBase.lock()->Size.x / 2.f }));
+						if (homebase) {
+							gfx->DrawLineDecal(homebase->Position - ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x + float(homebase->Size.x) / 2.f + ActionZone.x, homebase->Position.y - ActionZone.y + float(homebase->Size.x) / 2.f }));
+							gfx->DrawLineDecal(homebase->Position - ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x - ActionZone.x + float(homebase->Size.x) / 2.f  ,homebase->Position.y + ActionZone.y + float(homebase->Size.y) / 2.f }));
+							gfx->DrawLineDecal(homebase->Position + ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x + ActionZone.x + float(homebase->Size.x) / 2.f  ,homebase->Position.y - ActionZone.y + float(homebase->Size.y) / 2.f }));
+							gfx->DrawLineDecal(homebase->Position + ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x - ActionZone.x + float(homebase->Size.x) / 2.f ,homebase->Position.y + ActionZone.y + float(homebase->Size.x) / 2.f }));
 
 					}
 
