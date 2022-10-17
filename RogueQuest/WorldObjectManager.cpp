@@ -232,7 +232,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
 
     // create decals for each texture state
     for(auto& [ name, meta ] : data.texture_metadata){
-        const Building::GFXState& state = States[name]; // local state ref
+        const Building::GFXState& state = States.at(name); // local state ref
         // load a decal texture and add to decal map
 
         if (meta.level_offsets.size() < build->Level.size()) {
@@ -249,7 +249,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     build->cType = Collidable::isBuilding;
     objectList.emplace_back(build);
     engine.buildingManager->addNewBuilding(build);
-    return build;    
+    return build;
 }
 
 std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& name, olc::vf2d pos, std::weak_ptr<WorldObject> Target) {

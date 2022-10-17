@@ -88,19 +88,19 @@ public:
 	olc::vi2d vTileSize;
     int Animation;
     inline bool BuildingExists(const std::string& name) { return !!buildCache.count(name); }
-    inline const BuildingType& GetBuildingData(const std::string& name) { return buildCache[name]; }
+    inline const BuildingType& GetBuildingData(const std::string& name) { return buildCache.at(name); }
 
     inline bool UnitExists(const std::string& name) { return !!unitCache.count(name); }
-    inline const UnitType& GetUnitData(const std::string& name) { return unitCache[name]; }
+    inline const UnitType& GetUnitData(const std::string& name) { return unitCache.at(name); }
     
     inline bool ProjectileExists(const std::string& name) { return !!projCache.count(name); }
-    inline const ProjectileType& GetProjectileData(const std::string& name) { return projCache[name]; }
+    inline const ProjectileType& GetProjectileData(const std::string& name) { return projCache.at(name); }
 
     void LoadUnitAssets();
     void LoadBuildingAssets();
     void LoadProjectileAssets();
 
-    inline Cursor* GetCursor(const std::string& name) { return assetCursorCache.count(name) ? &(assetCursorCache[name]) : nullptr; }
+    inline Cursor* GetCursor(const std::string& name) { return assetCursorCache.count(name) ? &(assetCursorCache.at(name)) : nullptr; }
 	bool ImportCursor(const std::string& name, const std::string& path, const olc::vf2d& size = {16.f, 16.f});
     void LoadCursorAssets();
 };

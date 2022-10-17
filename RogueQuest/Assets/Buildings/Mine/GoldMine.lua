@@ -49,8 +49,8 @@ return
 	Production = 
 	{
 		Gold = 25000,
-		Units = {""},
-		Research = {""}
+		Units = {},
+		Research = {}
 	},
-	Projectiles ={""}
+	Projectiles = {}
 }
