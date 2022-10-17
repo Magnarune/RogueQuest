@@ -45,7 +45,7 @@ return
 		Food = 5,
 		Cost = 12,
 		Ranged = false,
-		CollisionRadius = 10,
+		CollisionRadius = 5,
 		Abilities = {
 			Tasks = {"Move", "Build", "Attack","Repair", "Gather"}, -- task names allowed to be delegated to this unit
 			Buildables = {"House", "StoneTower", "Castle"},

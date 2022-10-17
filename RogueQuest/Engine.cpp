@@ -95,7 +95,7 @@ bool Game_Engine::OnUserCreate() {
     leaders->AddLeader(5);//add Main Menu
     Camera.vPOS = { 30.f,30.f };
     tv.SetWorldOffset(Camera.vPOS);
-
+    InitiateGame();
     curCursor = assetManager->GetCursor("default");
     SetLocked(true);
     return true;
@@ -344,8 +344,22 @@ bool Game_Engine::OnConsoleCommand(const std::string& stext) {
     return true;
 }
 
+void Game_Engine::InitiateGame() {//For Debugging Ease
+    worldManager->GenerateBuilding("GoldMine", 1, { 16 * 32.f,14 * 32.f });
+    worldManager->GenerateBuilding("Castle", 1, { 25 * 32.f  ,  14 * 32.f })->curStage =1;
+    worldManager->GenerateBuilding("House", 1, { 25 * 32.f  ,  19 * 32.f })->curStage = 1;
+    worldManager->GenerateBuilding("StoneTower", 1, { 20 * 32.f  ,  19 * 32.f })->curStage = 2;
+    for(int i=0; i< 20; i++)
+        worldManager->GenerateUnit("Archer", 1, {3*i+19 * 32.f,10 * 32.f });
 
+    worldManager->GenerateUnit("Builder", 1, { 19 * 32.f,14 * 32.f });
 
+    worldManager->GenerateBuilding("GoldMine", 0, { 16 * 32.f,30 * 32.f });
+    worldManager->GenerateBuilding("Castle", 0, { 25 * 32.f  ,  30 * 32.f })->curStage =1;
+    worldManager->GenerateBuilding("House", 0, { 25 * 32.f  ,  35 * 32.f })->curStage = 1;
+    worldManager->GenerateBuilding("StoneTower", 0, { 20 * 32.f  ,  35 * 32.f })->curStage = 2;
+    worldManager->GenerateUnit("Builder", 0, { 19 * 32.f,30 * 32.f });
+}
 
 /*
     struct VirtualObjectType {

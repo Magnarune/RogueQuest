@@ -334,7 +334,7 @@ public:
 
 	void DelegateTask(const std::string& name, const std::any& data);
 
-	bool ConditionedDelegateTask(int Owner, const std::string& name, const std::any& data);
+	void ConditionedDelegateTask(std::shared_ptr<Unit> unit, const std::string& name, const std::any& data);
 
 	void CheckTaskAbility(std::shared_ptr<Collidable> object , bool A_Click);
 
@@ -369,7 +369,9 @@ public:
 
 	bool IterateSelectedUnits(std::function<bool(std::shared_ptr<Unit>)> cb);
 	bool IterateAllUnits(std::function<bool(std::shared_ptr<Unit>)> cb);
-
+	olc::vf2d ArrangeSelectedUnits(int Size, int interator);
+	int numberofselectedunits;
+	int Columnoffset;
     friend class WorldManager;
 	friend class TaskManager;
 	friend class LeaderManager;

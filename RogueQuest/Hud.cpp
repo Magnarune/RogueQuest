@@ -217,5 +217,6 @@ void Hud::DrawBuild() {
 void Hud::DrawCenteredStringDecal(olc::vf2d pos, std::string str, olc::Pixel col, olc::vf2d scale) {
     auto& engine = Game_Engine::Current();
     olc::vf2d textOffset = olc::vf2d(engine.GetTextSize(str)) / 2 * scale;
+    //engine.DrawStringDecal(pos - textOffset , str, olc::BLACK, scale + olc::vf2d(0.01f,0.01f));
     engine.DrawStringDecal(pos - textOffset, str, col, scale);
 }

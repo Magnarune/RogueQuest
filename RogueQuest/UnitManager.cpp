@@ -277,32 +277,28 @@ void UnitManager::DelegateTask(const std::string& name, const std::any& data) {
 	}
 }
 //Step One 
-bool UnitManager::ConditionedDelegateTask(int Owner, const std::string& name, const std::any& data) {
-    for (auto& _unit : selectedUnits) {
-        
-        if (_unit.expired()) continue;
-        auto unit = _unit.lock();
-        const auto& abilities = unit->unitType.task_abilities;
-        if (std::find(abilities.begin(), abilities.end(), name) == abilities.end()) continue;
+void UnitManager::ConditionedDelegateTask(std::shared_ptr<Unit> unit, const std::string& name, const std::any& data) {
+    unit->taskQueue.push(taskMgr.PrepareTask(name, std::pair<std::shared_ptr<Unit>, std::any>{unit, data}));      
       
-    }
-    return true;
 }
 
 void UnitManager::CheckTaskAbility(std::shared_ptr<Collidable> object, bool A_Click) {
+    numberofselectedunits = 0;
+    Columnoffset = 0;
     auto& engine = Game_Engine::Current();
     std::weak_ptr<Unit> testunit;
     std::weak_ptr<Building> testbuilding;
     ParseObject(object,testbuilding,testunit);
     for (auto& _unit : selectedUnits) {
-        if (_unit.expired()) continue;
+        if (_unit.expired()) continue;     
+        numberofselectedunits += 1;
         auto unit = _unit.lock();
         const auto& abilities = unit->unitType.task_abilities;
   
         if (!object) {
             if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
-                engine.unitManager->DelegateTask("Move",
-                    std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), A_Click));
+                engine.unitManager->ConditionedDelegateTask(unit,"Move",
+                    std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos())+ArrangeSelectedUnits(selectedUnits.size(),numberofselectedunits), A_Click));
             continue;
         }
         if (testbuilding.lock()) {
@@ -330,6 +326,57 @@ void UnitManager::CheckTaskAbility(std::shared_ptr<Collidable> object, bool A_Cl
     }
 }
 
+olc::vf2d UnitManager::ArrangeSelectedUnits(int Size, int iterator) {
+    iterator -= 1;
+    float unitoffset = 20.f;
+    int ColumnSize = 4;
+    int ColumnSizeOdd = 5;
+    int Sizeadder=-1;
+    if (Size == 1) {
+        return { 0.f,0.f };
+    }
+    for (int i = 0; i < Size; i++) {
+        if ((i + 1) % 3 == 0)
+            Sizeadder +=1;
+    }
+    if (Size > 1) {
+      
+
+        if (Size % 2 == 0) {//Even
+            if ((iterator) % ColumnSize == 0) {
+                if ((iterator) != 0)
+                    Columnoffset += 1;
+            }
+            if ((iterator - Columnoffset * ColumnSize) < ColumnSize / 2) {//
+                return { -unitoffset * Columnoffset,   -unitoffset / 2.f + -unitoffset * ((iterator - Columnoffset*ColumnSize )) };
+            }
+            else
+            {
+                return { -unitoffset * Columnoffset ,  unitoffset / 2.f + unitoffset * ((iterator  - Columnoffset * ColumnSize - ColumnSize/2))  };//size/2
+            }
+        }
+        else{
+            if ((iterator) % ColumnSizeOdd == 0) {
+                if ((iterator) != 0)
+                    Columnoffset += 1;
+            }
+            if(Size == 3)
+                if (iterator - Columnoffset * ColumnSizeOdd < ((ColumnSizeOdd + 1) / 2) -1) {
+                return { -unitoffset * Columnoffset,   -unitoffset * ((iterator - Columnoffset * ColumnSizeOdd)) };
+                } else {
+                    return { -unitoffset * Columnoffset ,  unitoffset * ((iterator + 2 - Columnoffset * ColumnSizeOdd - (ColumnSizeOdd + 1) / 2)) };//size/2
+                }
+
+            if (iterator - Columnoffset * ColumnSizeOdd < ((ColumnSizeOdd + 1) / 2)+ Sizeadder) {
+                return { -unitoffset * Columnoffset,   -unitoffset * ((iterator - Columnoffset * ColumnSizeOdd)) };
+            } else {
+                return { -unitoffset * Columnoffset ,  unitoffset * ((iterator + 1  - Columnoffset * ColumnSizeOdd - (ColumnSizeOdd +1) / 2)) };//size/2
+            }
+        }
+    }
+
+    return {0.f,0.f};
+}
 
 
 // Get methods

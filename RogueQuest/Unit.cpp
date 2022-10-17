@@ -251,9 +251,8 @@ void Unit::UpdatePosition(float delta) {
 			
 	}else
 		Velocity = { 0.f,0.f };
-	//Down here somewhere is Pos += Velocity * felapsedtime;
-	//velocity = {0.f,0.f}; dont forget to zero it out after XD or they slide
 
+	//To Do: Re-add Knockback soon
 	//HitVelocity *= std::pow(0.05f, delta);
 	//if (HitVelocity.mag2() < 4.f)
 	//	HitVelocity = { 0.f, 0.f };
@@ -288,8 +287,7 @@ if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len 
 	if (Health <= 0) {
 		Graphic_State = Dead;
 		Stop();
-	}
-	
+	}	
 
 	if (Last_State != Graphic_State) {
 		curFrame = 0;
@@ -298,9 +296,11 @@ if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len 
 
 	if (bAnimating)
 		m_fTimer += delta;
-	if (m_fTimer >= 0.1f) {
+
+	if (m_fTimer >= 0.1f) {//if time > 0.1f ms
 		m_fTimer -= 0.1f;
-		++curFrame %= textureMetadata[Graphic_State].ani_len;
+		++curFrame %= textureMetadata[Graphic_State].ani_len;//This is animation length it's complex cause my game 
+		// ++toframe 
 	}
 }
 
@@ -351,22 +351,15 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 	
 	if (bSelected == true) {//Debug Selection
 		static Circle debugCircle{ 512.f };
-
-	/*	debugCircle.position = Position;
+			/*	debugCircle.position = Position;
 		debugCircle.radius = olc::vf2d(AgroRange, AgroRange);
 		debugCircle.Draw();
 
 		debugCircle.radius = olc::vf2d(Unit_Collision_Radius, Unit_Collision_Radius);
 		debugCircle.col = olc::Pixel(0x700F0AAA);
 		debugCircle.Draw();*/
-
-
 		//DrawCircleDecal(Position, AgroRange, olc::DARK_RED, gfx);
 		//DrawCircleDecal(Position, Unit_Collision_Radius, olc::GREEN, gfx);
-
-
-
-
 		//DrawCircleDecal(Position, fAttackRange, olc::BLACK, gfx);
 		if (Target.has_value()) {
 			gfx->DrawLineDecal(Position, Target.value());
@@ -414,17 +407,3 @@ void Unit::DrawCircleDecal(olc::vf2d pos, float radius, olc::Pixel col, olc::Til
 	engine.SetDecalMode(olc::DecalMode::NORMAL);
 	engine.SetDecalStructure(olc::DecalStructure::FAN);
 }
-
-//void Unit::FillCircleDecal(vf2d pos, float radius, Pixel col = WHITE) {
-//	std::vector<vf2d> poly;
-//	std::vector<vf2d> uvs;
-//	poly.push_back(pos);
-//	uvs.push_back({ 0,0 });
-//	for (int i = 0; i < CIRCLE_PRECISION; i++) {
-//		poly.push_back({ pos.x + sinf(2 * M_PI / CIRCLE_PRECISION * i) * radius,pos.y + cosf(2 * M_PI / CIRCLE_PRECISION * i) * radius });
-//		uvs.push_back({ 0,0 });
-//	}
-//	poly.push_back(poly[1]);
-//	uvs.push_back({ 0,0 });
-//	DrawPolygonDecal(nullptr, poly, uvs, col);
-//}

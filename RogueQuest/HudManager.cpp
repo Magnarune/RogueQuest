@@ -25,6 +25,7 @@ void HudManager::UnitSelected() {
         olc::Decal* decal = engine.hud->decals[_refname].get();
 
         engine.DrawPartialDecal({ 90.f, IconY - 8.f }, { 8.f,8.f }, engine.hud->decals["Attack"].get(), { 0,0 }, { 190,190 });
+       
         engine.hud->DrawCenteredStringDecal({ 103.f,  IconY - 4.f }, std::to_string((int)unitinfo->fAttackDamage), olc::WHITE, { 0.4f,0.4f });
 
         engine.DrawPartialDecal({ 90.f, IconY + 2.f }, { 8.f,8.f }, engine.hud->decals["Move"].get(), { 0,0 }, { 32,32 });

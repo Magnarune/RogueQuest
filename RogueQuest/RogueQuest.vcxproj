@@ -184,6 +184,7 @@
     <ClCompile Include="Leaders.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="MoveNodes.cpp" />
     <ClCompile Include="Options.cpp" />
     <ClCompile Include="Particles.cpp" />
     <ClCompile Include="Projectiles.cpp" />
@@ -221,6 +222,7 @@
     <ClInclude Include="Lua\include\lualib.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapManager.h" />
+    <ClInclude Include="MoveNodes.h" />
     <ClInclude Include="olcPGEX_TransformedView.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
     <ClInclude Include="Options.h" />

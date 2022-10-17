@@ -25,7 +25,7 @@ void UserInputManager::StandardUserInput() {
         if (!engine.GetKey(olc::SHIFT).bHeld && !engine.ActivityDone)
             engine.unitManager->DeselectUnits();
 
-        (Initial - Final).mag2() > 16 ?
+        (Initial - Final).mag2() > 16 && !engine.ActivityDone ?
             engine.unitManager->SelectUnits(Initial, Final) : engine.unitManager->SelectUnit(Final);
 
         if (!engine.ActivityDone)

@@ -67,7 +67,7 @@ protected:
     virtual bool OnUserUpdate(float fElapsedTime) override;   
 	virtual bool OnUserDestroy() override;
 	
-	
+	void InitiateGame();//ForDebugging only
 	bool _lastfocus = true;
 	void OnFocusUpdated(bool focus);
 
