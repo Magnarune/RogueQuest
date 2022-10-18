@@ -25,6 +25,9 @@ public:
             std::vector<int> Sprite_Order;
             olc::vf2d scale;
         };
+        int Cost;
+        int Food;
+        std::vector<std::string> Requirements;
         std::map<std::string, TextureMetaData> texture_metadata;
         std::vector<std::string> task_abilities;
         sol::table lua_data;
@@ -46,6 +49,8 @@ public:
             olc::vf2d scale;
             std::map<std::string, LevelOffset> level_offsets;
         };
+        int Cost;
+        std::vector<std::string> Requirements;
         std::map<std::string, TextureMetaData> texture_metadata;
         sol::table lua_data;
 
@@ -61,6 +66,7 @@ public:
             size_t tex_id;
             olc::vi2d target_size;
             olc::vf2d scale;
+            bool Any;
         };
         std::map<std::string, TextureMetaData> texture_metadata;
         sol::table lua_data;

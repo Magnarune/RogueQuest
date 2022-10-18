@@ -163,7 +163,7 @@ void Hud::DrawLeaderHud() {
 
     
     engine.DrawPartialDecal({ 0.f,0.f }, olc::vf2d({ SWitdh, 10.f }), decals["Background"].get(), { 0.f,0.f }, { 512.f,40.f });
-    engine.DrawPartialDecal(olc::vf2d(0.f, 9.f), olc::vf2d(engine.ScreenWidth(), 2.f), decals["TopBorder"].get(), {0.f,0.f}, {90.f,16.f});
+    engine.DrawPartialDecal(olc::vf2d(0.f, 9.f), olc::vf2d((float)engine.ScreenWidth(), 2.f), decals["TopBorder"].get(), {0.f,0.f}, {90.f,16.f});
 
     engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 2.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
     engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 25.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});

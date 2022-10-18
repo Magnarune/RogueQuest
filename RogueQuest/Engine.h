@@ -28,6 +28,7 @@
 #include "clock.h"
 #include "Leaders.h"
 #include "LeaderManager.h"
+#include "MoveNodes.h"
 
 
 extern std::string StringifyObject(sol::object val);
@@ -70,7 +71,6 @@ protected:
 	void InitiateGame();//ForDebugging only
 	bool _lastfocus = true;
 	void OnFocusUpdated(bool focus);
-
     virtual bool UpdateLocalMap(float fElapsedTime);
 	virtual bool UpdateOptions(float fElapsedTime);
 	virtual void DrawCursor();
@@ -86,7 +86,7 @@ public:
 	std::unique_ptr<UserInput> userinputs;
 	std::unique_ptr<UserInputManager> inputmanager;
 	std::unique_ptr<LeaderManager> leaders;
-
+	//This needs to be initialized to map size
 	bool ActivityDone;
 	struct Cam{
 		olc::vf2d vPOS;

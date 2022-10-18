@@ -35,7 +35,8 @@ return
 	},
 	Parameters = {
 		Food = 5,
-		Cost = 12,
+		Cost = 22,
+		Requirements = {},
 		Ranged = true,
 		CollisionRadius = 10,
 		Abilities = {

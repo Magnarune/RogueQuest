@@ -73,6 +73,7 @@ bool Game_Engine::OnUserCreate() {
     inputmanager.reset(new UserInputManager);
     particles.reset(new Particles);
     leaders.reset(new LeaderManager); //Handler for the Leaders in the game
+
     
     // Configure Controllers
     assetManager->LoadUnitAssets();     // Load all the Lua files
@@ -84,8 +85,8 @@ bool Game_Engine::OnUserCreate() {
     particles->ImportEffectsAssets();
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
-
     worldManager->ChangeMap("Terra");
+
     SetPixelMode(olc::Pixel::ALPHA);
     ConsoleCaptureStdOut(true);     
     Clear(olc::Pixel(100,164,44,255));
@@ -163,6 +164,8 @@ void Game_Engine::DrawCursor() {//Assets\Gui\Cursors\cursor.png
 void Game_Engine::OnFocusUpdated(bool focus){
     SetLocked(focus ? bWasLocked : false, false);
 }
+
+
 
 void Game_Engine::SetLocked(bool locked, bool permanent) {
     config->SaveValue<bool>("ScreenLocked", locked);
@@ -350,7 +353,7 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
     worldManager->GenerateBuilding("House", 1, { 25 * 32.f  ,  19 * 32.f })->curStage = 1;
     worldManager->GenerateBuilding("StoneTower", 1, { 20 * 32.f  ,  19 * 32.f })->curStage = 2;
     for(int i=0; i< 20; i++)
-        worldManager->GenerateUnit("Archer", 1, {3*i+19 * 32.f,10 * 32.f });
+        worldManager->GenerateUnit("Archer", 1, {3.f*(float)i+19.f * 32.f,10 * 32.f });
 
     worldManager->GenerateUnit("Builder", 1, { 19 * 32.f,14 * 32.f });
 
@@ -359,6 +362,8 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
     worldManager->GenerateBuilding("House", 0, { 25 * 32.f  ,  35 * 32.f })->curStage = 1;
     worldManager->GenerateBuilding("StoneTower", 0, { 20 * 32.f  ,  35 * 32.f })->curStage = 2;
     worldManager->GenerateUnit("Builder", 0, { 19 * 32.f,30 * 32.f });
+    for (int i = 0; i < 20; i++)
+        worldManager->GenerateUnit("Archer", 0, { 3.f * (float)i + 19.f * 32.f,38 * 32.f });
 }
 
 /*

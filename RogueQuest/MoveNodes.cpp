@@ -1,26 +1,27 @@
 #include "MoveNodes.h"
-#include "Engine.h"
+MoveLogic::MoveLogic() {
+	obstacles.reserve(std::size_t(1000) * 1000);
+}
+MoveLogic::~MoveLogic() {
+	obstacles.clear();
+}
 
-MoveNodes::MoveNodes() {
+void MoveLogic::addStaticObjects(){
 
 }
 
-MoveNodes::~MoveNodes()
-{
+void MoveLogic::addDynamicObject(std::weak_ptr<Collidable> object){
+	obstacles.emplace_back(object);
 }
 
-void MoveNodes::GenerateNodes() {
-	//auto& engine = Game_Engine::Current();
-	//MapSize = engine.worldManager->curMap().layerSize;
-	//nodes.reset(new Node[MapSize.x*MapSize.y]);
-	//for (int x = 0; x < MapSize.x; x++)
-	//	for (int y = 0; y < MapSize.y; y++)
-	//	{
-	//		nodes[y * MapSize.x + x].x = x; // ...because we give each node its own coordinates
-	//		nodes[y * MapSize.x + x].y = y;
-	//		nodes[y * MapSize.x + x].bObstacle = false;
-	//		nodes[y * MapSize.x + x].parent = nullptr;
-	//		nodes[y * MapSize.x + x].bVisited = false;
-	//	}
+void MoveLogic::UpdateDynamicObject(){
+
+}
+
+void MoveLogic::removeDynamicObject(){
+
+}
+
+void MoveLogic::UnitCheckPath(){
 
 }

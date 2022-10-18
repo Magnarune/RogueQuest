@@ -43,22 +43,22 @@ void cAssets::LoadUnitAssets(){
 
             sol::protected_function_result rcode = script();
 
-            if (!rcode.valid()) { 
+            if (!rcode.valid()) {
                 sol::error e = rcode;
-                std::cout << "error: " << e.what() << "\n"; 
+                std::cout << "error: " << e.what() << "\n";
             } else {
-                UnitData = rcode; 
+                UnitData = rcode;
             }
 
-            std::string name =  UnitData["Name"];
-            
+            std::string name = UnitData["Name"];
+
             UnitType::TextureMetaData meta;
             for (int i = 1; i < 5; i++)
                 meta.Sprite_Order.push_back(UnitData["SpriteOrder"][i]);//Im in danger
 
             UnitType unitType;
             FileSets = UnitData["Files"];
-            for (int i = 0; i < FileSets.size(); ++i){
+            for (int i = 0; i < FileSets.size(); ++i) {
                 sol::table fileset = FileSets[i + 1];
                 // load the Name : TextureID for the unitType
                 std::string name = fileset["Name"], path = fileset["FileName"];
@@ -67,19 +67,25 @@ void cAssets::LoadUnitAssets(){
                 meta.ani_len = sol::object(fileset["AnimationLength"]).as<int>();
                 meta.sprite_size = to_vi2d(fileset["SpriteSize"]);
                 meta.tile_size = to_vi2d(fileset["TileSize"]);
-            
+
                 meta.target_size = to_vi2d(fileset["TargetSize"]);
 
                 meta.scale = olc::vf2d(meta.target_size) / olc::vf2d(meta.tile_size);
 
                 // load head location data into the texture meta data
-                if(fileset["HeadImage"] != sol::nil){
+                if (fileset["HeadImage"] != sol::nil) {
                     unitType.head.tl = to_vi2d(fileset["HeadImage"]["tl"]);
                     unitType.head.sz = to_vi2d(fileset["HeadImage"]["size"]);
                     unitType.head.tex_id = meta.tex_id;
                 }
 
                 unitType.texture_metadata.insert_or_assign(name, std::move(meta));
+            }
+            unitType.Cost = UnitData["Parameters"]["Cost"];
+            unitType.Food = UnitData["Parameters"]["Food"];
+            sol::table Requirements = UnitData["Parameters"]["Requirements"];
+            for (int i = 0; i < Requirements.size(); i++){
+                unitType.Requirements.push_back(Requirements[i+1]);
             }
             if(UnitData["Parameters"] != sol::nil &&
                UnitData["Parameters"]["Abilities"] != sol::nil &&
@@ -131,7 +137,7 @@ void cAssets::LoadBuildingAssets() {
             }
 
             std::string name = BuildingData["Name"];
-           
+
             BuildingType::TextureMetaData meta;
 
             BuildingType buildingType;
@@ -141,6 +147,7 @@ void cAssets::LoadBuildingAssets() {
                 buildingType.icon.sz = to_vi2d(BuildingData["Icon"]["size"]);
                 buildingType.icon.tex_id = TextureCache::GetCache().CreateTexture(BuildingData["Icon"]["FileName"]);
             }
+            
 
             FileSets = BuildingData["Files"];
             for (int i = 0; i < FileSets.size(); ++i) {

@@ -135,7 +135,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     // Load Parameters
     unit->Unit_Collision_Radius = data.lua_data["Parameters"]["CollisionRadius"]; //I'm not in stats section of .lua
     unit->bIsRanged = data.lua_data["Parameters"]["Ranged"];
-    unit->cost = data.lua_data["Parameters"]["Cost"];
+   
     unit->food = data.lua_data["Parameters"]["Food"];
     // Load Stats
     unit->Health = data.lua_data["Stats"]["Health"]; unit->fMaxHealth = data.lua_data["Stats"]["MaxHealth"];
@@ -299,6 +299,7 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
     objectList.emplace_back(proj);
     return proj;
 }
+
 
 void WorldManager::ImportMapData() {
     // to do: iterate map folder and find maps

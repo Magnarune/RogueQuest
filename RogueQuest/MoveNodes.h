@@ -1,21 +1,16 @@
 #pragma once
 #include "olcPixelGameEngine.h"
-class MoveNodes{//Static
-	MoveNodes();
-	virtual ~MoveNodes();
-	struct Node {
-		bool isObstacle = false;// Is the node an obstruction?
-		bool hasVisited = false; // Have we searched this node before?
-		float fGlobalGoal;		 // Distance to goal so far
-		float LocalGoal;		 // Distance to goal if we took the alternative route
-		olc::vi2d xy;			// Nodes position in 2D space
-
-		std::vector<std::shared_ptr<Node>> vecNeighbours;// Connections to neighbours
-		std::weak_ptr<Node> parent;// Node connecting to this node that offers shortest parent
-	};
-	void GenerateNodes();
-	std::shared_ptr<Node> nodes;
-	olc::vi2d MapSize;
-
+#include "WorldObject.h"
+class MoveLogic {
+	MoveLogic();
+	virtual ~MoveLogic();
+	std::vector<std::vector<int>> mapData;
+	std::vector<std::weak_ptr<Collidable>> obstacles;
+public:
+	void addStaticObjects();
+	void addDynamicObject(std::weak_ptr<Collidable> object);
+	void UpdateDynamicObject();
+	void removeDynamicObject();
+	
+	void UnitCheckPath();
 };
-

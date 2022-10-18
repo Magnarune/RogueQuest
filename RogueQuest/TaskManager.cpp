@@ -17,13 +17,13 @@ std::shared_ptr<TaskManager::Task> TaskManager::PrepareTask(const std::string& n
     const auto& regtask = taskTypes.at(name);
     
     std::shared_ptr<Task> task;
-    task.reset(new Task{ &regtask, {},{},{}, data});//added third option
+    task.reset(new Task{ &regtask, {},{},{}, data});
     task->taskName = name;
     
     std::weak_ptr<Task> _wtask(task); // copy a weak reference to prevent memleak caused by having a closure hold a shared ref to itself
     task->initTask = [=]() -> bool { return _wtask.expired() ? false : regtask.initTask(_wtask.lock()); };
 
-    task->performTask = [=]() -> bool { return _wtask.expired() ? false : regtask.preformTask(_wtask.lock()); };//added
+    task->performTask = [=]() -> bool { return _wtask.expired() ? false : regtask.preformTask(_wtask.lock()); };
 
     task->checkCompleted = [=]() -> bool { return _wtask.expired() ? true : regtask.checkCompleted(_wtask.lock()); };
     

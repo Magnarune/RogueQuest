@@ -60,7 +60,7 @@ public:
 	std::shared_ptr<Building> GenerateBuilding(const std::string& name, int owner, olc::vf2d pos = { 0.f,0.f });
 
 	std::shared_ptr<Projectile> GenerateProjectile(const std::string& name, olc::vf2d pos, std::weak_ptr<WorldObject> trgt);
-	
+
 	friend class WorldObject;
 	friend class Unit;
 	friend class UnitManager;

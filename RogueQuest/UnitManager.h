@@ -370,6 +370,9 @@ public:
 	bool IterateSelectedUnits(std::function<bool(std::shared_ptr<Unit>)> cb);
 	bool IterateAllUnits(std::function<bool(std::shared_ptr<Unit>)> cb);
 	olc::vf2d ArrangeSelectedUnits(int Size, int interator);
+	
+
+
 	int numberofselectedunits;
 	int Columnoffset;
     friend class WorldManager;

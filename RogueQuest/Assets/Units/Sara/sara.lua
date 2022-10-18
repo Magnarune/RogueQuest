@@ -37,6 +37,7 @@ return
 	{
 		Food = 5,
 		Cost = 12,
+		Requirements = {"House","Wands"},
 		Ranged = true,
 		CollisionRadius = 10,
 		Abilities = {

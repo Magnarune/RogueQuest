@@ -17,6 +17,7 @@ public:
 
 	void UpgradeBuilding();
 
+	void UnProduceUnit();
 	void ProduceUnit(const std::string& unit);
 	void SentUnitlocation(olc::vf2d pos);
 	void SendUnit(std::shared_ptr<Unit> unit);

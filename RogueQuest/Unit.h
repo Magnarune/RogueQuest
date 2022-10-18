@@ -17,7 +17,7 @@
 
 
 
-class Unit : public Collidable  {
+class Unit : public Collidable   {
 
 
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
@@ -60,16 +60,10 @@ public:
 	std::weak_ptr<TaskManager::Task> trashtask;
 	std::shared_ptr<TaskManager::Task> HoldTask;
 	bool Taskpaused;
-	
-	//circle for debugging will be moved soon :)
-
-
-
 
 	int Gold;
 	std::weak_ptr<Building> HomeBase;
 	std::weak_ptr<Building> MineTarget;
-
 
 	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both
 	//End of Testing
@@ -81,11 +75,9 @@ public:
 	// Who Owns me,   Who are my friends;
 
 	int Owner;
-	 std::vector<int> FriendList;
+	std::vector<int> FriendList;
 	 //These could be a map? maybe that is wasteful
-	 int food;
-	 int cost;
-
+	int food;
 	bool bSelected;		//Did the player select me?
 	bool bIsRanged;		// Am i Ranged?
 	bool bIsAttackable; //Can you Attack me

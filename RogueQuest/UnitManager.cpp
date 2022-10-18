@@ -85,7 +85,7 @@ UnitManager::UnitManager() {
             const olc::vf2d& target = params.second;
             unit->ActionMode = false;
             unit->Target = build.lock()->Position + olc::vf2d(build.lock()->Size) / 2.f;
-            unit->ActionZone = olc::vf2d(build.lock()->Size /2.f) + olc::vf2d(12, 12);
+            unit->ActionZone = olc::vf2d(build.lock()->Size) /2.f + olc::vf2d(12, 12);
             unit->repairedbuilding = build;
             return true;
          },
@@ -184,7 +184,7 @@ UnitManager::UnitManager() {
             const olc::vf2d& target = params.second;
             unit->ActionMode = false;
             unit->MineTarget = build;
-            unit->ActionZone =( olc::vf2d(unit->MineTarget.lock()->Size /2.f ) + olc::vf2d(12, 12.f));
+            unit->ActionZone =( olc::vf2d(unit->MineTarget.lock()->Size )/2.f  + olc::vf2d(12, 12.f));
             unit->Target = build.lock()->Position + olc::vf2d(build.lock()->Size) / 2.f;
             if(unit->Gold > 0)
                 unit->currentTask->performTask();
@@ -198,16 +198,16 @@ UnitManager::UnitManager() {
                 unit->Gather();
             }
             
-            if (unit->Gold > 0 && unit->Target !=  unit->HomeBase.lock()->Position + unit->HomeBase.lock()->Size / 2.f) {//Change Take to Delivery
+            if (unit->Gold > 0 && unit->Target !=  unit->HomeBase.lock()->Position + olc::vf2d(unit->HomeBase.lock()->Size) / 2.f) {//Change Take to Delivery
                 unit->Target = unit->HomeBase.lock()->Position + olc::vf2d(unit->HomeBase.lock()->Size) / 2.f;
-                unit->ActionZone = olc::vf2d(unit->HomeBase.lock()->Size /2.f ) +olc::vf2d(12.f, 12.f);
+                unit->ActionZone = olc::vf2d(unit->HomeBase.lock()->Size) /2.f  +olc::vf2d(12.f, 12.f);
                 return true;//This is Dangerous but will work for now
 
            }
             if (unit->Gold > 0) {//If I have gold and have triggered preform task
                 unit->Deliver();
 
-                unit->ActionZone = olc::vf2d(unit->MineTarget.lock()->Size /2.f) + olc::vf2d(12.f, 12.f);//Restart Gather
+                unit->ActionZone = olc::vf2d(unit->MineTarget.lock()->Size) /2.f + olc::vf2d(12.f, 12.f);//Restart Gather
                 unit->Target = unit->MineTarget.lock()->Position + olc::vf2d(unit->MineTarget.lock()->Size) / 2.f;
             }
 
@@ -298,7 +298,7 @@ void UnitManager::CheckTaskAbility(std::shared_ptr<Collidable> object, bool A_Cl
         if (!object) {
             if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
                 engine.unitManager->ConditionedDelegateTask(unit,"Move",
-                    std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos())+ArrangeSelectedUnits(selectedUnits.size(),numberofselectedunits), A_Click));
+                    std::make_pair(olc::vf2d(engine.tv.ScreenToWorld(olc::vf2d(engine.GetMousePos())))+ArrangeSelectedUnits((int)selectedUnits.size(),numberofselectedunits), A_Click));
             continue;
         }
         if (testbuilding.lock()) {
@@ -339,13 +339,20 @@ olc::vf2d UnitManager::ArrangeSelectedUnits(int Size, int iterator) {
         if ((i + 1) % 3 == 0)
             Sizeadder +=1;
     }
-    if (Size > 1) {
-      
+    if (Size > 1) {     
 
         if (Size % 2 == 0) {//Even
             if ((iterator) % ColumnSize == 0) {
                 if ((iterator) != 0)
                     Columnoffset += 1;
+            }
+            if (Size == 2) {
+                if (iterator == 0) {//
+                    return { 0.f,   -unitoffset / 2.f };
+                } else
+                {
+                    return { 0.f,  unitoffset / 2.f };//size/2
+                }
             }
             if ((iterator - Columnoffset * ColumnSize) < ColumnSize / 2) {//
                 return { -unitoffset * Columnoffset,   -unitoffset / 2.f + -unitoffset * ((iterator - Columnoffset*ColumnSize )) };

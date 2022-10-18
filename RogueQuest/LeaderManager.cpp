@@ -45,7 +45,7 @@ void LeaderManager::AddEnemy(std::shared_ptr<Leader> lead, int allignment) {
 	for (auto& leader : LeaderList) {
 		int i = 0;
 		if (leader == lead) {
-			std::erase(lead->Allies[i], allignment); //if is friend remove it
+			std::erase(lead->Allies[i], allignment); //if add enemy
 			lead->Allies[i].push_back(-allignment);
 		}
 		else

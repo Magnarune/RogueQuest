@@ -263,7 +263,7 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="Assets\Buildings\Mine\GoldMine.lua">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

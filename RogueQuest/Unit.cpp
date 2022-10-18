@@ -236,9 +236,6 @@ void Unit::UpdatePosition(float delta) {
 					Velocity = { 0.f,0.f };
 				}
 			} else{
-				//if (Distance.x > ActionZone.x && Distance.y >ActionZone.y 
-				//&& Distance.x  < ActionZone.x + buildingSize.x 
-				//&& Distance.y  < ActionZone.y + buildingSize.y) {//if Distance is less then square???
 				Distance = Target.value() - Position;
 				if (   std::abs(Distance.x) < ActionZone.x 
 					&& std::abs(Distance.y) < ActionZone.y  ) {

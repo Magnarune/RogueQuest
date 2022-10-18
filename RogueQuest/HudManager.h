@@ -18,6 +18,8 @@ public:
 	void BuildingAbilities(std::shared_ptr<Building> buildinginfo);
 	void PrimaryBuildingSelection();//if you select buildings of differing types what abilities do you want shown
 
+	bool CheckRequirements(int owner, cAssets::BuildingType object);
+	bool CheckRequirements(int owner, cAssets::UnitType object);
 	HudManager();
 	~HudManager();
 

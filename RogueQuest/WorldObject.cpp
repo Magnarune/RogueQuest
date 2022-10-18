@@ -20,6 +20,7 @@ void WorldObject::Destroy() {
     engine.worldManager->DestroyObject(this);
 }
 
+
 void WorldObject::Update(float delta) {
 }
 

@@ -64,15 +64,20 @@ void Building::ProduceUnit(const std::string& unitName) {
 	}
 }
 
+void Building::UnProduceUnit() {
+	if (!productionQue.empty()) productionQue.pop();
+	building = false;
+	startbuilding = false;
+	m_fTimer = 0.f;
+}
+
 void Building::SentUnitlocation(olc::vf2d pos) {
 
 }
 
 void Building::SendUnit(std::shared_ptr<Unit> unit) {
 	auto& engine = Game_Engine::Current();
-	if (sentUnitPos.mag2() > 0.f) {
-		
-		engine.leaders->Gold(Owner, -unit->cost);
+	if (sentUnitPos.mag2() > 0.f) {		
 		unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {sentUnitPos, false} }));
 	}
 }
@@ -98,7 +103,7 @@ void Building::Update(float delta){
 		m_fTimer = 0.f;
 		ProduceUnit(productionQue.front());		
 	}
-	if (building&& engine.leaders->LeaderList[Owner]->Gold > 12) {
+	if (building) {
 		ProduceUnit(unitproduced);
 		m_fTimer += delta;
 	}
