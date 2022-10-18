@@ -43,6 +43,8 @@ return
 	},
 	Parameters =
 	{
+		Cost = 120,
+		Requirements = {"Castle"},
 		Interactable = false,
 		CollisionSize = {64,64},
 		BuildTime = 10

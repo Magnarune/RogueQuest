@@ -75,7 +75,6 @@ void LeaderManager::Food(int owner, int cost) {
 
 void LeaderManager::FoodMaintenance( std::vector<std::weak_ptr<Unit>> unilist) {
 
-
 	for (int i = 0; i < LeaderList.size(); i++) {
 		int fos = 0;
 		for (int j = 0; j < unilist.size(); j++) {
@@ -83,5 +82,19 @@ void LeaderManager::FoodMaintenance( std::vector<std::weak_ptr<Unit>> unilist) {
 				fos += unilist[j].lock()->food;
 		}
 		LeaderList[i]->Food = fos;
+	}
+}
+
+void LeaderManager::BuildingMaintenance(std::vector<std::weak_ptr<Building>> buildlist) {
+	for (int i = 0; i < LeaderList.size(); i++) {
+	
+		for (int j = 0; j < buildlist.size(); j++) {
+			if (buildlist[j].expired()) continue;
+			if (i == buildlist[j].lock()->Owner)
+				LeaderList[i]->ResearchUpgrades.push_back( buildlist[j].lock()->name);
+		}	
+		std::vector<std::string>::iterator it;
+		it =std::unique(LeaderList[i]->ResearchUpgrades.begin(), LeaderList[i]->ResearchUpgrades.end());
+		LeaderList[i]->ResearchUpgrades.erase(it, LeaderList[i]->ResearchUpgrades.end());
 	}
 }

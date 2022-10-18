@@ -38,6 +38,8 @@ return
 	},
 	Parameters =
 	{
+		Cost = 350,
+		Requirements = {"Castle"},
 		Interactable = false,
 		CollisionSize = {32,32},
 		BuildTime = 10
@@ -53,7 +55,7 @@ return
 	},
 	Production = 
 	{
-		Units = {""}
+		Units = {}
 	},
 	Projectiles = {"","Arrow","ThrowingAxe","Bolt"	}
 }

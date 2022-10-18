@@ -7,6 +7,12 @@ BuildingManager::BuildingManager() {
   
 }
 
+
+void BuildingManager::Update(float delta) {
+    auto& engine = Game_Engine::Current();
+    engine.leaders->BuildingMaintenance(BuildingList);
+}
+
 void BuildingManager::addNewBuilding(std::weak_ptr<Building> Building) {
 	BuildingList.emplace_back(Building);
 }

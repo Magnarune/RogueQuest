@@ -110,13 +110,15 @@ void HudManager::UnitAbilities(std::shared_ptr<Unit> unit) {
         }
         olc::Decal* decal = engine.hud->decals[_refname].get();
         float yoffset = i < 3 ? 0 : (i < 20 ? 16.f : 32.f);
-
-        // um .. what the *** are these doing here this isn't a draw function
+        bool rq = CheckRequirements(unit->Owner, data);
+       
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
-        engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.f,16.f }, decal, {0.f,0.f}, data.icon.fsz);
+        engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.f,16.f }, decal, {0.f,0.f}, data.icon.fsz, rq ? olc::WHITE : olc::GREY);
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
 
-        if (engine.inputmanager->Button({ 186.f + 16.f * (i % 3), IconY - 12.f + yoffset }, engine.GetMousePos(), { 16,16 })) {
+        if (engine.inputmanager->Button({ 186.f + 16.f * (i % 3), IconY - 12.f + yoffset }, engine.GetMousePos(), { 16,16 })&& rq) {
+            engine.leaders->LeaderList[unit->Owner]->Gold -= data.Cost;
+            
             engine.hud->BuildMode = true;
             engine.hud->Object = buildingName;
         }

@@ -89,6 +89,7 @@ void UserInputManager::GetBuildModeUserInput() {
     if (engine.GetMouse(1).bPressed) {
         engine.ActivityDone = true;
         engine.hud->BuildMode=false;
+        
         engine.unitManager->DelegateTask("Build",
             std::make_pair(engine.hud->Object, engine.tv.ScreenToWorld(engine.GetMousePos())));
     }

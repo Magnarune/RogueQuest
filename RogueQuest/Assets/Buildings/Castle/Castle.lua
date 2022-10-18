@@ -38,6 +38,8 @@ return
 	},
 	Parameters =
 	{
+		Cost = 500,
+		Requirements = {},
 		Interactable = false,
 		CollisionSize = {128,128},
 		BuildTime = 10

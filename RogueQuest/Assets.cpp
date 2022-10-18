@@ -169,7 +169,11 @@ void cAssets::LoadBuildingAssets() {
                     lvlo.tile_size = to_vi2d(level["TileSize"]);
                     meta.level_offsets.insert_or_assign(name, std::move(lvlo));
                 }
-
+                buildingType.Cost = BuildingData["Parameters"]["Cost"];
+                sol::table Requirements = BuildingData["Parameters"]["Requirements"];
+                for (int i = 0; i < Requirements.size(); i++) {
+                    buildingType.Requirements.push_back(Requirements[i + 1]);
+                }
                 buildingType.texture_metadata.insert_or_assign(name, std::move(meta));
             }
 

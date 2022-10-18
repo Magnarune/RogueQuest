@@ -131,6 +131,7 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     userinputs->GetUserInput();
     // Game Updates
     if(!IsConsoleShowing()){
+        buildingManager->Update(fElapsedTime);
         unitManager->Update(fElapsedTime);
         worldManager->Update(fElapsedTime);
         particles->UpdateParticles(fElapsedTime);
@@ -349,18 +350,32 @@ bool Game_Engine::OnConsoleCommand(const std::string& stext) {
 
 void Game_Engine::InitiateGame() {//For Debugging Ease
     worldManager->GenerateBuilding("GoldMine", 1, { 16 * 32.f,14 * 32.f });
-    worldManager->GenerateBuilding("Castle", 1, { 25 * 32.f  ,  14 * 32.f })->curStage =1;
-    worldManager->GenerateBuilding("House", 1, { 25 * 32.f  ,  19 * 32.f })->curStage = 1;
-    worldManager->GenerateBuilding("StoneTower", 1, { 20 * 32.f  ,  19 * 32.f })->curStage = 2;
+    const auto& Castle = worldManager->GenerateBuilding("Castle", 1, { 25 * 32.f  ,  14 * 32.f });
+    Castle->Health = Castle->maxHealth;
+    Castle->curStage = 1;
+     
+    const auto& House = worldManager->GenerateBuilding("House", 1, { 25 * 32.f  ,  19 * 32.f });
+    House->Health = House->maxHealth;
+    House->curStage = 1;
+   const auto& Tower =  worldManager->GenerateBuilding("StoneTower", 1, { 20 * 32.f  ,  19 * 32.f });
+   Tower->Health = Tower->maxHealth;
+   Tower->curStage = 2;
+
     for(int i=0; i< 20; i++)
         worldManager->GenerateUnit("Archer", 1, {3.f*(float)i+19.f * 32.f,10 * 32.f });
-
     worldManager->GenerateUnit("Builder", 1, { 19 * 32.f,14 * 32.f });
 
     worldManager->GenerateBuilding("GoldMine", 0, { 16 * 32.f,30 * 32.f });
-    worldManager->GenerateBuilding("Castle", 0, { 25 * 32.f  ,  30 * 32.f })->curStage =1;
-    worldManager->GenerateBuilding("House", 0, { 25 * 32.f  ,  35 * 32.f })->curStage = 1;
-    worldManager->GenerateBuilding("StoneTower", 0, { 20 * 32.f  ,  35 * 32.f })->curStage = 2;
+
+    const auto& Castles = worldManager->GenerateBuilding("Castle", 0, { 25 * 32.f  ,  30 * 32.f });
+    Castles->Health = Castles->maxHealth;
+    Castles->curStage = 1;
+    const auto& Houses= worldManager->GenerateBuilding("House", 0, { 25 * 32.f  ,  35 * 32.f });
+    Houses->Health = Houses->maxHealth;
+    Houses->curStage = 1;
+    const auto& Towers =worldManager->GenerateBuilding("StoneTower", 0, { 20 * 32.f  ,  35 * 32.f });
+    Towers->Health = Towers->maxHealth;
+    Towers->curStage = 2;
     worldManager->GenerateUnit("Builder", 0, { 19 * 32.f,30 * 32.f });
     for (int i = 0; i < 20; i++)
         worldManager->GenerateUnit("Archer", 0, { 3.f * (float)i + 19.f * 32.f,38 * 32.f });
