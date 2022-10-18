@@ -9,14 +9,12 @@
 #include "UnitManager.h"
 
 class BuildingManager {
-
-    std::vector<std::weak_ptr<Building>> BuildingList; 
-
-    void addNewBuilding(std::weak_ptr<Building> Building); 
-
+    std::vector<std::weak_ptr<Building>> BuildingList;
     std::vector<std::weak_ptr<Building>> selectedBuildings;
 
     TaskManager taskMgr;
+
+    void addNewBuilding(std::weak_ptr<Building> Building);
 public:
     BuildingManager();
     ~BuildingManager() = default;
@@ -26,7 +24,7 @@ public:
 
 
 
-    std::shared_ptr<Building> This_Building(olc::vf2d Pos);
+    std::shared_ptr<Building> This_Building(const olc::vf2d& Pos); // is this even used?
     void StopBuilding();
     //void MoveUnits(olc::vf2d Target, bool Attackstate);
     void SelectBuilding(olc::vf2d Mouse);
@@ -40,7 +38,7 @@ public:
 
     void SentUnitslocation(olc::vf2d Target);
 
-    bool IterateSelectetBuildings(std::function<bool(std::shared_ptr<Building>)> cb);
+    bool IterateSelectedBuildings(std::function<bool(std::shared_ptr<Building>)> cb);
     bool IterateAllBuildings(std::function<bool(std::shared_ptr<Building>)> cb);
 
     friend class WorldManager;

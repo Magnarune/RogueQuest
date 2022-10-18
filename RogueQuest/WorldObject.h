@@ -6,7 +6,7 @@
 #include <map>
 
 
-class WorldObject {
+class WorldObject : std::enable_shared_from_this<WorldObject> {
 public:
 
 	WorldObject();

@@ -103,6 +103,16 @@ bool BuildingManager::IterateAllBuildings(std::function<bool(std::shared_ptr<Bui
     return true; // iterate completed successfully
 }
 
+bool BuildingManager::IterateSelectedBuildings(std::function<bool(std::shared_ptr<Building>)> cb) {
+    for(auto& build : selectedBuildings) {
+        if(build.expired()) continue;
+        if(!cb(build.lock())){
+            return false; // user abort
+        }
+    }
+    return true; // iterate completed successfully
+}
+
 
 /*
     Building Manager Tasks For Selected Units - Will eventually be migrated into TaskManager
@@ -117,16 +127,14 @@ void BuildingManager::StopBuilding() {
     }
 }
 
-std::shared_ptr<Building> BuildingManager::This_Building(olc::vf2d pos) {
+std::shared_ptr<Building> BuildingManager::This_Building(const olc::vf2d& pos) {
     std::shared_ptr<Building> thisBuild;
-    for (auto& _build: BuildingList) {
-        if (_build.expired())
-            continue;
-        auto build = _build.lock();
-
+    IterateAllBuildings([&](auto build) -> bool {
         if (build->Position == pos) {
             thisBuild = build;
+            return false;
         }
-    }
+        return true;
+    });
     return thisBuild;
 }
