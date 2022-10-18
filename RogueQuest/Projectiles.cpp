@@ -5,7 +5,7 @@ Projectile::Projectile() : Collidable() {
 }
 
 Projectile::~Projectile(){
-    TargetPos.reset();
+    TargetObj.reset();
 }
 
 void Projectile::Destroy() {
@@ -20,18 +20,24 @@ void Projectile::Update(float fElapsedtime) {
         m_fTimer -= 0.1f;
 	       
 	}
-    if (TargetPos.lock()) {
-        if ((TargetPos.lock()->Position - Position).mag2() < 64) {
-            TargetPos.lock()->Health -= Damage;
-            engine.particles->GenerateBlood(TargetPos.lock()->Position);
+    if (!TargetObj.expired()) {
+        auto obj = TargetObj.lock();
+        if ((obj->Position - Position).mag2() < 64) {
+            if(auto build = std::dynamic_pointer_cast<Building>(obj)){
+                build->Health -= Damage;
+            }
+            if(auto unit = std::dynamic_pointer_cast<Unit>(obj)){
+                unit->Health -= Damage;
+            }
+
+            engine.particles->GenerateBlood(obj->Position);
             Destroy();
         }
-    }
-    else
+        direction = (obj->Position - Position).norm();
+    } else {
         Destroy();
-    if(TargetPos.lock())
-        direction = (TargetPos.lock()->Position - Position).norm();
-     Velocity = direction * PSpeed; // arrow speed is incorrect. This is a projectile, not an arrow. Not all projectiles are Arrows. Think of another way to do this such as generic velocity or proj speed
+    }
+    Velocity = direction * PSpeed; // arrow speed is incorrect. This is a projectile, not an arrow. Not all projectiles are Arrows. Think of another way to do this such as generic velocity or proj speed
     Collidable::Update(fElapsedtime);
 }
 

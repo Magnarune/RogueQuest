@@ -17,7 +17,7 @@ public:
 	void Draw(olc::TileTransformedView* gfx) override;
 
 	olc::vf2d direction;
-	std::weak_ptr<WorldObject> TargetPos;
+	std::weak_ptr<WorldObject> TargetObj;
 	float Damage {}; //Damage of projectile
 	float Speed {}; //Speed of projectile
 	float spincounter {};

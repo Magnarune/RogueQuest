@@ -61,6 +61,7 @@ public:
 	std::shared_ptr<TaskManager::Task> HoldTask;
 	bool Taskpaused;
 
+	float Health; // units have health
 	int Gold;
 	std::weak_ptr<Building> HomeBase;
 	std::weak_ptr<Building> MineTarget;
@@ -119,7 +120,8 @@ public:
 	int	SOEast = 3;	
 	std::vector<int> Direction;//Sprite order direction
 
-	std::optional<olc::vf2d>Target {}; // position for unit to move to I assume? This is where this belongs
+	olc::vf2d Distance {}; // distance to target (this is where this belongs)
+	std::optional<olc::vf2d> Target {}; // position for unit to move to I assume? This is where this belongs
 	
 	enum UnitLogic {
 		Aggressive, //If you say attack a pos Search and Kill anything within agro-range

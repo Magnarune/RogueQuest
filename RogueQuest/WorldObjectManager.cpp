@@ -1,6 +1,6 @@
 #include "WorldObjectManager.h"
 #include "Engine.h"
-#include <optional>
+#include <ranges>
 
 WorldManager::WorldManager() {
     objectList.reserve(1024 * 512);
@@ -28,8 +28,13 @@ void WorldManager::Update(float delta) {//Update last frames
 	}
 }
 
-void WorldManager::Draw() {//Draw 
+void WorldManager::Draw() {
     Game_Engine& engine = Game_Engine::Current();
+
+    // sort the object list based on draw depth
+    std::ranges::sort(objectList, [](auto& a, auto& b) -> bool {
+        return a->drawDepth < b->drawDepth;
+    });
 
     currentMap->DrawMap(&engine.tv);
     for (auto& object : objectList) {
@@ -37,7 +42,6 @@ void WorldManager::Draw() {//Draw
         object->Draw(&engine.tv);
     }
     engine.particles->DrawParticles();
-    
 }
 
 void WorldManager::DestroyObject(WorldObject* self) {
@@ -265,7 +269,7 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
     std::shared_ptr<Projectile> proj;
     proj.reset(new Projectile());
     proj->predPosition = proj->Position = pos;
-    proj->TargetPos = Target;
+    proj->TargetObj = Target;
     proj->Damage = data.lua_data["Stats"]["Damage"];
     proj->PSpeed = data.lua_data["Stats"]["Speed"];
     proj->Spinning = data.lua_data["Stats"]["Spin"];

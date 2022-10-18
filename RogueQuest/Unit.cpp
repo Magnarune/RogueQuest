@@ -4,7 +4,7 @@
 
 
 Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
-	 fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0){
+	 fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0) {
 }
 
 Unit::~Unit() {
@@ -115,14 +115,12 @@ void Unit::Update(float delta) {
 	UnitBehaviour();
 
 	if((currentTask && currentTask->checkCompleted()) || Health < 0){
-		//std::shared_ptr<TaskManager::Task> trash;
-		currentTask.reset();//swap(trash);
+		currentTask.reset();
 		if (Taskpaused == true) {			
 			if (HoldTask) {
 				currentTask = HoldTask;
 				currentTask->initTask();
-				//std::shared_ptr<TaskManager::Task> trashHold;
-				HoldTask.reset();//swap(trashHold);
+				HoldTask.reset();
 			}
 			Taskpaused = false;
 		}
@@ -135,8 +133,11 @@ void Unit::Update(float delta) {
 		}
 	}
 	if (Graphic_State != Dead) 
-		UpdatePosition(delta);		
+		UpdatePosition(delta);
+
 	Collidable::Update(delta);
+
+	drawDepth = Position.y / 4000.f;
 }
 
 void Unit::TrytoBuild(const std::string& name,const olc::vf2d& target) {

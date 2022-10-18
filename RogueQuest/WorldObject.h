@@ -11,13 +11,11 @@ public:
 
 	WorldObject();
 	virtual ~WorldObject();
-	float Health;		 // How much health do i have?
+
 	olc::vf2d Position {};
 	olc::vf2d Velocity {};
-	// std::optional<olc::vf2d>Target {};    //Move Target // THIS IS WRONG AND MAKES NO SENSE --------------- TO DO: REMOVE THIS CRAP - THIS BREAKS Proper Polymorphic Behavior
-
-	olc::vf2d Distance {};   //distange to Target	
-	float m_fTimer {};		//Graphics timer
+	float m_fTimer {};		// Graphics timer
+	float drawDepth; // depth of object for rendering
 
 	virtual void Draw(olc::TileTransformedView* gfx);
 	virtual void Update(float delta);

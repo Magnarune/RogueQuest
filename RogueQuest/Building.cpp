@@ -111,6 +111,8 @@ void Building::Update(float delta){
 		Collidable::Destroy();
 
 	Collidable::Update(delta); // Inherit
+
+	drawDepth = Position.y / 4000.f;
 }
 
 void Building::BuildingEffect() {

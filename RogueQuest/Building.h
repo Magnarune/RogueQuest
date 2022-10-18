@@ -70,10 +70,11 @@ public:
 	bool fire;
 	bool effect;
 
-	bool bSelected;	
+	bool bSelected;
 	float maxHealth;
-	int Stage;//What stage is this in? lvl 1 house lvl 2 house etc
-	int hurtstage;//if hurt show burning flames effects	
+	float Health; // Buildings have health
+	int Stage; //What stage is this in? lvl 1 house lvl 2 house etc
+	int hurtstage; //if hurt show burning flames effects	
 	float m_fTimer;		//Graphics timer
 
 	enum GFXState {//?

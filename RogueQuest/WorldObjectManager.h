@@ -17,6 +17,7 @@
 #include <cmath>
 #include <functional>
 #include <cassert>
+#include <optional>
 
 // Forward Declare For Factory Functions
 class Unit;
@@ -28,8 +29,10 @@ class WorldManager {
 	std::vector<std::shared_ptr<Map>> mapList; // Maybe
 	std::vector<std::shared_ptr<WorldObject>> objectList; // fixed size for optimization
 	std::vector<std::shared_ptr<WorldObject>> garbageList;
-	bool cu;
-	bool cb;
+
+	// vague variables will lead to broken code later down the line - either rename these or label them with a comment properly
+	bool cu; // this is for ...
+	bool cb; // this is for ...
 
 	std::shared_ptr<Map> currentMap;
 public:
