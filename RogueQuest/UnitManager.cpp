@@ -199,7 +199,7 @@ UnitManager::UnitManager() {
             }
             
             if (unit->Gold > 0 && unit->Target !=  unit->HomeBase.lock()->Position + olc::vf2d(unit->HomeBase.lock()->Size) / 2.f) {//Change Take to Delivery
-                unit->Target = unit->HomeBase.lock()->Position + olc::vf2d(unit->HomeBase.lock()->Size) / 2.f;
+                unit->Target = unit->HomeBase.lock()->Position + olc::vf2d(unit->HomeBase.lock()->Size) / 2.f;//+ olc::vf2d(0.f, -5.f);
                 unit->ActionZone = olc::vf2d(unit->HomeBase.lock()->Size) /2.f  +olc::vf2d(12.f, 12.f);
                 return true;//This is Dangerous but will work for now
 
@@ -208,7 +208,7 @@ UnitManager::UnitManager() {
                 unit->Deliver();
 
                 unit->ActionZone = olc::vf2d(unit->MineTarget.lock()->Size) /2.f + olc::vf2d(12.f, 12.f);//Restart Gather
-                unit->Target = unit->MineTarget.lock()->Position + olc::vf2d(unit->MineTarget.lock()->Size) / 2.f;
+                unit->Target = unit->MineTarget.lock()->Position + olc::vf2d(unit->MineTarget.lock()->Size) / 2.f + olc::vf2d(0.f, 5.f);
             }
 
 

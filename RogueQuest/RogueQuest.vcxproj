@@ -178,6 +178,7 @@
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Effects.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Highlighting.cpp" />
     <ClCompile Include="Hud.cpp" />
     <ClCompile Include="HudManager.cpp" />
     <ClCompile Include="LeaderManager.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="Effects.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="Highlighting.h" />
     <ClInclude Include="Hud.h" />
     <ClInclude Include="HudManager.h" />
     <ClInclude Include="LeaderManager.h" />

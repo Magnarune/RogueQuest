@@ -37,29 +37,37 @@ void Map::UpdateRain(float fElapsedtime) {
 }
 
 void Map::UpdateTimeofDay(float felapsedtime) {
+    if (!Cycle) {
+        if (DayLength > 0.f) {//It's Day time
+            DayLength -= felapsedtime;
 
-    TimeofDay = 255;
-    if (TimeofDay >= 255)
-        TimeofDay = 255.0f;
-    if (TimeofDay < 50)
-        TimeofDay = 50.0f;
-    if (DayTime == true) {
-        TimeofDay += 20 * felapsedtime;
-        FTIME += felapsedtime;
-        if (FTIME > 30) {
-            FTIME = 0.0f;
-            DayTime = false;
+        } else {
+            if (Darkness.r >= 1) {//Turn it to night
+                darkness_timer += felapsedtime;
+                if (((int)darkness_timer % 2) == 0)
+                    Darkness += olc::Pixel{ 1,1,1,0 };
+            } else {//It is now Night
+                darkness_timer = 0;
+                DayLength = 100;
+                Cycle = true;
+                Darkness = olc::Pixel{ 100,100,100,0 };
+            }
         }
     }
-    else {
-        TimeofDay -= 20 * felapsedtime;
-    }
-    if (TimeofDay < 50) {
-        UpdateRain(felapsedtime);
-        FTIME += felapsedtime;
-        if (FTIME > 20) {
-            FTIME = 0;
-            DayTime = true;
+    if (Cycle) {
+        if (NightLength > 0.f) {//It's Night time
+            NightLength -= felapsedtime;
+        } else {
+            if (Darkness.r <= 0) {//Turn it to Day
+                darkness_timer += felapsedtime;
+                if (((int)darkness_timer % 2) == 0)
+                    Darkness -= olc::Pixel{ 1,1,1,0 };
+            } else {//It is now Day
+                darkness_timer = 0;
+                NightLength = 30;
+                Cycle = false;
+                Darkness = olc::Pixel{ 0,0,0,0 };
+            }
         }
     }
 }
@@ -148,7 +156,7 @@ void Map::DrawMap(olc::TileTransformedView* tv) {
                 int tile = layerData[i][pos];
                 if (tile == 0) continue;
                 olc::vi2d position = { x,  y }; //screen space position
-                tv->DrawPartialDecal(offset + position * tileSize, GetTileSet(tile).decal, GetTile(tile) * tileSize, tileSize, { 1.0,1.0 }, olc::WHITE);
+                tv->DrawPartialDecal(offset + position * tileSize, GetTileSet(tile).decal, GetTile(tile) * tileSize, tileSize, { 1.0,1.0 }, olc::WHITE - Darkness);
             }
         }
 

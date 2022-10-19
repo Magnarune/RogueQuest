@@ -40,9 +40,12 @@ public:
     olc::vi2d bottomRightTile;//Bottom right tile on screen
 
     //MapUpdate
-    float TimeofDay;
-    bool DayTime;
-    float FTIME;
+    bool Cycle =false;
+    float DayLength =10;
+    float darkness_timer =0;
+    olc::Pixel Darkness{0,0,0,0};//Inverse
+    float NightLength =30;
+
     //Rain
     struct Rain
     {

@@ -36,7 +36,7 @@ return
 	Parameters = {
 		Food = 5,
 		Cost = 12,
-		Requirements = {"House","Wands"},
+		Requirements = {"House"},
 		Ranged = true,--un needed
 		CollisionRadius = 10,
 		Abilities = {

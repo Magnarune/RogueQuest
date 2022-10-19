@@ -222,6 +222,7 @@ void Unit::PerformAttack() {
 		}
 	}	
 	fAttackCD = fAttackSpeed; // reset time for next attack
+	Graphic_State = Walking;
 }
 
 void Unit::UpdatePosition(float delta) {
@@ -261,26 +262,47 @@ void Unit::UnitGraphicUpdate(float delta) {
 	bAnimating = true;
 	if (Velocity.mag2() < 0.1f * 0.1f && Graphic_State != Dead)
 		bAnimating = false;
+	
+	
+	if (Distance.mag2() < ActionZone.mag2()) {
 
-if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1) {
+		if (repairedbuilding.lock()) {
+			Graphic_State = Build;
+			bAnimating = true;
+		}
+		if ((targetUnit.lock() || targetBuilding.lock()) && fAttackCD < 0.f) {
+			Graphic_State = Attacking;
+			bAnimating = true;
+		}
+
+	
+	
+	
+	
+	}
+
+
+
+
+
+	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1) {
 		Stop();
 		Destroy();
 	}
-	if (currentTask) {//Exceptions to the rule
-		if (currentTask->taskName == "Repair" && Velocity.mag2() < 0.1f * 0.1f)
-			Graphic_State = Build;
-		if (currentTask->taskName == "Hunting" && Velocity.mag2() < 0.1f * 0.1f)
-			Graphic_State = Attacking;
-	}
-	else
-		Graphic_State = Walking;
+	//if (currentTask) {//Exceptions to the rule
+	//	if (currentTask->taskName == "Repair" && Velocity.mag2() < 0.1f * 0.1f)
+	//		Graphic_State = Build;
+	//	
+	//}
+	//else
+	//	Graphic_State = Walking;
 
-	if (repairedbuilding.lock() && Velocity.mag2() < 0.1f * 0.1f)
-		bAnimating = true;
-	if (targetUnit.lock() && Velocity.mag2() < 0.1f * 0.1f)
-		bAnimating = true;
-	if (targetBuilding.lock() && Velocity.mag2() < 0.1f * 0.1f)
-		bAnimating = true;
+	//if (repairedbuilding.lock() && Velocity.mag2() < 0.1f * 0.1f)
+	//	bAnimating = true;
+	//if (targetUnit.lock() && Velocity.mag2() < 0.1f * 0.1f && fAttackCD < 0.f)
+	//	bAnimating = true;
+	//if (targetBuilding.lock() && Velocity.mag2() < 0.1f * 0.1f && fAttackCD < 0.f)
+	//	bAnimating = true;
 
 	if (Health <= 0) {
 		Graphic_State = Dead;
@@ -304,6 +326,7 @@ if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len 
 
 void Unit::Draw(olc::TileTransformedView* gfx){
 	Collidable::Draw(gfx); // inherit
+	auto& engine = Game_Engine::Current();
 
 	const auto& meta = textureMetadata[Graphic_State];
 	olc::vi2d SpriteSheetOffset = { 0, 0 };
@@ -345,7 +368,7 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 
 	}
 	gfx->DrawPartialDecal((Position - Origin), decals[Graphic_State].get(),
-		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, bSelected ? olc::WHITE : olc::GREY);
+		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, (bSelected ? olc::WHITE: engine.highlightmanagment->OwnerColor(Owner))- engine.worldManager->currentMap->Darkness);
 	
 	if (bSelected == true) {//Debug Selection
 		static Circle debugCircle{ 512.f };

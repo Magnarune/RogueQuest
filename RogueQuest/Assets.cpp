@@ -146,8 +146,7 @@ void cAssets::LoadBuildingAssets() {
                 buildingType.icon.fsz = to_vi2d(BuildingData["Icon"]["FileSize"]);
                 buildingType.icon.sz = to_vi2d(BuildingData["Icon"]["size"]);
                 buildingType.icon.tex_id = TextureCache::GetCache().CreateTexture(BuildingData["Icon"]["FileName"]);
-            }
-            
+            }            
 
             FileSets = BuildingData["Files"];
             for (int i = 0; i < FileSets.size(); ++i) {

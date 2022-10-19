@@ -73,6 +73,7 @@ bool Game_Engine::OnUserCreate() {
     inputmanager.reset(new UserInputManager);
     particles.reset(new Particles);
     leaders.reset(new LeaderManager); //Handler for the Leaders in the game
+    highlightmanagment.reset(new Highlighting);
 
     
     // Configure Controllers
@@ -197,6 +198,7 @@ bool Game_Engine::OnUserDestroy(){
     TextureCache::FreeCache();
     particles.reset();
     leaders.reset();
+    highlightmanagment.reset();
     return true;
 }
 

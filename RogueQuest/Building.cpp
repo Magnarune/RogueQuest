@@ -127,7 +127,8 @@ void Building::Draw(olc::TileTransformedView* gfx){
 	const auto& meta = textureMetadata.at(Graphic_State);
 	const auto& stage = meta.level_offsets.at(Level.at(curStage));
 	Collidable::Draw(gfx); // inherit
-	gfx->DrawPartialDecal(Position, meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size, bSelected ? olc::WHITE : olc::GREY);
+	auto& engine = Game_Engine::Current();
+	gfx->DrawPartialDecal(Position, meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size, (bSelected ? olc::WHITE : engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
 	
 	//gfx->DrawLineDecal(Position, { Position.x + Size .x,Position.y });//collision box
 	//gfx->DrawLineDecal(Position, { Position.x ,Position.y + Size.y });

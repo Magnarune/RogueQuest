@@ -87,7 +87,7 @@ void LeaderManager::FoodMaintenance( std::vector<std::weak_ptr<Unit>> unilist) {
 
 void LeaderManager::BuildingMaintenance(std::vector<std::weak_ptr<Building>> buildlist) {
 	for (int i = 0; i < LeaderList.size(); i++) {
-	
+		LeaderList[i]->ResearchUpgrades.clear();
 		for (int j = 0; j < buildlist.size(); j++) {
 			if (buildlist[j].expired()) continue;
 			if (i == buildlist[j].lock()->Owner)

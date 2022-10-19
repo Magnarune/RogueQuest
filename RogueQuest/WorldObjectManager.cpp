@@ -198,9 +198,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     if (pos == olc::vf2d(0.f, 0.f))
         pos = { 10.f,10.f };
     build->predPosition = build->Position = pos;
-    build->name = data.lua_data["Name"];
-
-    
+    build->name = data.lua_data["Name"];    
 
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];

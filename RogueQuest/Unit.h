@@ -160,7 +160,7 @@ protected:
 
 	float m_fTimer;		//Graphics timer
 	float m_fStateTick;// How long unil i can do action tick again
-	float fAttackCD; //simple timer before unit can attack
+	float fAttackCD =0.1f; //simple timer before unit can attack
 	bool bAnimating = false; // is animating
 
 private:

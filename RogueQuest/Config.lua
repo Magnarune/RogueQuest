@@ -10,6 +10,6 @@ return
 	ScreenLocked = true,
 	ScreenWidth = 1080,
 	Sound = true,
-	Squelch = 5000.444300,
+	Squelch = "Zip Zap Zoop: ",
 	debug = 4,
 }

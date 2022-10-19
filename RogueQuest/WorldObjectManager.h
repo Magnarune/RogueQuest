@@ -34,8 +34,8 @@ class WorldManager {
 	bool cu; // this is for ...
 	bool cb; // this is for ...
 
-	std::shared_ptr<Map> currentMap;
 public:
+	std::shared_ptr<Map> currentMap;
 	WorldManager();
 	virtual ~WorldManager();
     
