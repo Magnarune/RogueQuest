@@ -128,6 +128,7 @@ bool Game_Engine::OnUserUpdate(float fElapsedTime) {
 }
 
 bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
+    fElapsedTime = std::min(fElapsedTime, 0.8f); // Cap to 800ms
 
     userinputs->GetUserInput();
     // Game Updates
