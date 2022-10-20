@@ -24,6 +24,7 @@ public:
 	void BuildingBehaviour();
 	void Draw(olc::TileTransformedView* gfx) override;
 	void Update(float delta) override;
+	void AfterUpdate(float delta) override;
 	void Destroy() override;
 	void Stop();
 	void BuildingEffect();

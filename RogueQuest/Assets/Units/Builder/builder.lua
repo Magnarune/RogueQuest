@@ -7,8 +7,9 @@ return
 		{
 			Name = "Walking",			
 			TileSize = { 64 , 64 },
-			TargetSize = { 32, 32 },
 			SpriteSize = {576 , 256 },
+			TargetSize = { 32, 32 },
+			Origin = {16,16},
 			AnimationLength = math.floor(576 / 64), 
 			FileName = "Assets/Units/Builder/Walk.png",
 			HeadImage = {
@@ -19,24 +20,27 @@ return
 		{
 			Name = "Attacking",
 			TileSize = { 64 , 64 },
-			TargetSize = { 32, 32 },
 			SpriteSize = {448, 256 },
+			TargetSize = { 32, 32 },
+			Origin = {16,16},
 			AnimationLength = math.floor(384 / 64),
 			FileName = "Assets/Units/Builder/Attack.png"
 		},
 		{
 			Name = "Dead",
 			TileSize = { 64 , 64 },
-			TargetSize = { 32, 32 },
 			SpriteSize = { 384 , 64 },
+			TargetSize = { 32, 32 },
+			Origin = {16,16},
 			AnimationLength = math.floor(384 / 64),
 			FileName = "Assets/Units/Builder/Dead.png"
 		},
 		{
 		Name = "Build",
 			TileSize = { 64 , 64 },
-			TargetSize = { 32, 32 },
 			SpriteSize = {448, 256 },
+			TargetSize = { 32, 32 },
+			Origin = {16,16},
 			AnimationLength = math.floor(384 / 64),
 			FileName = "Assets/Units/Builder/Build.png"
 		}

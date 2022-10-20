@@ -134,10 +134,10 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     //Load Sprite Order
     for (int i = 0; i < 4; i++)
         unit->Direction.push_back(data.lua_data["SpriteOrder"][i+1]);
-    unit->Target = std::nullopt;//{0.f,0.f};
+    unit->Target = std::nullopt;
        
     // Load Parameters
-    unit->Unit_Collision_Radius = data.lua_data["Parameters"]["CollisionRadius"]; //I'm not in stats section of .lua
+    unit->Unit_Collision_Radius = data.lua_data["Parameters"]["CollisionRadius"];
     unit->bIsRanged = data.lua_data["Parameters"]["Ranged"];
    
     unit->food = data.lua_data["Parameters"]["Food"];
@@ -169,12 +169,11 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
         std::unique_ptr<olc::Decal> decal;
         decal.reset(new olc::Decal(TextureCache::GetCache().GetTexture(meta.tex_id)));
         unit->decals.insert_or_assign(state, std::move(decal));
-        // copy texture metadata
+        // copy texture metadata    
         unit->textureMetadata.insert_or_assign(state, meta);
     }
-    unit->bFriendly = true;
-   
-
+    unit->bFriendly = true;  
+    
     unit->SetMask(Collidable::Mask(unit->Unit_Collision_Radius));
     unit->cType = Collidable::isUnit;
     objectList.emplace_back(unit);
@@ -216,7 +215,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     build->AttackSpeed = data.lua_data["Stats"]["AttackSpeed"];
     build->Owner = owner;
     build->FriendList = InitializeObject(owner);
-
+ 
    if( sol::table UnitProduction = data.lua_data["Production"]["Units"])
        for (int i = 0; i < UnitProduction.size(); i++) {
            build->unitproduction.push_back(UnitProduction[i + 1]);
@@ -267,6 +266,7 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
     std::shared_ptr<Projectile> proj;
     proj.reset(new Projectile());
     proj->predPosition = proj->Position = pos;
+   
     proj->TargetObj = Target;
     proj->Damage = data.lua_data["Stats"]["Damage"];
     proj->PSpeed = data.lua_data["Stats"]["Speed"];

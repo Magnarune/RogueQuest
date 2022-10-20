@@ -9,6 +9,7 @@ return
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
 			SpriteSize = {576 , 256 },
+			Origin = {16,16},
 			AnimationLength = math.floor(576 / 64), 
 			FileName = "Assets/Units/Archer/Walk.png",
 			HeadImage = {
@@ -21,6 +22,7 @@ return
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
 			SpriteSize = {448, 256 },
+			Origin = {16,16},
 			AnimationLength = math.floor(384 / 64),
 			FileName = "Assets/Units/Archer/Attack.png"
 		},
@@ -29,6 +31,7 @@ return
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
 			SpriteSize = { 384 , 64 },
+			Origin = {16,16},
 			AnimationLength = math.floor(384 / 64),
 			FileName = "Assets/Units/Archer/Dead.png"
 		},
@@ -39,6 +42,7 @@ return
 		ProductionTime = 6,
 		Requirements = {},
 		Ranged = true,
+		Projectile = "Arrow",
 		CollisionRadius = 10,
 		Abilities = {
 			Tasks = {"Move", "Attack"} -- task names allowed to be delegated to this unit			

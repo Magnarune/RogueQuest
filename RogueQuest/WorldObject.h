@@ -14,8 +14,10 @@ public:
 
 	olc::vf2d Position {};
 	olc::vf2d Velocity {};
-	float m_fTimer {};		// Graphics timer
-	float drawDepth; // depth of object for rendering
+	
+	float m_fTimer {};		
+	float drawDepth; 
+
 
 	virtual void Draw(olc::TileTransformedView* gfx);
 	virtual void Update(float delta);
@@ -30,10 +32,11 @@ class Collidable : public WorldObject {
 public:
 	struct Mask {
 		enum MaskType { MASK_RECTANGLE, MASK_CIRCLE, MASK_NONE } type;
-		union {
+		union {			
 			olc::vf2d rect;
 			float radius;
 		};
+		olc::vf2d origin;
 
 		Mask();
 		Mask(olc::vf2d rect);
@@ -49,7 +52,7 @@ public:
 		isProjectile
 	} cType;
 	olc::vf2d predPosition;
-
+	
 	Collidable();
 	virtual ~Collidable();
 

@@ -22,11 +22,13 @@ public:
         struct TextureMetaData {
             size_t tex_id, ani_len;
             olc::vi2d sprite_size, tile_size, target_size;
+            olc::vf2d draw_origin;
             std::vector<int> Sprite_Order;
             olc::vf2d scale;
         };
         int Cost;
         int Food;
+        std::string projectileName;
         std::vector<std::string> Requirements;
         std::map<std::string, TextureMetaData> texture_metadata;
         std::vector<std::string> task_abilities;
@@ -46,6 +48,7 @@ public:
         struct TextureMetaData {
             size_t tex_id;
             olc::vi2d target_size;
+            olc::vf2d draw_origin;
             olc::vf2d scale;
             std::map<std::string, LevelOffset> level_offsets;
         };

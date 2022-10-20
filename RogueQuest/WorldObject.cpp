@@ -55,11 +55,12 @@ Collidable::Collidable(): WorldObject() {
 Collidable::~Collidable() {
 }
 
-Collidable::Mask::Mask(): type(MASK_NONE) {}
-Collidable::Mask::Mask(olc::vf2d rect): type(MASK_RECTANGLE), rect(rect) {}
-Collidable::Mask::Mask(float radius): type(MASK_CIRCLE), radius(radius) {}
+Collidable::Mask::Mask() : type(MASK_NONE), origin({ 0.f, 0.f }) {}
+Collidable::Mask::Mask(olc::vf2d rect): type(MASK_RECTANGLE), rect(rect), origin({ 0.f, 0.f }) {}
+Collidable::Mask::Mask(float radius): type(MASK_CIRCLE), radius(radius), origin({ 0.f, 0.f }) {}
 
 void Collidable::SetMask(const Mask& mask) {
+	
 	this->mask = mask;
 }
 
@@ -80,7 +81,7 @@ bool Collidable::CheckCollision(float delta) {
 	auto& engine = Game_Engine::Current();
 
 	const olc::vf2d& nextPos = predPosition; // next frame position
-	auto checkCvC = [&](std::shared_ptr<Collidable> other, float r1, float r2) {
+	auto checkCvC = [&](std::shared_ptr<Collidable> other, float r1, float r2, olc::vf2d origin) {
 		olc::vf2d ray = (other->Position - nextPos);
 		float overlap = (r1 + r2) - ray.mag();
 		if(std::isnan(overlap)) overlap = 0;
@@ -88,12 +89,12 @@ bool Collidable::CheckCollision(float delta) {
 		if(overlap > 0.01f)
 			return OnCollision(other, (ray.mag2() < 0.01 ? ray : ray.norm()) * overlap);
 
-		return true; // yay for simple
+		return true;
 	};
 
-	auto checkRvC = [&](std::shared_ptr<Collidable> other, double radius, olc::vf2d size, bool inverse=false) {
-		olc::vf2d circlePos = inverse ? nextPos : other->Position,
-				  rectPos = inverse ? other->Position : nextPos;
+	auto checkRvC = [&](std::shared_ptr<Collidable> other, double radius, olc::vf2d size, olc::vf2d origin, bool inverse=false) {
+		olc::vf2d circlePos = inverse ? nextPos : other->Position ,
+				  rectPos = inverse ? other->Position - other->mask.origin : nextPos - origin;
 
 		// nearest position
 		olc::vf2d nPos = circlePos.max(rectPos).min(rectPos + size); // simplified vector clamp
@@ -107,17 +108,18 @@ bool Collidable::CheckCollision(float delta) {
 		return true;
 	};
 
-	auto checkRvR = [&](std::shared_ptr<Collidable> other, olc::vf2d mSize, olc::vf2d oSize) {
-		const olc::vf2d& oPos = other->Position;
+	auto checkRvR = [&](std::shared_ptr<Collidable> other, olc::vf2d mSize, olc::vf2d oSize, olc::vf2d origin) {
+		const olc::vf2d& oPos = other->Position - other->mask.origin;
+		const olc::vf2d& mPos = nextPos - origin;
 
 		olc::vf2d overlap{};
-		if (nextPos.x + mSize.x > oPos.x && nextPos.x < oPos.x + oSize.x &&
-			nextPos.y + mSize.y > oPos.y && nextPos.y < oPos.y + oSize.y) {
-			olc::vf2d quadrant((nextPos + mSize / 2.f) - (oPos + oSize / 2.f));
+		if (mPos.x + mSize.x > oPos.x && mPos.x < oPos.x + oSize.x &&
+			mPos.y + mSize.y > oPos.y && mPos.y < oPos.y + oSize.y) {
+			olc::vf2d quadrant((mPos + mSize / 2.f) - (oPos + oSize / 2.f));
 			bool top = quadrant.y < 0,
 				left = quadrant.x < 0;
-			overlap.x = left ? (nextPos.x + mSize.x) - oPos.x : nextPos.x - (oPos.x + oSize.x);
-			overlap.y = top ? (nextPos.y + mSize.y) - oPos.y : nextPos.y - (oPos.y + oSize.y);
+			overlap.x = left ? (mPos.x + mSize.x) - oPos.x : mPos.x - (oPos.x + oSize.x);
+			overlap.y = top ? (mPos.y + mSize.y) - oPos.y : mPos.y - (oPos.y + oSize.y);
 
 			olc::vf2d alap = { std::fabs(overlap.x),std::fabs(overlap.y) };
 			if (alap.x > alap.y) overlap.x = 0.f; else overlap.y = 0.f; // find shortest distance
@@ -140,19 +142,19 @@ bool Collidable::CheckCollision(float delta) {
 		if(obj->mask.type == Mask::MASK_RECTANGLE){
 			olc::vf2d& rect = obj->mask.rect;
 			if(mask.type == Mask::MASK_RECTANGLE){
-				return checkRvR(obj, mask.rect, rect);
+				return checkRvR(obj, mask.rect, rect, mask.origin);
 			}
 			if(mask.type == Mask::MASK_CIRCLE){
-				return checkRvC(obj, mask.radius, rect, true); // reverse for circle v rect
+				return checkRvC(obj, mask.radius, rect, mask.origin, true); // reverse for circle v rect
 			}
 		}
 		if(obj->mask.type == Mask::MASK_CIRCLE){
 			float& radius = obj->mask.radius;
 			if(mask.type == Mask::MASK_CIRCLE){
-				return checkCvC(obj, mask.radius, radius);
+				return checkCvC(obj, mask.radius, radius, mask.origin);
 			}
 			if(mask.type == Mask::MASK_RECTANGLE){
-				return checkRvC(obj, radius, mask.rect); // just rect v circle
+				return checkRvC(obj, radius, mask.rect, mask.origin); // just rect v circle
 			}
 		}
 

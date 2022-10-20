@@ -12,6 +12,7 @@ return
 		{
 			Name = "Normal",
 			TargetSize = { 128, 128 },--Size of Building
+			Origin = {64,64},
 			FileName = "Assets/Buildings/Castle/Castle.png",
 			LevelOffsets = {
 				{

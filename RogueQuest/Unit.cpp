@@ -174,7 +174,8 @@ void Unit::RepairBuilding() {
 
 void Unit::AfterUpdate(float delta) {
 	UnitGraphicUpdate(delta);
-	Collidable::AfterUpdate(delta);// inherit
+	mask.origin = textureMetadata.at(Graphic_State).draw_origin;
+	Collidable::AfterUpdate(delta);// inherit	
 }
 
 void Unit::UnitSearch() {//Target = unit/build.front()
@@ -205,10 +206,10 @@ void Unit::UnitHunting() {
 
 void Unit::PerformAttack() {
 	auto& engine = Game_Engine::Current();
-	
+
 	if (targetUnit.lock()) {
 		if (bIsRanged) {
-			engine.worldManager->GenerateProjectile("Arrow", Position, targetUnit);
+			engine.worldManager->GenerateProjectile(unitType.projectileName, Position, targetUnit);
 		}
 		else {
 			targetUnit.lock()->Health -= fAttackDamage;
@@ -218,7 +219,7 @@ void Unit::PerformAttack() {
 	}
 	else if (targetBuilding.lock()) {
 		if (bIsRanged) {
-			engine.worldManager->GenerateProjectile("Arrow", Position, targetBuilding);
+			engine.worldManager->GenerateProjectile(unitType.projectileName, Position, targetBuilding);
 		}
 		else {
 			targetBuilding.lock()->Health -= fAttackDamage;
@@ -249,10 +250,8 @@ void Unit::UpdatePosition(float delta) {
 					if (currentTask)
 						currentTask->performTask();
 					Velocity = { 0.f,0.f };
-				}
-				
-			}
-			
+				}				
+			}			
 	}else
 		Velocity = { 0.f,0.f };
 
@@ -323,11 +322,10 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 	Collidable::Draw(gfx); // inherit
 	auto& engine = Game_Engine::Current();
 
-	const auto& meta = textureMetadata[Graphic_State];
+	const auto& meta = textureMetadata.at(Graphic_State);
 	olc::vi2d SpriteSheetOffset = { 0, 0 };
 	olc::vi2d SpriteSheetTileSize = meta.tile_size;
-	const olc::vf2d& SpriteScale = meta.scale;
-	olc::vf2d Origin = olc::vf2d(SpriteSheetTileSize) * SpriteScale / 2.f;
+	const olc::vf2d& SpriteOrigin = meta.draw_origin;
 
 	//Calculate graphic facing Direction
 	if (Velocity != olc::vf2d({ 0.0f, 0.0f }))
@@ -361,20 +359,19 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 			SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;
 			break;
 	}
-	gfx->DrawPartialDecal((Position - Origin), decals[Graphic_State].get(),
-		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, (bSelected ? olc::WHITE: engine.highlightmanagment->OwnerColor(Owner))- engine.worldManager->currentMap->Darkness);
+	gfx->DrawPartialDecal((Position - SpriteOrigin),meta.target_size, decals[Graphic_State].get(),
+		SpriteSheetOffset, SpriteSheetTileSize, 
+		(bSelected ? olc::WHITE: engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
 	
 	if (bSelected == true) {//Debug Selection
 		static Circle debugCircle{ 512.f };
-			/*	debugCircle.position = Position;
-		debugCircle.radius = olc::vf2d(AgroRange, AgroRange);
-		debugCircle.Draw();
+		debugCircle.position = Position ;	
 
-		debugCircle.radius = olc::vf2d(Unit_Collision_Radius, Unit_Collision_Radius);
+		debugCircle.radius = olc::vf2d(mask.radius, mask.radius);
 		debugCircle.col = olc::Pixel(0x700F0AAA);
-		debugCircle.Draw();*/
+		debugCircle.Draw();
 		//DrawCircleDecal(Position, AgroRange, olc::DARK_RED, gfx);
-		//DrawCircleDecal(Position, Unit_Collision_Radius, olc::GREEN, gfx);
+		DrawCircleDecal(Position, mask.radius, olc::GREEN, gfx);
 		//DrawCircleDecal(Position, fAttackRange, olc::BLACK, gfx);
 		if (Target.has_value()) {
 			gfx->DrawLineDecal(Position, Target.value());
@@ -406,8 +403,8 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 	}
 }
 
-int CIRCLE_PRECISION = 32;
 void Unit::DrawCircleDecal(olc::vf2d pos, float radius, olc::Pixel col, olc::TileTransformedView* gfx) {
+int CIRCLE_PRECISION = 32;
 	auto& engine = Game_Engine::Current();
 	std::vector<olc::vf2d> poly;
 	std::vector<olc::vf2d> uvs;

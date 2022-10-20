@@ -9,6 +9,7 @@ return
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
 			SpriteSize = {576 , 256 },
+			Origin = {16,16},
 			AnimationLength = math.floor(576 / 64), 
 			FileName = "Assets/Units/Mage/MageWalk.png",
 			HeadImage = {
@@ -21,6 +22,7 @@ return
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
 			SpriteSize = {448, 256 },
+			Origin = {16,16},
 			AnimationLength = math.floor(448 / 64),
 			FileName = "Assets/Units/Mage/MageAttack.png"
 		},
@@ -29,6 +31,7 @@ return
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
 			SpriteSize = { 384 , 64 },
+			Origin = {16,16},
 			AnimationLength = math.floor(384 / 64),
 			FileName = "Assets/Units/Mage/MageDead.png"
 		}
@@ -39,6 +42,7 @@ return
 		Requirements = {"House"},
 		ProductionTime = 8,
 		Ranged = true,--un needed
+		Projectile = "ThrowingAxe",
 		CollisionRadius = 10,
 		Abilities = {
 			Tasks = {"Move", "Attack"}, -- task names allowed to be delegated to this unit

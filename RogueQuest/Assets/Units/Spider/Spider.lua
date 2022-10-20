@@ -9,6 +9,7 @@ return
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
 			SpriteSize = {384 , 256 },
+			Origin = {16,16},
 			AnimationLength = math.floor(384 / 64), 
 			FileName = "Assets/Units/Spider/Walk.png" ,
 			HeadImage = {
@@ -21,6 +22,7 @@ return
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
 			SpriteSize = {256, 256 },
+			Origin = {16,16},
 			AnimationLength = math.floor(256 / 64),
 			FileName = "Assets/Units/Spider/Attack.png"
 		},
@@ -29,6 +31,7 @@ return
 			TileSize = { 64 , 64 },
 			TargetSize = { 32, 32 },
 			SpriteSize = { 384 , 64 },
+			Origin = {16,16},
 			AnimationLength = math.floor(384 / 64),
 			FileName = "Assets/Units/Spider/Dead.png"
 		}

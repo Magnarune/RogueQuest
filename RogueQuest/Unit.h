@@ -18,8 +18,6 @@
 
 
 class Unit : public Collidable   {
-
-
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
 
 	void RepairBuilding();
@@ -39,15 +37,13 @@ class Unit : public Collidable   {
 	void Update(float fElapsedTime) override; //remake
 	void AfterUpdate(float delta) override;
 	void Draw(olc::TileTransformedView* gfx) override;//good
-	//void FillCircleDecal(olc::vf2d pos, float radius, olc::Pixel col = olc::WHITE,);
 	void DrawCircleDecal(olc::vf2d pos, float radius, olc::Pixel col,olc::TileTransformedView * gfx);
 public:
 	Unit(const cAssets::UnitType& unitType);
 	virtual ~Unit();
 	const cAssets::UnitType& unitType; // internal unit type reference
 
-	//Testing Some Build Logic Gates
-	
+	//Testing Some Build Logic Gates	
 	olc::vf2d buildlocation;//Where is the building going to be made
 	olc::vf2d buildingSize; //Size of Building | Given by construct
 	std::string buildName; //Name of what Im building
@@ -121,7 +117,7 @@ public:
 	std::vector<int> Direction;//Sprite order direction
 
 	olc::vf2d Distance {}; // distance to target (this is where this belongs)
-	std::optional<olc::vf2d> Target {}; // position for unit to move to I assume? This is where this belongs
+	std::optional<olc::vf2d> Target {}; // position for unit to move to.
 	
 	enum UnitLogic {
 		Aggressive, //If you say attack a pos Search and Kill anything within agro-range

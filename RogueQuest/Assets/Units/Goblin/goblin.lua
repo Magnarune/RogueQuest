@@ -9,6 +9,7 @@ return
 			TileSize = { 64 , 64},
 			TargetSize = { 32, 32 },
 			SpriteSize = {576 , 256 },
+			Origin = {16,16},
 			AnimationLength = math.floor(448/ 64), 
 			FileName = "Assets/Units/Goblin/Walk.png", --in Assets
 			HeadImage = {
@@ -21,14 +22,16 @@ return
 			TileSize = { 64 , 64},
 			TargetSize = { 32, 32 },
 			SpriteSize = {448, 256},
+			Origin = {16,16},
 			AnimationLength =  math.floor(256 / 64),
 			FileName = "Assets/Units/Goblin/Attack.png"
 		},
 		{
 			Name = "Dead",
 			TileSize = { 64 , 64 },
-			SpriteSize = { 384 , 64 },
 			TargetSize = { 32, 32 },
+			SpriteSize = { 384 , 64 },
+			Origin = {16,16},
 			AnimationLength =  math.floor(320 / 64),
 			FileName = "Assets/Units/Goblin/Dead.png"
 		}

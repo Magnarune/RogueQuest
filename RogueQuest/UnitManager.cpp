@@ -232,6 +232,61 @@ UnitManager::UnitManager() {
          }
          , 0, olc::Key::R }); // metadata , hotkey
 
+        taskMgr.RegisterTask("AttackTarget",
+            { [&](std::shared_ptr<TaskManager::Task> task) -> bool {//Initiate Task
+                auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+                auto& unit = arguments.first;           // customizable parameters
+                const auto& params = std::any_cast<std::pair<std::weak_ptr<Building>, std::weak_ptr<Unit>>>(arguments.second);
+                const std::weak_ptr<Building>& HBuild = params.first;
+                const std::weak_ptr<Unit>& HUnit = params.second;
+                unit->ActionMode = true;
+                if (HBuild.lock()) {
+                    unit->Target = HBuild.lock()->Position + olc::vf2d(HBuild.lock()->Size) / 2.f; //center of building
+                    unit->ActionZone.x = unit->fAttackRange + (float)HBuild.lock()->Size.x / 2.f;
+                    unit->ActionZone.y = unit->fAttackRange + (float)HBuild.lock()->Size.y / 2.f;
+                }
+                if (HUnit.lock()) {
+                    unit->Target = olc::vf2d(HUnit.lock()->Position.x + HUnit.lock()->Unit_Collision_Radius * 1.414f,
+                                             HUnit.lock()->Position.y + HUnit.lock()->Unit_Collision_Radius * 1.414f);
+                    unit->ActionZone.x = unit->fAttackRange + HUnit.lock()->Unit_Collision_Radius * 1.414f;
+                    unit->ActionZone.y = unit->fAttackRange + HUnit.lock()->Unit_Collision_Radius * 1.414f;
+                }
+                 return true;
+             },
+            [&](std::shared_ptr<TaskManager::Task> task) -> bool {//Preform Task
+                auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+                auto& unit = arguments.first;//ATTACK
+                if (unit->fAttackCD > 0 || (!unit->targetBuilding.lock() && !unit->targetUnit.lock())) {//if can't attack or target is dead
+                    return false;
+                } else {
+                    unit->Graphic_State = Unit::Attacking;
+                    if (unit->curFrame == unit->textureMetadata[unit->Graphic_State].ani_len - 1) {
+                        unit->PerformAttack();
+                        // unit->Graphic_State = Unit::Walking;
+                     }
+                     return true;
+                 }
+                 return true;
+              },
+              [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished when unit dies here this == true
+                  // required
+                  auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+                  auto& unit = arguments.first;
+                  if (!unit->targetBuilding.lock() && !unit->targetUnit.lock())
+                      return true;
+                  if (unit->targetBuilding.lock() && unit->targetBuilding.lock()->Health < 0.f) {
+                      unit->targetBuilding.reset();
+                      unit->targetUnit.reset();
+                      return true;
+                  }
+                  if (unit->targetUnit.lock() && unit->targetUnit.lock()->Health < 0.f) {
+                      unit->targetUnit.reset();
+                      unit->targetBuilding.reset();
+                      return true;
+                  }
+                  return false;
+              }
+              , 0, olc::Key::A });
 }
 // internal do not touch
 void UnitManager::addNewUnit(std::weak_ptr<Unit> unit) {

@@ -67,6 +67,7 @@ void cAssets::LoadUnitAssets(){
                 meta.ani_len = sol::object(fileset["AnimationLength"]).as<int>();
                 meta.sprite_size = to_vi2d(fileset["SpriteSize"]);
                 meta.tile_size = to_vi2d(fileset["TileSize"]);
+                meta.draw_origin = olc::vf2d(to_vi2d(fileset["Origin"]));
 
                 meta.target_size = to_vi2d(fileset["TargetSize"]);
 
@@ -95,9 +96,11 @@ void cAssets::LoadUnitAssets(){
                     unitType.task_abilities.emplace_back(tasks[i + 1].get<std::string>());
                 }
             }
+            if (UnitData["Parameters"]["Ranged"] == true)
+                unitType.projectileName = UnitData["Parameters"]["Projectile"];
 
             unitType.lua_data = std::move(UnitData); // UnitData is empty now
-
+            
             unitCache.insert_or_assign(name, std::move(unitType));//if you say unit you get Full table!
         } catch(std::exception e) {
             std::cerr << e.what() << "\n";
@@ -158,7 +161,8 @@ void cAssets::LoadBuildingAssets() {
                 meta.tex_id = TextureCache::GetCache().CreateTexture(path);
                 meta.target_size = to_vi2d(fileset["TargetSize"]);
                 meta.scale = olc::vf2d(meta.target_size);
-                
+                meta.draw_origin = olc::vf2d(to_vi2d(fileset["Origin"]));
+
                 BuildingType::LevelOffset lvlo;
                 Offsets = fileset["LevelOffsets"];
                 for(int i = 0; i < Offsets.size(); ++i){

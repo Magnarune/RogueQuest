@@ -107,12 +107,18 @@ void Building::Update(float delta){
 		ProduceUnit(unitproduced);
 		m_fTimer += delta;
 	}
-	if(Health < 0)
+	if(Health <= 0.f)
 		Collidable::Destroy();
 
 	Collidable::Update(delta); // Inherit
 
 	drawDepth = Position.y / 4000.f;
+}
+
+void Building::AfterUpdate(float delta) {
+	mask.origin = textureMetadata.at(Graphic_State).draw_origin;
+	Collidable::AfterUpdate(delta);
+
 }
 
 void Building::BuildingEffect() {
@@ -124,16 +130,23 @@ void Building::BuildingEffect() {
 }
 
 void Building::Draw(olc::TileTransformedView* gfx){
-	const auto& meta = textureMetadata.at(Graphic_State);
-	const auto& stage = meta.level_offsets.at(Level.at(curStage));
-	Collidable::Draw(gfx); // inherit
 	auto& engine = Game_Engine::Current();
+	const auto& meta = textureMetadata.at(Graphic_State);
+	const auto& stage = meta.level_offsets.at(Level.at(curStage));	
+	//const olc::vf2d& SpriteScale = meta.scale;
+	const olc::vf2d& SpriteOrigin = meta.draw_origin;
 
-	gfx->DrawPartialDecal(Position - olc::vf2d(offset), meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size, (bSelected ? olc::WHITE : engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
-	if (engine.hud->BuildMode) {
-		gfx->DrawLineDecal(Position, { Position.x + Size .x,Position.y });//collision box
-		gfx->DrawLineDecal(Position, { Position.x ,Position.y + Size.y });
-		gfx->DrawLineDecal(Position + Size, { Position.x,Position.y + Size.y });
-		gfx->DrawLineDecal(Position + Size, { Position.x + Size.x,Position.y  });
-	}
+	Collidable::Draw(gfx); // inherit
+
+
+	gfx->DrawPartialDecal(Position -SpriteOrigin - olc::vf2d(offset), meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size,
+						 (bSelected ? olc::WHITE : engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
+	
+	//if (engine.hud->BuildMode) {
+	auto maskpos = Position - SpriteOrigin;
+		gfx->DrawLineDecal(maskpos, { maskpos.x + mask.rect.x,maskpos.y });//collision box
+		gfx->DrawLineDecal(maskpos, { maskpos.x ,maskpos.y + mask.rect.y });
+		gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x,maskpos.y + mask.rect.y });
+		gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x + mask.rect.x,maskpos.y  });
+	//}
 }
