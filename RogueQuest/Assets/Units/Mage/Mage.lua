@@ -37,6 +37,7 @@ return
 		Food = 5,
 		Cost = 12,
 		Requirements = {"House"},
+		ProductionTime = 8,
 		Ranged = true,--un needed
 		CollisionRadius = 10,
 		Abilities = {

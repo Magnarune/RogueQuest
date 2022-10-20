@@ -1,6 +1,7 @@
 return 
 {
 	Name = "GoldMine", -- used for Engine::GenerateBuilding()
+	offset = {0,0},
 	Icon = {
 		FileName = "Assets/Buildings/Mine/GoldMineIcon.png",
 		size = {32,32},

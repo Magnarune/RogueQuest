@@ -34,7 +34,10 @@ void Unit::Stop() {
 	ULogic = Passive;
 	Target = std::nullopt;
 	Velocity = { 0.f,0.f };
+	if(Graphic_State != Dead)
+		Graphic_State = Walking;
 	repairedbuilding.reset();
+	Taskpaused = false;
 }
 
 void Unit::UnitBehaviour() {
@@ -109,12 +112,13 @@ void Unit::Update(float delta) {
 	auto& engine = Game_Engine::Current();
 	if(fAttackCD > 0)
 		fAttackCD -= delta;
+	UnitBehaviour();
 	if (ULogic == Aggressive) {
 		UnitSearch();
 	}
-	UnitBehaviour();
 
 	if((currentTask && currentTask->checkCompleted()) || Health < 0){
+		Target = std::nullopt;
 		currentTask.reset();
 		if (Taskpaused == true) {			
 			if (HoldTask) {
@@ -223,6 +227,7 @@ void Unit::PerformAttack() {
 	}	
 	fAttackCD = fAttackSpeed; // reset time for next attack
 	Graphic_State = Walking;
+	curFrame = 0;
 }
 
 void Unit::UpdatePosition(float delta) {
@@ -240,7 +245,7 @@ void Unit::UpdatePosition(float delta) {
 			} else{
 				Distance = Target.value() - Position;
 				if (   std::abs(Distance.x) < ActionZone.x 
-					&& std::abs(Distance.y) < ActionZone.y  ) {
+					&& std::abs(Distance.y) < ActionZone.y) {
 					if (currentTask)
 						currentTask->performTask();
 					Velocity = { 0.f,0.f };
@@ -261,8 +266,7 @@ void Unit::UpdatePosition(float delta) {
 void Unit::UnitGraphicUpdate(float delta) {
 	bAnimating = true;
 	if (Velocity.mag2() < 0.1f * 0.1f && Graphic_State != Dead)
-		bAnimating = false;
-	
+		bAnimating = false;	
 	
 	if (Distance.mag2() < ActionZone.mag2()) {
 
@@ -273,17 +277,8 @@ void Unit::UnitGraphicUpdate(float delta) {
 		if ((targetUnit.lock() || targetBuilding.lock()) && fAttackCD < 0.f) {
 			Graphic_State = Attacking;
 			bAnimating = true;
-		}
-
-	
-	
-	
-	
+		}	
 	}
-
-
-
-
 
 	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1) {
 		Stop();
@@ -365,7 +360,6 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 			SpriteSheetOffset.y = Direction[FacingDirection] * SpriteSheetTileSize.y;
 			SpriteSheetOffset.x = curFrame * SpriteSheetTileSize.x;
 			break;
-
 	}
 	gfx->DrawPartialDecal((Position - Origin), decals[Graphic_State].get(),
 		SpriteSheetOffset, SpriteSheetTileSize, SpriteScale, (bSelected ? olc::WHITE: engine.highlightmanagment->OwnerColor(Owner))- engine.worldManager->currentMap->Darkness);
@@ -402,9 +396,8 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 							gfx->DrawLineDecal(homebase->Position - ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x + float(homebase->Size.x) / 2.f + ActionZone.x, homebase->Position.y - ActionZone.y + float(homebase->Size.x) / 2.f }));
 							gfx->DrawLineDecal(homebase->Position - ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x - ActionZone.x + float(homebase->Size.x) / 2.f  ,homebase->Position.y + ActionZone.y + float(homebase->Size.y) / 2.f }));
 							gfx->DrawLineDecal(homebase->Position + ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x + ActionZone.x + float(homebase->Size.x) / 2.f  ,homebase->Position.y - ActionZone.y + float(homebase->Size.y) / 2.f }));
-							gfx->DrawLineDecal(homebase->Position + ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x - ActionZone.x + float(homebase->Size.x) / 2.f ,homebase->Position.y + ActionZone.y + float(homebase->Size.x) / 2.f }));
-
-					}
+							gfx->DrawLineDecal(homebase->Position + ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({ homebase->Position.x - ActionZone.x + float(homebase->Size.x) / 2.f ,homebase->Position.y + ActionZone.y + float(homebase->Size.x) / 2.f }));
+						}
 
 				}
 			}

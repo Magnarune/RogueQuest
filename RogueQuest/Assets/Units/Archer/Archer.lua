@@ -36,6 +36,7 @@ return
 	Parameters = {
 		Food = 5,
 		Cost = 22,
+		ProductionTime = 6,
 		Requirements = {},
 		Ranged = true,
 		CollisionRadius = 10,
@@ -51,10 +52,10 @@ return
 		MaxMana = 20,
 		Ammo = 0, 
 		MaxAmmo = 0,
-		MoveSpeed = 150,       
+		MoveSpeed = 80,       
 		AttackRange = 80, 
 		AttackDamage = 2,
-		AttackSpeed = 0.5,
+		AttackSpeed = .7,
 		SpellCooldown = 5,
 		KnockBackResist = 1
 	},

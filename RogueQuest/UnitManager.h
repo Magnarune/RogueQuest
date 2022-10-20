@@ -358,6 +358,8 @@ public:
 
 	void ParseSearch(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& build, std::weak_ptr<Unit>& unit);
 
+	bool CheckBuildObstruction(std::shared_ptr<Building> potBuilding);
+
 	void DeselectUnits();
 
 	bool FindHomeBase(std::shared_ptr<Unit>& unit);
@@ -372,7 +374,7 @@ public:
 	olc::vf2d ArrangeSelectedUnits(int Size, int interator);
 	
 
-
+	
 	int numberofselectedunits;
 	int Columnoffset;
     friend class WorldManager;

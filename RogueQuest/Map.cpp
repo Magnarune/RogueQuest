@@ -43,7 +43,7 @@ void Map::UpdateTimeofDay(float felapsedtime) {
 
         } else {
             if (Darkness.r >= 1) {//Turn it to night
-                darkness_timer += felapsedtime;
+                darkness_timer += 1.f*felapsedtime;
                 if (((int)darkness_timer % 2) == 0)
                     Darkness += olc::Pixel{ 1,1,1,0 };
             } else {//It is now Night
@@ -59,7 +59,7 @@ void Map::UpdateTimeofDay(float felapsedtime) {
             NightLength -= felapsedtime;
         } else {
             if (Darkness.r <= 0) {//Turn it to Day
-                darkness_timer += felapsedtime;
+                darkness_timer += 1.f*felapsedtime;
                 if (((int)darkness_timer % 2) == 0)
                     Darkness -= olc::Pixel{ 1,1,1,0 };
             } else {//It is now Day

@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Castle", -- used for Engine::GenerateBuilding()
+	offset = {0,0},
 	Icon = {
 		FileName = "Assets/Buildings/Castle/castleicon.png",
 		size = {32,32},
@@ -38,6 +39,7 @@ return
 	},
 	Parameters =
 	{
+		
 		Cost = 500,
 		Requirements = {},
 		Interactable = false,

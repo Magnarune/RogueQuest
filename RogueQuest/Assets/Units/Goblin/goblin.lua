@@ -38,6 +38,7 @@ return
 		Food = 5,
 		Cost = 12,
 		Requirements = {},
+		ProductionTime = 12,
 		Ranged = false,
 		CollisionRadius = 10, 
 		Abilities = {

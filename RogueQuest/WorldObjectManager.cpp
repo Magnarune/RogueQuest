@@ -15,7 +15,7 @@ WorldManager::~WorldManager() {
 }
 
 void WorldManager::Update(float delta) {//Update last frames
-    currentMap->UpdateMap(delta);
+    //currentMap->UpdateMap(delta);
     for (auto& object : objectList) {
 		if (object == nullptr) continue;
         object->Update(delta);
@@ -199,7 +199,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
         pos = { 10.f,10.f };
     build->predPosition = build->Position = pos;
     build->name = data.lua_data["Name"];    
-
+    build->offset = to_vi2d(data.lua_data["offset"]);
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];
     build->Interactable = data.lua_data["Parameters"]["Interactable"];

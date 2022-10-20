@@ -90,7 +90,7 @@ public:
 	olc::vf2d vRubberBand;   // X , Y, Position to go back to
 	olc::vf2d AttackTarget;  // Target you are chasing
 	olc::vf2d HitVelocity;	// velocity for getting kicked
-	float AgroRange = 80.f; //How far will you look to kill somthing
+	float AgroRange = 120.f; //How far will you look to kill somthing
 	float fUnitAngle;        // Angle of the player 0->2pi Radians
 
 	// Parameters

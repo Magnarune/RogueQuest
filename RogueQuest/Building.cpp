@@ -52,7 +52,7 @@ void Building::ProduceUnit(const std::string& unitName) {
 	unitproduced = unitName;
 	if (!building) {
 		auto& data = engine.assetManager->GetUnitData(unitName);
-		productiontime = data.lua_data["Stats"]["Health"];
+		productiontime = data.lua_data["Parameters"]["ProductionTime"];
 		building = true;
 	}
 
@@ -128,11 +128,12 @@ void Building::Draw(olc::TileTransformedView* gfx){
 	const auto& stage = meta.level_offsets.at(Level.at(curStage));
 	Collidable::Draw(gfx); // inherit
 	auto& engine = Game_Engine::Current();
-	gfx->DrawPartialDecal(Position, meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size, (bSelected ? olc::WHITE : engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
-	
-	//gfx->DrawLineDecal(Position, { Position.x + Size .x,Position.y });//collision box
-	//gfx->DrawLineDecal(Position, { Position.x ,Position.y + Size.y });
-	//gfx->DrawLineDecal(Position + Size, { Position.x,Position.y + Size.y });
-	//gfx->DrawLineDecal(Position + Size, { Position.x + Size.x,Position.y  });
 
+	gfx->DrawPartialDecal(Position - olc::vf2d(offset), meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size, (bSelected ? olc::WHITE : engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
+	if (engine.hud->BuildMode) {
+		gfx->DrawLineDecal(Position, { Position.x + Size .x,Position.y });//collision box
+		gfx->DrawLineDecal(Position, { Position.x ,Position.y + Size.y });
+		gfx->DrawLineDecal(Position + Size, { Position.x,Position.y + Size.y });
+		gfx->DrawLineDecal(Position + Size, { Position.x + Size.x,Position.y  });
+	}
 }

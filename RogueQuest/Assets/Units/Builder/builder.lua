@@ -44,6 +44,7 @@ return
 	Parameters = {
 		Food = 5,
 		Cost = 12,
+		ProductionTime = 10,
 		Requirements = {},
 		Ranged = false,
 		CollisionRadius = 5,

@@ -5,6 +5,7 @@ Hud::Hud() {
 }
 
 Hud::~Hud() {   
+    potBuilding.reset();
     decals.clear();
 }
 
@@ -203,14 +204,15 @@ void Hud::CalculateMiniMap(int x, int y, const Map &cur_map) {
 void Hud::DrawBuild() {
     auto& engine = Game_Engine::Current();
 
-    const auto& data = engine.assetManager->GetBuildingData(Object);
-    std::string _refname = Object + "__tex";
+    const auto& data = engine.assetManager->GetBuildingData(potBuilding->name);
+    engine.hud->potBuilding->Position = engine.tv.ScreenToWorld(engine.GetMousePos()) - olc::vf2d(engine.hud->potBuilding->Size) / 2.f;
+    std::string _refname = potBuilding->name + "__tex";
     if (!engine.hud->decals.count(_refname)) {
         engine.hud->loadImage(_refname, data.icon.tex_id);
     }
     olc::Decal* decal = engine.hud->decals[_refname].get();
-    olc::vf2d Center = olc::vf2d(engine.GetMousePos()) - olc::vf2d((float)data.icon.sz.x , (float)data.icon.sz.y );
-    engine.DrawPartialDecal( ((Center)), {64,64}, decal, {0,0}, data.icon.fsz, olc::PixelF(0.f, 255.f, 0.f, 0.7f));
+    olc::vf2d Center = olc::vf2d(engine.tv.ScreenToWorld(engine.GetMousePos())) - olc::vf2d((float)data.icon.sz.x/2.f, (float)data.icon.sz.y/2.f );
+    engine.tv.DrawPartialDecal( ((Center)), olc::vf2d(engine.hud->potBuilding->Size), decal, {0,0}, data.icon.fsz, engine.unitManager->CheckBuildObstruction(potBuilding) ? olc::PixelF(0.f, 255.f, 0.f, 0.7f) : olc::PixelF(1.f, 0.f, 0.f, 0.7f));
 }
 
 

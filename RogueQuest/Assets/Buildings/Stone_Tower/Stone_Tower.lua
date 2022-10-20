@@ -1,6 +1,7 @@
 return 
 {
 	Name = "StoneTower", -- used for Engine::GenerateBuilding()
+	offset = {0,32},
 	Icon = {
 		FileName = "Assets/Buildings/Stone_Tower/tower.png",
 		size = {32,32},

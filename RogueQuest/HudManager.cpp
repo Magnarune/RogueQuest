@@ -117,10 +117,16 @@ void HudManager::UnitAbilities(std::shared_ptr<Unit> unit) {
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
 
         if (engine.inputmanager->Button({ 186.f + 16.f * (i % 3), IconY - 12.f + yoffset }, engine.GetMousePos(), { 16,16 })&& rq) {
-            engine.leaders->LeaderList[unit->Owner]->Gold -= data.Cost;
-            
-            engine.hud->BuildMode = true;
-            engine.hud->Object = buildingName;
+            auto to_vi2d = [](sol::table obj) -> olc::vi2d {
+                int32_t x = obj[1],
+                    y = obj[2];
+                return { x, y };
+            };//PUT ALL DATA OF THE POTENTIAL BUILDING INTO POTENTIAL BUILDING    
+            engine.hud->potBuilding.reset(new Building);
+            const auto& potdata = engine.assetManager->GetBuildingData(buildingName);
+            engine.hud->BuildMode = true;//InputManager goes to build Mode
+            engine.hud->potBuilding->name = buildingName;
+            engine.hud->potBuilding->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
         }
     }
 }

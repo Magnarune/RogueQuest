@@ -34,6 +34,7 @@ public:
 	//
 	olc::vf2d sentUnitPos;
 	// unit production vars
+	olc::vi2d offset;
 	bool building;
 	bool startbuilding;
 	float productiontime;
@@ -92,6 +93,7 @@ private:
 	friend class TaskManager;
 	friend class Unit;
 	friend class UserInputManager;
+	friend class HudManager;
 	
 };
 

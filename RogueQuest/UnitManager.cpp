@@ -22,9 +22,9 @@ UnitManager::UnitManager() {
             const bool& attackstate = params.second;
             // action code            
             unit->ActionMode = true;
-            unit->ULogic = attackstate ? Unit::Aggressive : Unit::Neutral;
-            unit->ActionZone.x = 8.f;
-            unit->ActionZone.y = 8.f;
+            unit->ULogic = attackstate ? Unit::Aggressive : Unit::Passive;
+            unit->ActionZone.x = 3.f;
+            unit->ActionZone.y = 3.f;
             //unit->Distance = target - unit->Position;
             unit->Graphic_State = Unit::Walking;
             unit->Target = target;
@@ -49,17 +49,24 @@ UnitManager::UnitManager() {
             auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
             auto& unit = arguments.first;
             // customizable parameters
-            const auto& params = std::any_cast<std::pair<std::string, olc::vf2d>>(arguments.second);
-            const std::string& buildingname = params.first;// Only allowed two >.<
+            const auto& params = std::any_cast<std::pair<std::shared_ptr<Building>, olc::vf2d>>(arguments.second);
+            const std::shared_ptr<Building>& potbuilding = params.first;// Only allowed two >.<
             const olc::vf2d& target = params.second;
             unit->ActionMode = false;
-            unit->TrytoBuild(buildingname, target);
+            unit->TrytoBuild(potbuilding->name, target);
             unit->ActionZone = olc::vf2d(unit->buildingSize / 2.f) + olc::vf2d(12, 12);
              return true;
          },
          [&](std::shared_ptr<TaskManager::Task> task) -> bool {
              auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
              auto& unit = arguments.first;
+             //
+             const auto& buildingdata = engine.assetManager->GetBuildingData(unit->buildName);
+             if (engine.leaders->LeaderList[unit->Owner]->Gold < buildingdata.Cost) {
+                 return false;
+             }
+                 
+             engine.leaders->LeaderList[unit->Owner]->Gold -= buildingdata.Cost;
              engine.worldManager->GenerateBuilding(unit->buildName,unit->Owner, unit->Target.value() - unit->buildingSize / 2.f);
              engine.particles->GenerateSmoke(unit->Target.value() - unit->buildingSize / 2.f, unit->buildingSize, true);
              engine.particles->GenerateSmoke(unit->Target.value() - unit->buildingSize / 2.f, unit->buildingSize, true);
@@ -226,8 +233,6 @@ UnitManager::UnitManager() {
          , 0, olc::Key::R }); // metadata , hotkey
 
 }
-
-
 // internal do not touch
 void UnitManager::addNewUnit(std::weak_ptr<Unit> unit) {
     unitList.emplace_back(unit);
@@ -279,8 +284,7 @@ void UnitManager::DelegateTask(const std::string& name, const std::any& data) {
 }
 //Step One 
 void UnitManager::ConditionedDelegateTask(std::shared_ptr<Unit> unit, const std::string& name, const std::any& data) {
-    unit->taskQueue.push(taskMgr.PrepareTask(name, std::pair<std::shared_ptr<Unit>, std::any>{unit, data}));      
-      
+    unit->taskQueue.push(taskMgr.PrepareTask(name, std::pair<std::shared_ptr<Unit>, std::any>{unit, data}));       
 }
 
 void UnitManager::CheckTaskAbility(std::shared_ptr<Collidable> object, bool A_Click) {
@@ -386,7 +390,6 @@ olc::vf2d UnitManager::ArrangeSelectedUnits(int Size, int iterator) {
     return {0.f,0.f};
 }
 
-
 // Get methods
 size_t UnitManager::GetUnitCount(const std::string& name) {
     return name == "" ? unitList.size() :
@@ -455,13 +458,35 @@ void UnitManager::SelectUnits(olc::vf2d Initial, olc::vf2d Final) {
         if (unit->Position.x > std::min(Initial.x, Final.x) && 
             unit->Position.y > std::min(Initial.y, Final.y) &&
             unit->Position.x < std::max(Final.x, Initial.x) &&
-            unit->Position.y < std::max(Final.y, Initial.y) &&
-            unit->bFriendly) 
+            unit->Position.y < std::max(Final.y, Initial.y)) 
         {
            unit->bSelected = true;
            selectedUnits.push_back(_unit);
         }
     }
+}
+
+bool UnitManager::CheckBuildObstruction(std::shared_ptr<Building> potBuilding) {
+    auto& engine = Game_Engine::Current();
+    bool GoodtoPlaceBuilding = true;
+    engine.buildingManager->IterateAllBuildings([&](std::shared_ptr<Building> build) -> bool {
+   /*     if (build->Position.x > potBuilding->Position.x + (float)potBuilding->Size.x &&
+            build->Position.y > potBuilding->Position.y + (float)potBuilding->Size.y &&
+            build->Position.x + (float)build->Size.x > potBuilding->Position.x &&
+            build->Position.y + (float)build->Size.y > potBuilding->Position.y) {
+            GoodtoPlaceBuilding = false;
+            return false;
+        }*/
+        if ((potBuilding->Position.x < build->Position.x + (float)build->Size.x && potBuilding->Position.x + (float)potBuilding->Size.x>  build->Position.x &&
+            potBuilding->Position.y < build->Position.y + (float)build->Size.y && potBuilding->Position.y + (float)potBuilding->Size.y>  build->Position.y)) {
+            GoodtoPlaceBuilding = false;
+            return false;
+        }
+            
+        return true;
+        });
+    engine.DrawStringDecal({30.f,30.f}, std::to_string(GoodtoPlaceBuilding));
+    return GoodtoPlaceBuilding;
 }
 
 // Public method for deselecting all units
@@ -493,8 +518,6 @@ bool UnitManager::IterateAllUnits(std::function<bool(std::shared_ptr<Unit>)> cb)
     }
     return true; // iterate completed successfully
 }
-
-
 
 /*
     Unit Manager Tasks For Selected Units - Will eventually be migrated into TaskManager
@@ -550,9 +573,10 @@ std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
 
     std::shared_ptr<Collidable> testBuild;
     engine.buildingManager->IterateAllBuildings([&](std::shared_ptr<Building> build) -> bool {
-        const float& sz = (build->Size.x + build->Size.y) / 2.f;
-        const float r2 = 0;
-        if ((build->Position - Mouse).mag2() < (sz * sz + r2 * r2)) {
+
+        if (Mouse.x > build->Position.x && Mouse.y > build->Position.y &&
+            Mouse.x < build->Position.x + build->Size.x &&
+            Mouse.y < build->Position.y + build->Size.y) {
            testBuild = build;
             return false;
         }

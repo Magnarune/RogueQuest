@@ -87,11 +87,14 @@ void UserInputManager::GetBuildModeUserInput() {
         engine.hud->BuildMode = false;
 
     if (engine.GetMouse(1).bPressed) {
+        if (!engine.GetKey(olc::SHIFT).bHeld)
+            engine.unitManager->StopUnits();
         engine.ActivityDone = true;
         engine.hud->BuildMode=false;
-        
-        engine.unitManager->DelegateTask("Build",
-            std::make_pair(engine.hud->Object, engine.tv.ScreenToWorld(engine.GetMousePos())));
+        engine.hud->potBuilding->Position = engine.tv.ScreenToWorld(engine.GetMousePos()) - olc::vf2d(engine.hud->potBuilding->Size)/2.f;
+        if(engine.unitManager->CheckBuildObstruction(engine.hud->potBuilding))
+            engine.unitManager->DelegateTask("Build",
+                std::make_pair(engine.hud->potBuilding, engine.tv.ScreenToWorld(engine.GetMousePos())));
     }
 }
 
