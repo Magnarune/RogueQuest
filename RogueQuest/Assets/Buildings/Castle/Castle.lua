@@ -54,7 +54,7 @@ return
 		MaxHealth = 550,      
 		AttackRange = 0, 
 		AttackDamage = 0,
-		AttackSpeed = 0.6
+		AttackSpeed = 0.8
 	},
 	Production = 
 	{

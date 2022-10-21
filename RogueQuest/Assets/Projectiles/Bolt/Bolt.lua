@@ -16,7 +16,7 @@ return
 	Stats =
 	{
 		Spin = false,
-		Damage = 5,
-		Speed = 60
+		Damage = 50,
+		Speed = 80
 	},
 }
