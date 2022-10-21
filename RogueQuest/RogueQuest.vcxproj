@@ -105,7 +105,7 @@
       <AdditionalDependencies>Lua\lua54_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>lua54_x86.lib;</IgnoreSpecificDefaultLibraries>
-      <Profile>true</Profile>
+      <Profile>false</Profile>
       <DataExecutionPrevention />
     </Link>
   </ItemDefinitionGroup>
@@ -148,7 +148,7 @@
       <AdditionalDependencies>Lua\lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>lua54.lib;</IgnoreSpecificDefaultLibraries>
-      <Profile>true</Profile>
+      <Profile>false</Profile>
       <DataExecutionPrevention />
     </Link>
   </ItemDefinitionGroup>

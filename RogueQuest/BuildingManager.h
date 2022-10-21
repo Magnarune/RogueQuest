@@ -6,8 +6,9 @@
 #include "Building.h"
 #include "WorldObjectManager.h"
 #include "TaskManager.h"
+#include "Unit.h"
 #include "UnitManager.h"
-
+class Unit;
 class BuildingManager {
     std::vector<std::weak_ptr<Building>> BuildingList;
     std::vector<std::weak_ptr<Building>> selectedBuildings;
@@ -22,6 +23,7 @@ public:
     void Update(float delta);
     void CollectGarbage();
 
+    void AssignTask(olc::vf2d Location,std::shared_ptr<Unit>& unit);
 
 
     std::shared_ptr<Building> This_Building(const olc::vf2d& Pos); // is this even used?
@@ -43,5 +45,5 @@ public:
 
     friend class WorldManager;
     friend class TaskManager;
-   // friend class UnitManager;
+    friend class UnitManager;
 };

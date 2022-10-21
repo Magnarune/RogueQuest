@@ -33,13 +33,14 @@ void BuildingManager::SelectBuilding(olc::vf2d Mouse) {
     for (auto& _build : BuildingList) {
         if (_build.expired()) continue;
         auto build = _build.lock();
-        
+        const auto& meta = build->textureMetadata.at(build->Graphic_State);
         if (build->bSelected) continue;
         const float& r = (build->Size.x /2.f);
         const float r2 = 0.55f;
-        if (Mouse.x > build->Position.x + r2 && Mouse.y > build->Position.y + r2 &&
-            Mouse.x < build->Position.x + build->Size.x - r2 &&
-            Mouse.y < build->Position.y + build->Size.y - r2) {
+        if (Mouse.x > build->Position.x - meta.draw_origin.x  && 
+            Mouse.y > build->Position.y - meta.draw_origin.y  &&
+            Mouse.x < build->Position.x + meta.draw_origin.x  &&
+            Mouse.y < build->Position.y + meta.draw_origin.y) {
             build->bSelected = true;
             selectedBuildings.push_back(_build);
             break;
@@ -113,10 +114,37 @@ bool BuildingManager::IterateSelectedBuildings(std::function<bool(std::shared_pt
     return true; // iterate completed successfully
 }
 
-
 /*
     Building Manager Tasks For Selected Units - Will eventually be migrated into TaskManager
 */
+void BuildingManager::AssignTask(olc::vf2d Location, std::shared_ptr<Unit>& unit) {
+    auto& engine = Game_Engine::Current();
+    std::weak_ptr<Unit> testunit;
+    std::weak_ptr<Building> testbuilding;
+    engine.unitManager->ParseObject(engine.unitManager->FindObject(Location), testbuilding, testunit);        
+        const auto& abilities = unit->unitType.task_abilities;
+        if (testbuilding.expired() && testunit.expired()) {
+            if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
+            unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {Location, true} }));               
+        }
+        if (testbuilding.lock()) {
+            if (testbuilding.lock()->Owner == unit->Owner) {//If it was an ally
+
+                if (std::find(abilities.begin(), abilities.end(), "Gather") != abilities.end() && testbuilding.lock()->isMine)
+                    unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Gather", std::pair<std::shared_ptr<Unit>, std::any>{unit,
+                        std::pair< std::weak_ptr<Building>, olc::vf2d> {testbuilding, Location} }));
+                else
+                    if (std::find(abilities.begin(), abilities.end(), "Repair") != abilities.end())
+                        unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Repair", std::pair<std::shared_ptr<Unit>, std::any>{unit,
+                            std::pair< std::weak_ptr<Building>, olc::vf2d> {testbuilding, Location} }));                       
+                    else
+                        if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
+                            unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {Location, true} }));
+            } else
+                if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
+                    unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {Location, true} }));
+        }    
+}
 
 void BuildingManager::StopBuilding() {
    

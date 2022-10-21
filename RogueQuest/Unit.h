@@ -49,6 +49,7 @@ public:
 	std::string buildName; //Name of what Im building
 	std::weak_ptr<Building> repairedbuilding; //pointer to building being repaired
 	//Searched units
+	bool attackTarget;
 	std::weak_ptr<Building> targetBuilding;//parsing pointer
 	std::weak_ptr<Unit> targetUnit;//parsing pointer
 	std::queue<std::shared_ptr<TaskManager::Task>> taskQueue; // queue of tasks
@@ -63,23 +64,22 @@ public:
 	std::weak_ptr<Building> MineTarget;
 
 	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both
-	//End of Testing
+
 	// Data
 	Clock execTimeout; //Delay In unit thinking time
 	std::string sUnitName; //Name
 	bool bFriendly;		//Will i attack the Player?
 	bool ActionMode;//Square if true circle if false
 	// Who Owns me,   Who are my friends;
-
 	int Owner;
 	std::vector<int> FriendList;
 	 //These could be a map? maybe that is wasteful
-	int food;
+	int food;//food added to Leader
 	bool bSelected;		//Did the player select me?
 	bool bIsRanged;		// Am i Ranged?
 	bool bIsAttackable; //Can you Attack me
 	bool bDead;			// Am I dead?
-	bool bLoot;			//If dead then drop some loot?
+	bool bLoot;	  	   //If dead then drop some loot?
 	bool bAttacked;    //Was I attacked
 	float prevHealth; // I was Hit!
 	// Vars For Task Manager System	
@@ -175,5 +175,4 @@ private:
 	friend class TaskManager;
 	friend class Building;
 	friend class BuildingManager;
-
 };

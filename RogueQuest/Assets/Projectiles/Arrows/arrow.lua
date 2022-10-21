@@ -17,6 +17,6 @@ return
 	{
 		Spin = false,
 		Damage = 5,
-		Speed = 20
+		Speed = 120
 	},
 }

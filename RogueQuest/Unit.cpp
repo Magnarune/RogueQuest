@@ -38,6 +38,7 @@ void Unit::Stop() {
 		Graphic_State = Walking;
 	repairedbuilding.reset();
 	Taskpaused = false;
+
 }
 
 void Unit::UnitBehaviour() {
@@ -91,11 +92,11 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 		Velocity /= 1.05f;
 	}
 	if(std::shared_ptr<Building> build = std::dynamic_pointer_cast<Building>(other)){
+		
 		// unit vs building
-		predPosition -= vOverlap;
+		predPosition -= vOverlap;		
+		return false;
 	}
-
-
 	return true;
 }
 
@@ -112,30 +113,34 @@ void Unit::Update(float delta) {
 	auto& engine = Game_Engine::Current();
 	if(fAttackCD > 0)
 		fAttackCD -= delta;
-	UnitBehaviour();
-	if (ULogic == Aggressive) {
-		UnitSearch();
-	}
+	if (!attackTarget) {//if your not told to kill somthing in preticular
+		UnitBehaviour();
+		if (ULogic == Aggressive) {
+			UnitSearch();
+		}
+	} else
+		UnitHunting();
 
-	if((currentTask && currentTask->checkCompleted()) || Health < 0){
-		Target = std::nullopt;
-		currentTask.reset();
-		if (Taskpaused == true) {			
-			if (HoldTask) {
-				currentTask = HoldTask;
-				currentTask->initTask();
-				HoldTask.reset();
+		if ((currentTask && currentTask->checkCompleted()) || Health < 0) {
+			Target = std::nullopt;
+			currentTask.reset();
+			if (Taskpaused == true) {
+				if (HoldTask) {
+					currentTask = HoldTask;
+					currentTask->initTask();
+					HoldTask.reset();
+				}
+				Taskpaused = false;
 			}
-			Taskpaused = false;
 		}
-	}
-	if(!currentTask){
-		if(taskQueue.size()){
-			currentTask = taskQueue.front();
-			taskQueue.pop();
-			currentTask->initTask();
+		if (!currentTask) {
+			if (taskQueue.size()) {
+				currentTask = taskQueue.front();
+				taskQueue.pop();
+				currentTask->initTask();
+			}
 		}
-	}
+	
 	if (Graphic_State != Dead) 
 		UpdatePosition(delta);
 
@@ -175,7 +180,7 @@ void Unit::RepairBuilding() {
 void Unit::AfterUpdate(float delta) {
 	UnitGraphicUpdate(delta);
 	mask.origin = textureMetadata.at(Graphic_State).draw_origin;
-	Collidable::AfterUpdate(delta);// inherit	
+	Collidable::AfterUpdate(delta);
 }
 
 void Unit::UnitSearch() {//Target = unit/build.front()
@@ -196,11 +201,10 @@ void Unit::UnitSearch() {//Target = unit/build.front()
 
 void Unit::UnitHunting() {
 	if (targetBuilding.lock()) {
-		Target = targetBuilding.lock()->Position + olc::vf2d(targetBuilding.lock()->Size) / 2.f;
+		Target = targetBuilding.lock()->Position;
 	}
 	if (targetUnit.lock()) {
-		Target = targetUnit.lock()->Position + olc::vf2d(targetUnit.lock()->Unit_Collision_Radius * 1.414f,
-			targetUnit.lock()->Unit_Collision_Radius * 1.414f);
+		Target = targetUnit.lock()->Position;
 	}
 }
 
@@ -232,7 +236,7 @@ void Unit::PerformAttack() {
 }
 
 void Unit::UpdatePosition(float delta) {
-	auto& engine = Game_Engine::Current();//UnitBehaviour();
+	auto& engine = Game_Engine::Current();
 	if (Target.has_value()) {		
 			Distance = Target.value() - Position;//distance from target location
 			olc::vf2d direction = (Target.value() - Position).norm(); //direction to target
@@ -373,6 +377,7 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 		//DrawCircleDecal(Position, AgroRange, olc::DARK_RED, gfx);
 		DrawCircleDecal(Position, mask.radius, olc::GREEN, gfx);
 		//DrawCircleDecal(Position, fAttackRange, olc::BLACK, gfx);
+
 		if (Target.has_value()) {
 			gfx->DrawLineDecal(Position, Target.value());
 
@@ -382,23 +387,23 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 				else {
 					auto homebase = HomeBase.lock();
 					auto minetarget = MineTarget.lock();
-					if (MineTarget.lock() && Target != homebase->Position + olc::vf2d(homebase->Size) / 2.f) {
-						gfx->DrawLineDecal(minetarget->Position - ActionZone + olc::vf2d(minetarget->Size) / 2.f, olc::vf2d({ minetarget->Position.x + float(minetarget->Size.x) / 2.f + ActionZone.x, minetarget->Position.y - ActionZone.y + float(minetarget->Size.x) / 2.f }));
-						gfx->DrawLineDecal(minetarget->Position - ActionZone + olc::vf2d(minetarget->Size) / 2.f, olc::vf2d({ minetarget->Position.x - ActionZone.x + float(minetarget->Size.x) / 2.f  ,minetarget->Position.y + ActionZone.y + float(minetarget->Size.y) / 2.f }));
-						gfx->DrawLineDecal(minetarget->Position + ActionZone + olc::vf2d(minetarget->Size) / 2.f, olc::vf2d({ minetarget->Position.x + ActionZone.x + float(minetarget->Size.x) / 2.f  ,minetarget->Position.y - ActionZone.y + float(minetarget->Size.y) / 2.f }));
-						gfx->DrawLineDecal(minetarget->Position + ActionZone + olc::vf2d(minetarget->Size) / 2.f, olc::vf2d({ minetarget->Position.x - ActionZone.x + float(minetarget->Size.x) / 2.f ,minetarget->Position.y + ActionZone.y + float(minetarget->Size.x) / 2.f }));
+					if (MineTarget.lock() && Target != homebase->Position) {
+						gfx->DrawLineDecal(minetarget->Position - ActionZone, olc::vf2d({ minetarget->Position.x + ActionZone.x, minetarget->Position.y - ActionZone.y }));
+						gfx->DrawLineDecal(minetarget->Position - ActionZone, olc::vf2d({ minetarget->Position.x - ActionZone.x  ,minetarget->Position.y + ActionZone.y }));
+						gfx->DrawLineDecal(minetarget->Position + ActionZone, olc::vf2d({ minetarget->Position.x + ActionZone.x  ,minetarget->Position.y - ActionZone.y }));
+						gfx->DrawLineDecal(minetarget->Position + ActionZone, olc::vf2d({ minetarget->Position.x - ActionZone.x ,minetarget->Position.y + ActionZone.y }));
 					}
-					else
+					else 
+					{					
 						if (homebase) {
-							gfx->DrawLineDecal(homebase->Position - ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x + float(homebase->Size.x) / 2.f + ActionZone.x, homebase->Position.y - ActionZone.y + float(homebase->Size.x) / 2.f }));
-							gfx->DrawLineDecal(homebase->Position - ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x - ActionZone.x + float(homebase->Size.x) / 2.f  ,homebase->Position.y + ActionZone.y + float(homebase->Size.y) / 2.f }));
-							gfx->DrawLineDecal(homebase->Position + ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({homebase->Position.x + ActionZone.x + float(homebase->Size.x) / 2.f  ,homebase->Position.y - ActionZone.y + float(homebase->Size.y) / 2.f }));
-							gfx->DrawLineDecal(homebase->Position + ActionZone + olc::vf2d(homebase->Size) / 2.f, olc::vf2d({ homebase->Position.x - ActionZone.x + float(homebase->Size.x) / 2.f ,homebase->Position.y + ActionZone.y + float(homebase->Size.x) / 2.f }));
+							gfx->DrawLineDecal(homebase->Position - ActionZone, olc::vf2d({ homebase->Position.x + ActionZone.x, homebase->Position.y - ActionZone.y }));
+							gfx->DrawLineDecal(homebase->Position - ActionZone, olc::vf2d({ homebase->Position.x - ActionZone.x  ,homebase->Position.y + ActionZone.y }));
+							gfx->DrawLineDecal(homebase->Position + ActionZone, olc::vf2d({ homebase->Position.x + ActionZone.x  ,homebase->Position.y - ActionZone.y }));
+							gfx->DrawLineDecal(homebase->Position + ActionZone, olc::vf2d({ homebase->Position.x - ActionZone.x ,homebase->Position.y + ActionZone.y }));
 						}
-
+					}
 				}
 			}
-
 		}
 	}
 }

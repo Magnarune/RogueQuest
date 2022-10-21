@@ -38,6 +38,7 @@ void Projectile::Update(float fElapsedtime) {
         Destroy();
     }
     Velocity = direction * PSpeed; // arrow speed is incorrect. This is a projectile, not an arrow. Not all projectiles are Arrows. Think of another way to do this such as generic velocity or proj speed
+    drawDepth = 30;
     Collidable::Update(fElapsedtime);
 }
 

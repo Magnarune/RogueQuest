@@ -49,7 +49,8 @@ void Particles::GenerateSmoke(olc::vf2d position, olc::vf2d Size, bool dust) {//
 	for (int i = 0; i < smokeCount; i++) {
 		smokeParticles.push_back(
 			/*Size*/{ {20,range(16,40)},
-			/*Position*/{range(position.x+10.f,position.x + Size.x - 10.f), range(position.y+10.f,position.y + Size.y - 10.f)}
+			/*Position*/{range(position.x - (float)Size.x / 2.f ,position.x + (float)Size.x / 2.f ),
+							range(position.y - (float)Size.y / 2.f ,position.y + (float)Size.y / 2.f) }
 			,/*Rise Speed*/range(1,3),/*Fade Speed*/range(60,100),dust });
 	}
 	//Instance.push_back({ 2.f, "Smoke" });

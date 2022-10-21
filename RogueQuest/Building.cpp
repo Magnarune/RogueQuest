@@ -24,16 +24,16 @@ void Building::Destroy() {
 void Building::BuildingBehaviour() {
 	auto& engine = Game_Engine::Current();
 	if (execTimeout.getMilliseconds() > 400) {
-		engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner, Position + olc::vf2d(Size) / 2.f, 120.f), BuildTarget, UnitTarget);
+		engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner, Position, 180.f), BuildTarget, UnitTarget);
 		execTimeout.restart();
 	}
 	if (AttackTypes.size() > 1){
 		if (BuildTarget.lock() && AttackCD < 0.f) {
-			engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position + olc::vf2d(Size) / 2.f, BuildTarget);
+			engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position, BuildTarget);
 			AttackCD = AttackSpeed;
 		}
 		if (UnitTarget.lock() && AttackCD <= 0.f) {
-			engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position + olc::vf2d(Size) / 2.f, UnitTarget);
+			engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position, UnitTarget);
 			AttackCD = AttackSpeed;
 		}
 	}
@@ -78,7 +78,7 @@ void Building::SentUnitlocation(olc::vf2d pos) {
 void Building::SendUnit(std::shared_ptr<Unit> unit) {
 	auto& engine = Game_Engine::Current();
 	if (sentUnitPos.mag2() > 0.f) {		
-		unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {sentUnitPos, false} }));
+		engine.buildingManager->AssignTask(sentUnitPos, unit);		
 	}
 }
 
@@ -141,7 +141,8 @@ void Building::Draw(olc::TileTransformedView* gfx){
 
 	gfx->DrawPartialDecal(Position -SpriteOrigin - olc::vf2d(offset), meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size,
 						 (bSelected ? olc::WHITE : engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
-	
+	gfx->DrawLineDecal(Position, Position + olc::vf2d(3, 3));
+	gfx->DrawLineDecal(Position - SpriteOrigin, Position - SpriteOrigin + olc::vf2d(3, 3));
 	//if (engine.hud->BuildMode) {
 	auto maskpos = Position - SpriteOrigin;
 		gfx->DrawLineDecal(maskpos, { maskpos.x + mask.rect.x,maskpos.y });//collision box

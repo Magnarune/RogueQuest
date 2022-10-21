@@ -98,7 +98,8 @@ bool Collidable::CheckCollision(float delta) {
 
 		// nearest position
 		olc::vf2d nPos = circlePos.max(rectPos).min(rectPos + size); // simplified vector clamp
-
+		if(nPos == circlePos)
+			nPos = circlePos.min(rectPos).max(rectPos + size);
 		olc::vf2d ray(nPos - circlePos);
 		float overlap = (float)radius - ray.mag();
 		if(std::isnan(overlap)) overlap = 0;
