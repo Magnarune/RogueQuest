@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "WorldObjectManager.h"
 #include <cmath>
+#include <numbers>
 #include <type_traits>
 
 /*
@@ -9,7 +10,7 @@
 */
 
 
-WorldObject::WorldObject(): Position({512.f,480.f }), Velocity({0.f, 0.f}) {		
+WorldObject::WorldObject(): Position({512.f,480.f }), Velocity({0.f, 0.f}), updatePriority(1.f) {
 }
 
 WorldObject::~WorldObject() {
@@ -98,10 +99,42 @@ bool Collidable::CheckCollision(float delta) {
 
 		// nearest position
 		olc::vf2d nPos = circlePos.max(rectPos).min(rectPos + size); // simplified vector clamp
-		if(nPos == circlePos)
-			nPos = circlePos.min(rectPos).max(rectPos + size);
-		olc::vf2d ray(nPos - circlePos);
-		float overlap = (float)radius - ray.mag();
+		olc::vf2d ray;
+		float overlap;
+		if(nPos == circlePos){
+			olc::vf2d tld = rectPos - circlePos;
+			olc::vf2d brd = tld + size;
+			olc::vf2d fPos = {FLT_MAX,FLT_MAX};
+
+			tld = {std::fabs(tld.x), std::fabs(tld.y)};
+			brd = {std::fabs(brd.x), std::fabs(brd.y)};
+			float brds = std::fmin(brd.x, brd.y), tlds = std::fmin(tld.x, tld.y);
+
+			if(tlds < brds) {
+				if (tld.x < tld.y) {
+					fPos.x = -tld.x;
+				} else {
+					fPos.y = -tld.y;
+				}
+			} else {
+				if (brd.x < brd.y) {
+					fPos.x = brd.x;
+				} else {
+					fPos.y = brd.y;
+				}
+			}
+
+			if (std::fabs(fPos.x) < std::fabs(fPos.y)) {
+				nPos.x += fPos.x;
+			} else {
+				nPos.y += fPos.y;
+			}
+			ray = circlePos - nPos;
+			overlap = ray.mag() + (float)radius;
+		} else {
+			ray = nPos - circlePos;
+			overlap = (float)radius - ray.mag();
+		}
 		if(std::isnan(overlap)) overlap = 0;
 
 		if(overlap > 0.01f) // collision
@@ -136,7 +169,7 @@ bool Collidable::CheckCollision(float delta) {
 	return engine.worldManager->IterateObjects([&](std::shared_ptr<WorldObject> _obj){
 		if(mask.type == Mask::MASK_NONE) return false; // don't continue if we don't even have a mask
 		auto obj = std::dynamic_pointer_cast<Collidable>(_obj);
-		if(!obj) return true;
+		if(!obj || obj.get() == this) return true;
 		if(obj->mask.type == Mask::MASK_NONE) return true; // skip non-masked
 
 		// rectangle mask

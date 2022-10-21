@@ -16,8 +16,8 @@ public:
 	olc::vf2d Velocity {};
 	
 	float m_fTimer {};		
-	float drawDepth; 
-
+	float drawDepth;
+	float updatePriority;
 
 	virtual void Draw(olc::TileTransformedView* gfx);
 	virtual void Update(float delta);

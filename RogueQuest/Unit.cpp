@@ -82,20 +82,17 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 	if(std::shared_ptr<Unit> unit = std::dynamic_pointer_cast<Unit>(other)){
 		// unit vs unit
 		if(unit->Velocity.mag2() < 4.f){
-			unit->Velocity += Velocity;
+			unit->Velocity += Velocity / 2.f;
 			unit->bAnimating = true;
-			if(Velocity.mag2() > 16.f && unit->Velocity.mag2() > 16.f){
-				vOverlap /= 1.3f;
-			}
 		}
 		predPosition -= vOverlap;
 		Velocity /= 1.05f;
 	}
 	if(std::shared_ptr<Building> build = std::dynamic_pointer_cast<Building>(other)){
-		
+		auto& engine = Game_Engine::Current();
+
 		// unit vs building
-		predPosition -= vOverlap;		
-		return false;
+		predPosition -= vOverlap;
 	}
 	return true;
 }
@@ -406,6 +403,7 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 			}
 		}
 	}
+
 }
 
 void Unit::DrawCircleDecal(olc::vf2d pos, float radius, olc::Pixel col, olc::TileTransformedView* gfx) {

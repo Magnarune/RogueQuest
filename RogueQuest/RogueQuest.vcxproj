@@ -212,7 +212,6 @@
     <ClInclude Include="Building.h" />
     <ClInclude Include="BuildingManager.h" />
     <ClInclude Include="clock.h" />
-    <ClInclude Include="Collisions.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Effects.h" />
     <ClInclude Include="Engine.h" />

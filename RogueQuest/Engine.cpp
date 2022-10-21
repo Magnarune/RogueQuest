@@ -106,7 +106,7 @@ bool Game_Engine::OnUserCreate() {
 
 bool Game_Engine::OnUserUpdate(float fElapsedTime) {
     bool rval = true;
-    fElapsedTime = std::fmin(1.f, fElapsedTime);
+    fElapsedTime = std::fmin(0.3f, fElapsedTime);
 
     if(_lastfocus != IsFocused()){
         _lastfocus = IsFocused();

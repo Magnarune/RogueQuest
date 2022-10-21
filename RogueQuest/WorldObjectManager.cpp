@@ -16,6 +16,12 @@ WorldManager::~WorldManager() {
 
 void WorldManager::Update(float delta) {//Update last frames
     //currentMap->UpdateMap(delta);
+
+    // sort the object list based on draw depth
+    std::ranges::sort(objectList, [](auto& a, auto& b) -> bool {
+        return a->updatePriority < b->updatePriority;
+    });
+
     for (auto& object : objectList) {
 		if (object == nullptr) continue;
         object->Update(delta);
@@ -108,7 +114,7 @@ std::shared_ptr<WorldObject> WorldManager::FindObject(size_t index) {
 bool WorldManager::IterateObjects(std::function<bool(std::shared_ptr<WorldObject>)> cb) {
     for(auto& object : objectList) {
         if(object == nullptr) continue;
-        cb(object);
+        if(!cb(object)) break;
     }
     return true; // iterate completed successfully
 }
@@ -176,6 +182,8 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     
     unit->SetMask(Collidable::Mask(unit->Unit_Collision_Radius));
     unit->cType = Collidable::isUnit;
+    unit->updatePriority = 0.1f; // highest priority
+
     objectList.emplace_back(unit);
     engine.unitManager->addNewUnit(unit);
     return unit;
@@ -248,6 +256,8 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     }
     build->SetMask(Collidable::Mask(olc::vf2d(build->Size)));
     build->cType = Collidable::isBuilding;
+    build->updatePriority = 0.9f; // lower priority
+
     objectList.emplace_back(build);
     engine.buildingManager->addNewBuilding(build);
     return build;
@@ -297,6 +307,7 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
     }
     //proj->SetMask(Collidable::Mask(olc::vf2d(proj->Size))); // TO DO: Figure out what the mask will be / and how to implement it
     proj->cType = Collidable::isProjectile;
+    proj->updatePriority = 0.5f; // mid priority
 
     objectList.emplace_back(proj);
     return proj;
