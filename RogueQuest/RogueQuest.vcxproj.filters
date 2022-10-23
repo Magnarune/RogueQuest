@@ -99,6 +99,9 @@
     <ClCompile Include="Highlighting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Research.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -215,6 +218,9 @@
     <ClInclude Include="Highlighting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Research.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Units\Mage\Mage.lua">
@@ -266,6 +272,9 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="Assets\Buildings\Mine\GoldMine.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Research\Weapon_Upgrade.lua">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

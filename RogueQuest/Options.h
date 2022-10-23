@@ -22,7 +22,6 @@ public:
 		} type;
 
 		olc::vf2d position;
-
 		std::string label;
 		CallbackType callback;
 		ValueType value;

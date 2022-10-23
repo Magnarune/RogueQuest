@@ -1,5 +1,5 @@
 #include "Assets.h"
-
+#include "Engine.h"
 cAssets::cAssets() {
     lua_state.open_libraries(sol::lib::base);
     lua_state.open_libraries(sol::lib::math);
@@ -250,6 +250,51 @@ void cAssets::LoadProjectileAssets() {
     }
 }
 
+void cAssets::LoadResearchAssets() {
+    auto& engine = Game_Engine::Current();
+    sol::table Researchdata, FileSets;
+
+    auto to_vi2d = [](sol::table obj) -> olc::vi2d {
+        int32_t x = obj[1],
+            y = obj[2];
+        return { x, y };
+    };
+    const std::vector<std::string> filePaths = { //
+        "Assets/Research/Weapon_Upgrade.lua"
+    };
+
+    for (const auto& path : filePaths) {
+        try {
+            sol::load_result script = lua_state.load_file(path);
+
+            sol::protected_function_result rcode = script();
+
+            if (!rcode.valid()) {
+                sol::error e = rcode;
+                std::cout << "error: " << e.what() << "\n";
+            } else {
+                Researchdata = rcode;
+            }
+
+            std::string name = Researchdata["Name"];
+            engine.researchmanager->ImportList.push_back(name);
+            ResearchType researchType;
+                // load the Name : TextureID for the Projectile          
+
+            if (Researchdata["Icon"] != sol::nil) {
+                researchType.icon.fsz = to_vi2d(Researchdata["Icon"]["FileSize"]);
+                researchType.icon.sz = to_vi2d(Researchdata["Icon"]["size"]);
+                researchType.icon.tex_id = TextureCache::GetCache().CreateTexture(Researchdata["Icon"]["FileName"]);
+            } 
+
+            researchType.lua_data = std::move(Researchdata);
+            resCache.insert_or_assign(name, std::move(researchType));
+        } catch (std::exception e) {
+            std::cerr << e.what() << "\n";
+        }
+    }
+}
+
 bool cAssets::ImportCursor(const std::string& name, const std::string& path, const olc::vf2d& size) {
     Cursor cursor;
     olc::Sprite* spr = TextureCache::GetCache().GetTexture(
@@ -302,7 +347,7 @@ void cAssets::LoadCursorAssets() {
 TextureCache* TextureCache::self = nullptr;
 
 TextureCache::TextureCache() {
-    textures.reserve(64);
+    textures.reserve(128);
 }
 
 TextureCache::~TextureCache() {
@@ -317,7 +362,6 @@ void TextureCache::InitCache() {
 void TextureCache::FreeCache() {
     delete self;
 }
-
 
 size_t TextureCache::CreateTexture(const std::string& path) {
     olc::Sprite* texture = new olc::Sprite(32,32); // errored/default texture on failed to load

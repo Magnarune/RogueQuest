@@ -140,12 +140,11 @@ void HudManager::BuildingSelected() {
     if (!engine.hud->decals.count(_refname)) {
         engine.hud->loadImage(_refname, data.icon.tex_id);
     }
-    //
+
     float healthMod = build->Health / build->maxHealth;
     float productionMod;
     if(build->building)
-         productionMod = build->m_fTimer / build->productiontime;
-    
+         productionMod = build->m_fTimer / build->productiontime;    
     
     olc::Decal* decal = engine.hud->decals[_refname].get();
 
@@ -161,7 +160,7 @@ void HudManager::BuildingSelected() {
 
     if (build->sentUnitPos != olc::vf2d(0.f, 0.f))
         engine.tv.DrawPartialDecal(build->sentUnitPos - olc::vf2d(0.f,14.f), olc::vf2d(8.f, 14.f), engine.hud->decals["flag"].get(), {0.f,0.f}, {113.f,218.f});
-
+    //If X is being made???
     if (build->building && build->productionQue.size() > 0) {
         const auto& data = engine.assetManager->GetUnitData(build->productionQue.front());
         std::string _refname = build->productionQue.front() + "__tex";
@@ -205,6 +204,15 @@ void HudManager::BuildingSelected() {
 
 void HudManager::BuildingAbilities(std::shared_ptr<Building> building) {
     auto& engine = Game_Engine::Current();
+    for (int i = 0; i < building->researchproduction.size(); i++) {
+
+    }
+
+
+
+
+
+
     for (int i = 0; i < building->unitproduction.size(); i++) {
         const auto& data = engine.assetManager->GetUnitData(building->unitproduction[i]);
         std::string _refname = building->unitproduction[i] + "__tex";

@@ -189,6 +189,7 @@ UnitManager::UnitManager() {
             if (!build.lock()->isMine)//If this building selected is not a mine you cant mine
                 return false;
             const olc::vf2d& target = params.second;
+
             unit->ActionMode = false;
             unit->MineTarget = build;
             unit->ActionZone =( olc::vf2d(unit->MineTarget.lock()->Size )/2.f  + olc::vf2d(12, 12.f));
@@ -205,8 +206,8 @@ UnitManager::UnitManager() {
                 unit->Gather();
             }
             
-            if (unit->Gold > 0 && unit->Target !=  unit->HomeBase.lock()->Position) {//Change Take to Delivery
-                unit->Target = unit->HomeBase.lock()->Position;//+ olc::vf2d(0.f, -5.f);
+            if (unit->Gold > 0 && unit->Target !=  unit->HomeBase.lock()->Position ) {//Change Take to Delivery
+                unit->Target = unit->HomeBase.lock()->Position ;
                 unit->ActionZone = olc::vf2d(unit->HomeBase.lock()->Size) /2.f  +olc::vf2d(12.f, 12.f);
                 return true;//This is Dangerous but will work for now
 

@@ -59,7 +59,7 @@ return
 	Production = 
 	{
 		Units = {"Mage", "Sara", "Builder", "Archer","Goblin","Imp","Spider"},
-		Research = {"Armor", "Weapon", "Boots"}
+		Research = {"Armor", "Weapon", "Boots","Wands"}
 	},
 	Projectiles ={"","Arrow","ThrowingAxe","Bolt"}
 }

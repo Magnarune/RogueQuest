@@ -74,6 +74,7 @@ bool Game_Engine::OnUserCreate() {
     particles.reset(new Particles);
     leaders.reset(new LeaderManager); //Handler for the Leaders in the game
     highlightmanagment.reset(new Highlighting);
+    researchmanager.reset(new Research);
 
     
     // Configure Controllers
@@ -81,6 +82,8 @@ bool Game_Engine::OnUserCreate() {
     assetManager->LoadBuildingAssets(); // Load all the Buildings files
     assetManager->LoadProjectileAssets(); // Load all Projectile files
     assetManager->LoadCursorAssets();   // Load all the Cursors files
+    assetManager->LoadResearchAssets(); //Load the Research files
+    researchmanager->ImportResearch(); //Load all the research data
     worldManager->ImportMapData();      // Load all the Lua Map files
     hud->ImportHudAssets();      // Load all the Hud files
     particles->ImportEffectsAssets();
@@ -100,7 +103,7 @@ bool Game_Engine::OnUserCreate() {
     tv.SetWorldOffset(Camera.vPOS);
     InitiateGame();
     curCursor = assetManager->GetCursor("default");
-    SetLocked(true);
+    SetLocked(bIsLocked);
     return true;
 }
 
@@ -130,7 +133,6 @@ bool Game_Engine::OnUserUpdate(float fElapsedTime) {
 
 bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     fElapsedTime = std::min(fElapsedTime, 0.8f); // Cap to 800ms
-
     userinputs->GetUserInput();
     // Game Updates
     if(!IsConsoleShowing()){
@@ -169,8 +171,6 @@ void Game_Engine::OnFocusUpdated(bool focus){
     SetLocked(focus ? bWasLocked : false, false);
 }
 
-
-
 void Game_Engine::SetLocked(bool locked, bool permanent) {
     config->SaveValue<bool>("ScreenLocked", locked);
 
@@ -182,7 +182,7 @@ void Game_Engine::SetLocked(bool locked, bool permanent) {
         my_rect.left += 16L;
         my_rect.bottom -= 16L;
         my_rect.right -= 16L;
-      //  ClipCursor(&my_rect);
+        ClipCursor(&my_rect);
     } else {
         ClipCursor(nullptr);
     }
@@ -201,6 +201,8 @@ bool Game_Engine::OnUserDestroy(){
     particles.reset();
     leaders.reset();
     highlightmanagment.reset();
+    config.reset();
+    researchmanager.reset();
     return true;
 }
 

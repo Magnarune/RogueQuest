@@ -143,7 +143,10 @@ void BuildingManager::AssignTask(olc::vf2d Location, std::shared_ptr<Unit>& unit
             } else
                 if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
                     unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {Location, true} }));
-        }    
+        } else
+            if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
+                unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {Location, true} }));
+
 }
 
 void BuildingManager::StopBuilding() {

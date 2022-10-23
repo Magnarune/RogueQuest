@@ -196,6 +196,7 @@
     <ClCompile Include="Options.cpp" />
     <ClCompile Include="Particles.cpp" />
     <ClCompile Include="Projectiles.cpp" />
+    <ClCompile Include="Research.cpp" />
     <ClCompile Include="TaskManager.cpp" />
     <ClCompile Include="tempParticles.cpp" />
     <ClCompile Include="Unit.cpp" />
@@ -236,6 +237,7 @@
     <ClInclude Include="Options.h" />
     <ClInclude Include="Particles.h" />
     <ClInclude Include="Projectiles.h" />
+    <ClInclude Include="Research.h" />
     <ClInclude Include="TaskManager.h" />
     <ClInclude Include="tempParticles.h" />
     <ClInclude Include="Unit.h" />
@@ -256,6 +258,7 @@
     <None Include="Assets\Maps\TerraProject2.lua" />
     <None Include="Assets\Projectiles\Axe\ThrowAxe.lua" />
     <None Include="Assets\Projectiles\Bolt\Bolt.lua" />
+    <None Include="Assets\Research\Weapon_Upgrade.lua" />
     <None Include="Assets\Units\Archer\Archer.lua" />
     <None Include="Assets\Units\Builder\builder.lua" />
     <None Include="Assets\Units\Goblin\goblin.lua" />

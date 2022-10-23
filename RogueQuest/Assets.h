@@ -18,7 +18,7 @@ class cAssets {
 	sol::state lua_state;
 public:
 
-    struct UnitType {        
+    struct UnitType { 
         struct TextureMetaData {
             size_t tex_id, ani_len;
             olc::vi2d sprite_size, tile_size, target_size;
@@ -74,20 +74,26 @@ public:
         std::map<std::string, TextureMetaData> texture_metadata;
         sol::table lua_data;
     };
-
-
+    
+    struct ResearchType {
+        struct {
+            olc::vi2d sz;
+            olc::vi2d fsz;
+            size_t tex_id;
+        } icon = {};
+        std::vector<std::string> Requirements;
+        sol::table lua_data;
+    };
     struct Cursor {
 		std::unique_ptr<olc::Decal> decal;
 		olc::vf2d scale;
 	};
-
-
 private:
-    //Unit name, Unit data
+            //Unit name, Object data
     std::map<std::string, UnitType> unitCache;
     std::map<std::string, BuildingType> buildCache;
     std::map<std::string, ProjectileType> projCache;
-	
+    std::map<std::string, ResearchType> resCache;
     std::map<std::string, Cursor> assetCursorCache;
 
 public:
@@ -105,9 +111,13 @@ public:
     inline bool ProjectileExists(const std::string& name) { return !!projCache.count(name); }
     inline const ProjectileType& GetProjectileData(const std::string& name) { return projCache.at(name); }
 
+    inline bool ResearchExists(const std::string& name) { return !!resCache.count(name); }
+    inline const ResearchType& GetResearchData(const std::string& name) { return resCache.at(name); }
+
     void LoadUnitAssets();
     void LoadBuildingAssets();
     void LoadProjectileAssets();
+    void LoadResearchAssets();
 
     inline Cursor* GetCursor(const std::string& name) { return assetCursorCache.count(name) ? &(assetCursorCache.at(name)) : nullptr; }
 	bool ImportCursor(const std::string& name, const std::string& path, const olc::vf2d& size = {16.f, 16.f});
@@ -130,6 +140,7 @@ public:
 
     size_t CreateTexture(const std::string& path); // create texture and load from file
     olc::Sprite* GetTexture(size_t texid); // get the sprite from the texture id
+    friend class Research;
     friend class Building;
     friend class WorldManager;
 };

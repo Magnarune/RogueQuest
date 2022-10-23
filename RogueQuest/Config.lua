@@ -7,7 +7,7 @@ return
 	Evil = true,
 	Intro = true,
 	ScreenHeight = 940,
-	ScreenLocked = true,
+	ScreenLocked = false,
 	ScreenWidth = 1080,
 	Sound = true,
 	Squelch = "Zip Zap Zoop: ",

@@ -50,7 +50,8 @@ public:
 
 	std::queue<std::string> productionQue;
 	std::string unitproduced;
-	std::vector<std::string> unitproduction;
+	std::vector<std::string> researchproduction;//Types of Research this building can proform
+	std::vector<std::string> unitproduction;//Type of units that can be made
 	std::vector<std::string> AttackTypes;
 	//       stage  offset
 

@@ -57,6 +57,9 @@ void Hud::ImportHudAssets() {
     loadImage("Food", "Assets/Gui/Food.png");
     loadImage("Tree", "Assets/Gui/Tree.png");
     loadImage("Gold", "Assets/Gui/Goldicon.png");
+    
+
+
 }
 
 void Hud::Update(float delta) {

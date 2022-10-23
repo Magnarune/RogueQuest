@@ -205,35 +205,44 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     if (pos == olc::vf2d(0.f, 0.f))
         pos = { 10.f,10.f };
     build->predPosition = build->Position = pos;
-    build->name = data.lua_data["Name"];    
+    build->name = data.lua_data["Name"];
     build->offset = to_vi2d(data.lua_data["offset"]);
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];
     build->Interactable = data.lua_data["Parameters"]["Interactable"];
-    
-   // build->health = data.lua_data["Stats"]["Health"];
+
+    // build->health = data.lua_data["Stats"]["Health"];
     build->Health = 0.4f;
     build->maxHealth = data.lua_data["Stats"]["MaxHealth"];
-    if (build->Interactable) 
-        build->Health = build->maxHealth;      
-    
+    if (build->Interactable)
+        build->Health = build->maxHealth;
+
     build->isMine = data.lua_data["Stats"]["isMine"];
-    if(build->isMine == true)
+    if (build->isMine == true)
         build->Gold = data.lua_data["Production"]["Gold"];
     build->AttackSpeed = data.lua_data["Stats"]["AttackSpeed"];
     build->Owner = owner;
     build->FriendList = InitializeObject(owner);
- 
-   if( sol::table UnitProduction = data.lua_data["Production"]["Units"])
-       for (int i = 0; i < UnitProduction.size(); i++) {
-           build->unitproduction.push_back(UnitProduction[i + 1]);
-       }
-   if (sol::table Attacktypes = data.lua_data["Projectiles"]) {
-       for (int i = 0; i < Attacktypes.size(); i++) {
-           build->AttackTypes.push_back(Attacktypes[i + 1]);
-       }
-       build->CanAttack = true;
-   }
+
+    if (sol::table UnitProduction = data.lua_data["Production"]["Units"])
+        for (int i = 0; i < UnitProduction.size(); i++) {
+            build->unitproduction.push_back(UnitProduction[i + 1]);
+        }
+    if (sol::table Attacktypes = data.lua_data["Projectiles"]) {
+        for (int i = 0; i < Attacktypes.size(); i++) {
+            build->AttackTypes.push_back(Attacktypes[i + 1]);
+        }
+        build->CanAttack = true;
+    }
+
+    if (data.lua_data["Research"] != sol::nil) {
+        sol::table Researchtypes = data.lua_data["Research"];
+        for (int i = 0; i < Researchtypes.size(); i++) {
+            build->researchproduction.push_back(Researchtypes[i + 1]);
+        }
+    }
+
+
     // make sure to update this when adding new GFXStates - enums don't magically connect to a string
     static std::map<std::string, Building::GFXState> States = {
         {"Normal", Building::Normal},

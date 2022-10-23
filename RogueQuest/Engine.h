@@ -30,6 +30,7 @@
 #include "LeaderManager.h"
 #include "MoveNodes.h"
 #include "Highlighting.h"
+#include "Research.h"
 
 
 extern std::string StringifyObject(sol::object val);
@@ -88,6 +89,7 @@ public:
 	std::unique_ptr<UserInputManager> inputmanager;
 	std::unique_ptr<LeaderManager> leaders;
 	std::unique_ptr<Highlighting> highlightmanagment;
+	std::unique_ptr<Research> researchmanager;
 	//This needs to be initialized to map size
 	bool ActivityDone;
 	struct Cam{
