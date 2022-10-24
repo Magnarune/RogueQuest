@@ -1,6 +1,7 @@
 #include "olcPixelGameEngine.h"
 #include "Leaders.h"
 #include "Building.h"
+#include "Research.h"
 #include "Unit.h"
 #include "clock.h"
 class LeaderManager {
@@ -34,6 +35,8 @@ public:
 
 	void AddEnemy(std::shared_ptr<Leader> lead, int allignment);
 	void RemoveEnemy(std::shared_ptr<Leader> lead, int allignment);
+
+	void AddResearch(int Owner, std::weak_ptr<Researchable> researchcomplete);
 
 	void Gold(int owner, int cost);
 	void Food(int owner, int Food);

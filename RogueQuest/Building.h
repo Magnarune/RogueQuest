@@ -16,10 +16,8 @@ public:
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
 
 	void UpgradeBuilding();
-
 	void UnProduceUnit();
-	void ProduceUnit(const std::string& unit);
-	void SentUnitlocation(olc::vf2d pos);
+	void InitializeProduction(const std::string& object);
 	void SendUnit(std::shared_ptr<Unit> unit);
 	void BuildingBehaviour();
 	void Draw(olc::TileTransformedView* gfx) override;
@@ -49,10 +47,12 @@ public:
 	std::weak_ptr<Building> BuildTarget;
 
 	std::queue<std::string> productionQue;
+	std::string researchproduced;
 	std::string unitproduced;
 	std::vector<std::string> researchproduction;//Types of Research this building can proform
 	std::vector<std::string> unitproduction;//Type of units that can be made
 	std::vector<std::string> AttackTypes;
+	bool MakingUnit=true;
 	//       stage  offset
 
 	//std::vector<std::string> Stage;
@@ -63,6 +63,13 @@ public:
 		{3, "Level three"},
 		{4, "Level four"}
 	};
+	enum {
+		isNone,
+		isUnit,
+		isResearch
+	}production= isNone;
+
+
 	int curStage = 0; // current stage - oof good luck with this
 	bool isMine;
 	bool Interactable;

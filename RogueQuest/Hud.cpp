@@ -58,7 +58,9 @@ void Hud::ImportHudAssets() {
     loadImage("Tree", "Assets/Gui/Tree.png");
     loadImage("Gold", "Assets/Gui/Goldicon.png");
     
-
+    loadImage("Units",    "Assets/Research/Icons/Make_Units_Icon.png");//Icons for buildings
+    loadImage("Research", "Assets/Research/Icons/Research_Icon.png"); //Icon for Research
+    loadImage("Back", "Assets/Research/Icons/No.png");//
 
 }
 

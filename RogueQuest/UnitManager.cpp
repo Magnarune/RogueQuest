@@ -743,6 +743,7 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestEnemy(int owner,olc::vf2d 
                     testobjects.push_back(build);
                 return true; // continue
             } else {
+                return true;//Bugged here fix later
                 for (int i = 0; i < build->FriendList.size(); i++) {
                     if (build->FriendList[i] == owner || build->Owner == 0)
                         if (abs(build->FriendList[i]) + build->FriendList[i] == 0)

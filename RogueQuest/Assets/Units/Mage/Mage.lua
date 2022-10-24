@@ -39,7 +39,7 @@ return
 	Parameters = {
 		Food = 5,
 		Cost = 12,
-		Requirements = {"House"},
+		Requirements = {"House","Wands"},
 		ProductionTime = 8,
 		Ranged = true,--un needed
 		Projectile = "ThrowingAxe",

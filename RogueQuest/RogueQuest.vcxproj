@@ -258,6 +258,11 @@
     <None Include="Assets\Maps\TerraProject2.lua" />
     <None Include="Assets\Projectiles\Axe\ThrowAxe.lua" />
     <None Include="Assets\Projectiles\Bolt\Bolt.lua" />
+    <None Include="Assets\Research\Armour_Upgrade.lua" />
+    <None Include="Assets\Research\Boots_Upgrade.lua" />
+    <None Include="Assets\Research\BowCraft.lua" />
+    <None Include="Assets\Research\HellCircle.lua" />
+    <None Include="Assets\Research\Wands.lua" />
     <None Include="Assets\Research\Weapon_Upgrade.lua" />
     <None Include="Assets\Units\Archer\Archer.lua" />
     <None Include="Assets\Units\Builder\builder.lua" />

@@ -82,6 +82,8 @@ public:
             size_t tex_id;
         } icon = {};
         std::vector<std::string> Requirements;
+        int Cost;
+        
         sol::table lua_data;
     };
     struct Cursor {

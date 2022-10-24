@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Weapon", -- used for Engine::GetResearch()
+	ResearchAmount = 5,
 	offset = {0,0},
 	Icon =
 	{
@@ -11,8 +12,7 @@ return
 	Parameters =
 	{
 		Oncer = false, --Only get one upgrade
-		InitialCost = 120,
-		CostScale = 2, --How Much more it costs per upgrade??? Use Math Equation
+		InitialCost = {100,200,400, 800, 1500},
 		ResearchTime = 22 --Seconds
 	},
 	Requirements =
@@ -21,7 +21,7 @@ return
 	},
 	Reward = 
 	{
-		Stats =	{Damage = 5, Armor = 5,Health = 10, MoveSpeed= 4},
-		Unlocks = {"Archer"}
+		MeleeDamage = {5, 10,20,50,100},	
+		Unlocks = {"BowCraft",}
 	}
 }

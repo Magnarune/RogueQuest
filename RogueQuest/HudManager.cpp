@@ -142,7 +142,7 @@ void HudManager::BuildingSelected() {
     }
 
     float healthMod = build->Health / build->maxHealth;
-    float productionMod;
+    float productionMod=0.f;
     if(build->building)
          productionMod = build->m_fTimer / build->productiontime;    
     
@@ -161,58 +161,123 @@ void HudManager::BuildingSelected() {
     if (build->sentUnitPos != olc::vf2d(0.f, 0.f))
         engine.tv.DrawPartialDecal(build->sentUnitPos - olc::vf2d(0.f,14.f), olc::vf2d(8.f, 14.f), engine.hud->decals["flag"].get(), {0.f,0.f}, {113.f,218.f});
     //If X is being made???
-    if (build->building && build->productionQue.size() > 0) {
-        const auto& data = engine.assetManager->GetUnitData(build->productionQue.front());
-        std::string _refname = build->productionQue.front() + "__tex";
-        if (!engine.hud->decals.count(_refname)) {
-            engine.hud->loadImage(_refname, data.head.tex_id);
-        }
-        olc::Decal* decal = engine.hud->decals[_refname].get();
-        
-        engine.hud->DrawCenteredStringDecal({ 109.f,   IconY - 11.f },"Producing: " + build->unitproduced, olc::BLUE, {0.4f,0.4f});
-        engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBoxBackground"].get(), { 0,0.f }, { 128,32 });
-        engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f * productionMod,4.f }, engine.hud->decals["Health"].get(), { 0.f,0.f }, { 128,32 },olc::YELLOW);
-        engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBox"].get(), { 0,0 }, { 128,32 });
+    if (build->building) {
+        if (build->production == build->isUnit) {
+            const auto& data = engine.assetManager->GetUnitData(build->unitproduced);
+            std::string _refname = build->unitproduced + "__tex";
+            if (!engine.hud->decals.count(_refname)) {
+                engine.hud->loadImage(_refname, data.head.tex_id);
+            }
 
-        engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
-        engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.f,16.f }, decal, data.head.tl, data.head.sz);
-        engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+            olc::Decal* decal = engine.hud->decals[_refname].get();
+
+            engine.hud->DrawCenteredStringDecal({ 109.f,   IconY - 11.f }, "Producing: " + build->unitproduced, olc::BLUE, { 0.4f,0.4f });
+            engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBoxBackground"].get(), { 0,0.f }, { 128,32 });
+            engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f * productionMod,4.f }, engine.hud->decals["Health"].get(), { 0.f,0.f }, { 128,32 }, olc::YELLOW);
+            engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBox"].get(), { 0,0 }, { 128,32 });
+
+            engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+            engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.f,16.f }, decal, data.head.tl, data.head.sz);
+            engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+        } else {
+            if (build->production == build->isResearch) {
+                const auto& data = engine.assetManager->GetResearchData(build->researchproduced);
+                std::string _refname = build->researchproduced + "__tex";
+                if (!engine.hud->decals.count(_refname)) {
+                    engine.hud->loadImage(_refname, data.icon.tex_id);
+                }
+                olc::Decal* decal = engine.hud->decals[_refname].get();
+                engine.hud->DrawCenteredStringDecal({ 109.f,   IconY - 11.f }, "Producing: " + build->unitproduced, olc::BLUE, { 0.4f,0.4f });
+                engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBoxBackground"].get(), { 0,0.f }, { 128,32 });
+                engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f * productionMod,4.f }, engine.hud->decals["Health"].get(), { 0.f,0.f }, { 128,32 }, olc::YELLOW);
+                engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBox"].get(), { 0,0 }, { 128,32 });
+
+                engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+                engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.f,16.f }, decal, {0.f,0.f}, data.icon.fsz);
+                engine.DrawPartialDecal({ 104.f , IconY - 4.f }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+
+            }
+        }
         
         if (engine.inputmanager->Button({ 104.f , IconY - 4.f }, engine.GetMousePos(), { 16.f,16.f }))
             build->UnProduceUnit();
-        
-        
+
+
         if (build->productionQue.size() < 10) {
             engine.DrawPartialDecal({ 104.f , IconY + 15.f }, { 8.f,8.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
-            engine.hud->DrawCenteredStringDecal({ 108.7f, IconY + 20.f }, std::to_string(build->productionQue.size()), olc::GREEN, { 0.8f,0.8f });
+            engine.hud->DrawCenteredStringDecal({ 108.7f, IconY + 20.f }, std::to_string(build->productionQue.size() + 1), olc::GREEN, { 0.8f,0.8f });
             engine.DrawPartialDecal({ 104.f , IconY + 15.f }, { 8.5f,8.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
         } else {
             if (build->productionQue.size() < 100) {
                 engine.DrawPartialDecal({ 104.f , IconY + 15.f }, { 16.f,8.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
-                engine.hud->DrawCenteredStringDecal({ 112.f, IconY + 20.f }, std::to_string(build->productionQue.size()), olc::GREEN, { 0.8f,0.8f });
+                engine.hud->DrawCenteredStringDecal({ 112.f, IconY + 20.f }, std::to_string(build->productionQue.size()+1), olc::GREEN, { 0.8f,0.8f });
                 engine.DrawPartialDecal({ 104.f , IconY + 15.f }, { 16.5f,8.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
             } else {
                 engine.DrawPartialDecal({ 101.f , IconY + 15.f }, { 23.f,8.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
-                engine.hud->DrawCenteredStringDecal({ 112.f, IconY + 20.f }, std::to_string(build->productionQue.size()), olc::GREEN, { 0.8f,0.8f });
+                engine.hud->DrawCenteredStringDecal({ 112.f, IconY + 20.f }, std::to_string(build->productionQue.size()+1), olc::GREEN, { 0.8f,0.8f });
                 engine.DrawPartialDecal({ 101.f , IconY + 15.f }, { 23.5f,8.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
             }
-        }
 
+        }
     }
     BuildingAbilities(build);
 }
 
 void HudManager::BuildingAbilities(std::shared_ptr<Building> building) {
     auto& engine = Game_Engine::Current();
-    for (int i = 0; i < building->researchproduction.size(); i++) {
-
+    switch (selection) {
+    case None:
+        engine.DrawPartialDecal({ 186.f + 16.f  , IconY - 12.f + 32.f }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+        engine.DrawPartialDecal({ 186.f + 16.f  , IconY - 12.f + 32.f }, { 16.f,16.f }, engine.hud->decals["Units"].get(), { 0.f,0.f }, { 64,64 });
+        engine.DrawPartialDecal({ 186.f + 16.f  , IconY - 12.f + 32.f }, { 16.5f,16.5f},engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+        if (engine.inputmanager->Button({ 186.f + 16.f  , IconY - 12.f + 32.f }, engine.GetMousePos(), { 16,16 }))
+            selection = Producable;
+        engine.DrawPartialDecal({ 186.f + 32.f  , IconY - 12.f + 32.f }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+        engine.DrawPartialDecal({ 186.f + 32.f  , IconY - 12.f + 32.f }, { 16.f,16.f }, engine.hud->decals["Research"].get(), { 0.f,0.f }, { 64,64 });
+        engine.DrawPartialDecal({ 186.f + 32.f  , IconY - 12.f + 32.f }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+        if (engine.inputmanager->Button({ 186.f + 32.f  , IconY - 12.f + 32.f }, engine.GetMousePos(), { 16,16 }))
+            selection = Research;
+        break;
+    case Research:
+        ResearchAbilites(building);
+        break;
+    case Producable:
+        ProductionAbilites(building);
+        break;
     }
+}
 
+void HudManager::ResearchAbilites(std::shared_ptr<Building> building) {
+    auto& engine = Game_Engine::Current();
+    for (int i = 0; i < building->researchproduction.size(); i++) {
+        if (!engine.assetManager->ResearchExists(building->researchproduction[i]))
+            continue;
+        const auto& data = engine.assetManager->GetResearchData(building->researchproduction[i]);
+        std::string _refname = building->researchproduction[i] + "__tex";
+        if (!engine.hud->decals.count(_refname)) {
+            engine.hud->loadImage(_refname, data.icon.tex_id);
+        }
+        olc::Decal* decal = engine.hud->decals[_refname].get();
+        bool rq = CheckRequirements(building->Owner, data);
+        float yoffset = i < 3 ? 0 : (i < 6 ? 16.f : 32.f);
+        engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+        engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, olc::vf2d(data.icon.sz) /2.f, decal, {0.f,0.f}, data.icon.fsz, rq ? olc::WHITE : olc::GREY);
+        engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+        if (engine.inputmanager->Button({ 186.f + 16.f * (i % 3), IconY - 12.f + yoffset }, engine.GetMousePos(), { 16,16 }) && rq) {
+           int cost= engine.leaders->LeaderList[building->Owner]->CheckCost(building->researchproduction[i]);
+            engine.leaders->LeaderList[building->Owner]->Gold -= engine.researchmanager->Researchables[building->researchproduction[i]]->Cost[cost];
+            building->productionQue.push(building->researchproduction[i]);
+        }
+    }
+    engine.DrawPartialDecal({ 186.f + 48.f  , IconY - 12.f + 32.f }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+    engine.DrawPartialDecal({ 186.f + 48.f  , IconY - 12.f + 32.f }, { 16.f,16.f }, engine.hud->decals["Back"].get(), { 0.f,0.f }, { 45,45 });
+    engine.DrawPartialDecal({ 186.f + 48.f  , IconY - 12.f + 32.f }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+    if (engine.inputmanager->Button({ 186.f + 48.f  , IconY - 12.f + 32.f }, engine.GetMousePos(), { 16,16 }))
+        selection = None;
 
-
-
-
-
+}
+void HudManager::ProductionAbilites(std::shared_ptr<Building> building) {
+    auto& engine = Game_Engine::Current();
     for (int i = 0; i < building->unitproduction.size(); i++) {
         const auto& data = engine.assetManager->GetUnitData(building->unitproduction[i]);
         std::string _refname = building->unitproduction[i] + "__tex";
@@ -228,9 +293,14 @@ void HudManager::BuildingAbilities(std::shared_ptr<Building> building) {
 
         if (engine.inputmanager->Button({ 186.f + 16.f * (i % 3), IconY - 12.f + yoffset }, engine.GetMousePos(), { 16,16 }) && rq) {
             engine.leaders->LeaderList[building->Owner]->Gold -= data.Cost;
-            building->productionQue.push(building->unitproduction[i]); 
+            building->productionQue.push(building->unitproduction[i]);
         }
     }
+    engine.DrawPartialDecal({ 186.f + 48.f  , IconY - 12.f + 32.f }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
+    engine.DrawPartialDecal({ 186.f + 48.f  , IconY - 12.f + 32.f }, { 16.f,16.f }, engine.hud->decals["Back"].get(), { 0.f,0.f }, { 45,45 });
+    engine.DrawPartialDecal({ 186.f + 48.f  , IconY - 12.f + 32.f }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+    if (engine.inputmanager->Button({ 186.f + 48.f  , IconY - 12.f + 32.f }, engine.GetMousePos(), { 16,16 }))
+        selection = None;
 }
 
 void HudManager::BuildingsSelected(size_t bcount) {
@@ -242,7 +312,9 @@ bool HudManager::CheckRequirements(int Owner , cAssets::UnitType object){
     auto& engine = Game_Engine::Current();
     for (int i = 0; i < object.Requirements.size(); i++)
         if (std::find(engine.leaders->LeaderList[Owner]->ResearchUpgrades.begin(),
-            engine.leaders->LeaderList[Owner]->ResearchUpgrades.end(), object.Requirements[i]) == engine.leaders->LeaderList[Owner]->ResearchUpgrades.end())
+            engine.leaders->LeaderList[Owner]->ResearchUpgrades.end(), object.Requirements[i]) == engine.leaders->LeaderList[Owner]->ResearchUpgrades.end() && 
+            std::find(engine.leaders->LeaderList[Owner]->Unlockes.begin(),
+                engine.leaders->LeaderList[Owner]->Unlockes.end(), object.Requirements[i]) == engine.leaders->LeaderList[Owner]->Unlockes.end())
             return false;
     if (engine.leaders->LeaderList[Owner]->Gold < object.Cost)
         return false;
@@ -255,6 +327,18 @@ bool HudManager::CheckRequirements(int Owner, cAssets::BuildingType object) {
         if (std::find(engine.leaders->LeaderList[Owner]->ResearchUpgrades.begin(),
             engine.leaders->LeaderList[Owner]->ResearchUpgrades.end(), object.Requirements[i]) == engine.leaders->LeaderList[Owner]->ResearchUpgrades.end())
             return false;
+    if (engine.leaders->LeaderList[Owner]->Gold < object.Cost)
+        return false;
+    return true;
+}
+
+bool HudManager::CheckRequirements(int Owner, cAssets::ResearchType object) {
+    auto& engine = Game_Engine::Current();
+    for (int i = 0; i < object.Requirements.size(); i++)
+        if (std::find(engine.leaders->LeaderList[Owner]->ResearchUpgrades.begin(),
+            engine.leaders->LeaderList[Owner]->ResearchUpgrades.end(), object.Requirements[i]) == engine.leaders->LeaderList[Owner]->ResearchUpgrades.end())
+            return false;
+
     if (engine.leaders->LeaderList[Owner]->Gold < object.Cost)
         return false;
     return true;

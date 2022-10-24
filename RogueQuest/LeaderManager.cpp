@@ -14,6 +14,8 @@ void LeaderManager::AddLeader(int Size) {//Only done at start of game. Must be 1
 		std::shared_ptr<Leader> playerleader;
 		playerleader.reset(new Leader);
 		playerleader->Allies.insert({ static_cast<leaderList>(i), {i}});
+		playerleader->AGE="Stone Age";//Starting "Age"
+		
 		LeaderList.push_back(playerleader);
 	}		
 }
@@ -97,4 +99,36 @@ void LeaderManager::BuildingMaintenance(std::vector<std::weak_ptr<Building>> bui
 		it =std::unique(LeaderList[i]->ResearchUpgrades.begin(), LeaderList[i]->ResearchUpgrades.end());
 		LeaderList[i]->ResearchUpgrades.erase(it, LeaderList[i]->ResearchUpgrades.end());
 	}
+}
+
+void LeaderManager::AddResearch(int Owner, std::weak_ptr<Researchable> research) {
+			
+	auto findval = std::find_if(LeaderList[Owner]->researchUpgrades.begin(), LeaderList[Owner]->researchUpgrades.end(),
+		[&research](std::weak_ptr<Researchable>& val) {
+			return val.lock() == research.lock();
+		}
+	);
+			
+	
+	
+	if(findval != LeaderList[Owner]->researchUpgrades.end())
+		for (int i = 0; i < LeaderList[Owner]->researchUpgrades.size(); i++) {
+			if (LeaderList[Owner]->researchUpgrades[i].lock() == research.lock()) {
+				LeaderList[Owner]->researchUpgrades[i].lock()->Level += 1;
+			}
+		}
+	else
+		LeaderList[Owner]->researchUpgrades.push_back(research);
+
+
+
+	
+	for (int i = 0; i < research.lock()->UnlockRewards.size(); i++) {
+		if (std::find(LeaderList[Owner]->Unlockes.begin(), LeaderList[Owner]->Unlockes.end(), research.lock()->UnlockRewards[i]) != LeaderList[Owner]->Unlockes.end())
+			continue;
+		else
+			LeaderList[Owner]->Unlockes.push_back(research.lock()->UnlockRewards[i]);
+	}
+	
+	LeaderList[Owner]->UpdateBonus();
 }

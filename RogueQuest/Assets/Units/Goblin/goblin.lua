@@ -40,7 +40,7 @@ return
 	{
 		Food = 5,
 		Cost = 12,
-		Requirements = {},
+		Requirements = {"HellCircle",},
 		ProductionTime = 12,
 		Ranged = false,
 		CollisionRadius = 10, 

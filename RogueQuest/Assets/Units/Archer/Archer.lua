@@ -40,7 +40,7 @@ return
 		Food = 5,
 		Cost = 22,
 		ProductionTime = 6,
-		Requirements = {},
+		Requirements = {"BowCraft"},
 		Ranged = true,
 		Projectile = "Arrow",
 		CollisionRadius = 10,

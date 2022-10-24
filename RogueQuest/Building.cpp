@@ -46,22 +46,31 @@ void Building::Stop() {
 	m_fTimer = 0.f;
 }
 
-void Building::ProduceUnit(const std::string& unitName) {
+void Building::InitializeProduction(const std::string& objectname) {
 	auto& engine = Game_Engine::Current();
-	if(!engine.assetManager->UnitExists(unitName)) return;
-	unitproduced = unitName;
-	if (!building) {
-		auto& data = engine.assetManager->GetUnitData(unitName);
+	if (engine.assetManager->UnitExists(objectname)) {
+		m_fTimer = 0.f;
+		unitproduced = objectname;
+		auto& data = engine.assetManager->GetUnitData(objectname);
 		productiontime = data.lua_data["Parameters"]["ProductionTime"];
+		production = isUnit;
 		building = true;
+
+	}else
+	if (engine.assetManager->ResearchExists(objectname)) {
+		m_fTimer = 0.f;
+		researchproduced = objectname;
+		auto& data = engine.assetManager->GetResearchData(objectname);
+		productiontime = data.lua_data["Parameters"]["ResearchTime"];
+		production = isResearch;
+		building = true;
+	} else
+		production = isNone;
+	if (production == isNone && !productionQue.empty()) {
+		
+		building = false;
 	}
 
-	if (m_fTimer > productiontime) {
-		if (!productionQue.empty()) productionQue.pop();		
-		SendUnit(engine.worldManager->GenerateUnit(unitName, Owner, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
-		building = false;
-		startbuilding = false;
-	}
 }
 
 void Building::UnProduceUnit() {
@@ -69,10 +78,6 @@ void Building::UnProduceUnit() {
 	building = false;
 	startbuilding = false;
 	m_fTimer = 0.f;
-}
-
-void Building::SentUnitlocation(olc::vf2d pos) {
-
 }
 
 void Building::SendUnit(std::shared_ptr<Unit> unit) {
@@ -87,28 +92,38 @@ void Building::Update(float delta){
 	if (AttackCD > 0)
 		AttackCD -= delta;
 	BuildingBehaviour();
-
 	if (Health < maxHealth) {
 		BuildingEffect();
 	}
-
 	if (Health > maxHealth) {
 		UpgradeBuilding();
 		Health = maxHealth;
 		Health -= 10;
 	}
 
-	if (productionQue.size() > 0 && !startbuilding) {
-		startbuilding = true;
-		m_fTimer = 0.f;
-		ProduceUnit(productionQue.front());		
+	if (productionQue.size() > 0 && !building) {
+			InitializeProduction(productionQue.front());
+			productionQue.pop();
 	}
-	if (building) {
-		ProduceUnit(unitproduced);
-		m_fTimer += delta;
+	if (building && productiontime < m_fTimer) {
+		switch (production){
+		case isNone:
+			break;
+		case isUnit:
+			SendUnit(engine.worldManager->GenerateUnit(unitproduced, Owner, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
+			building = false;
+			break;
+		case isResearch:
+			engine.leaders->AddResearch(Owner, engine.researchmanager->Researchables[researchproduced]);
+
+			building = false;
+			break;
+		}
 	}
+
 	if(Health <= 0.f)
 		Collidable::Destroy();
+		m_fTimer += delta;
 
 	Collidable::Update(delta); // Inherit
 

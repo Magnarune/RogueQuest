@@ -260,33 +260,37 @@ void cAssets::LoadResearchAssets() {
         return { x, y };
     };
     const std::vector<std::string> filePaths = { //
-        "Assets/Research/Weapon_Upgrade.lua"
+        "Assets/Research/Weapon_Upgrade.lua",
+        "Assets/Research/Armour_Upgrade.lua",
+        "Assets/Research/Boots_Upgrade.lua",
+        "Assets/Research/BowCraft.lua",
+        "Assets/Research/Wands.lua"
     };
 
     for (const auto& path : filePaths) {
         try {
             sol::load_result script = lua_state.load_file(path);
-
             sol::protected_function_result rcode = script();
-
             if (!rcode.valid()) {
                 sol::error e = rcode;
                 std::cout << "error: " << e.what() << "\n";
             } else {
                 Researchdata = rcode;
             }
-
             std::string name = Researchdata["Name"];
             engine.researchmanager->ImportList.push_back(name);
             ResearchType researchType;
-                // load the Name : TextureID for the Projectile          
+                // load the Name : TextureID for the Projectile   
 
             if (Researchdata["Icon"] != sol::nil) {
                 researchType.icon.fsz = to_vi2d(Researchdata["Icon"]["FileSize"]);
                 researchType.icon.sz = to_vi2d(Researchdata["Icon"]["size"]);
                 researchType.icon.tex_id = TextureCache::GetCache().CreateTexture(Researchdata["Icon"]["FileName"]);
             } 
-
+           sol::table Requirements = Researchdata["Requirements"]["Buildings"];
+           for (int i = 0; i < Requirements.size(); i++) {
+               researchType.Requirements.push_back(Requirements[i + 1]);
+           }
             researchType.lua_data = std::move(Researchdata);
             resCache.insert_or_assign(name, std::move(researchType));
         } catch (std::exception e) {

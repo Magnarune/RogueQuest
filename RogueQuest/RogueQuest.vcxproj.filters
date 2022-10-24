@@ -277,6 +277,21 @@
     <None Include="Assets\Research\Weapon_Upgrade.lua">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="Assets\Research\Armour_Upgrade.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Research\Boots_Upgrade.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Research\BowCraft.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Research\Wands.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\Research\HellCircle.lua">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Assets\Projectiles\Arrows\arrow.lua">

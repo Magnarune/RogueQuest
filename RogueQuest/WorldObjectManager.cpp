@@ -159,6 +159,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     unit->fKnockBackResist = data.lua_data["Stats"]["KnockBackResist"];   
     unit->Owner = owner;
     unit->FriendList = InitializeObject(owner);
+    unit->fAttackDamage += engine.leaders->LeaderList[owner]->Bonus.meleedamage;
     
     // make sure to update this when adding new GFXStates - enums don't magically connect to a string
     static std::map<std::string, Unit::GFXState> States = {
@@ -205,7 +206,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     if (pos == olc::vf2d(0.f, 0.f))
         pos = { 10.f,10.f };
     build->predPosition = build->Position = pos;
-    build->name = data.lua_data["Name"];
+    build->name = name;
     build->offset = to_vi2d(data.lua_data["offset"]);
     build->Size = to_vi2d(data.lua_data["Parameters"]["CollisionSize"]);
     build->buildtime = data.lua_data["Parameters"]["BuildTime"];
@@ -235,19 +236,16 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
         build->CanAttack = true;
     }
 
-    if (data.lua_data["Research"] != sol::nil) {
-        sol::table Researchtypes = data.lua_data["Research"];
+    if (data.lua_data["Production"]["Research"] != sol::nil) {
+        sol::table Researchtypes = data.lua_data["Production"]["Research"];
         for (int i = 0; i < Researchtypes.size(); i++) {
             build->researchproduction.push_back(Researchtypes[i + 1]);
         }
     }
-
-
     // make sure to update this when adding new GFXStates - enums don't magically connect to a string
     static std::map<std::string, Building::GFXState> States = {
         {"Normal", Building::Normal},
     };
-
     // create decals for each texture state
     for(auto& [ name, meta ] : data.texture_metadata){
         const Building::GFXState& state = States.at(name); // local state ref
