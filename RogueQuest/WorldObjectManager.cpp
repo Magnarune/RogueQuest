@@ -159,8 +159,11 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     unit->fKnockBackResist = data.lua_data["Stats"]["KnockBackResist"];   
     unit->Owner = owner;
     unit->FriendList = InitializeObject(owner);
+    //Bonuses
     unit->fAttackDamage += engine.leaders->LeaderList[owner]->Bonus.meleedamage;
-    
+    unit->fMoveSpeed += engine.leaders->LeaderList[owner]->Bonus.movespeed;
+    unit->fMaxHealth += engine.leaders->LeaderList[owner]->Bonus.health;
+    unit->Health = unit->fMaxHealth;
     // make sure to update this when adding new GFXStates - enums don't magically connect to a string
     static std::map<std::string, Unit::GFXState> States = {
         {"Walking", Unit::Walking},

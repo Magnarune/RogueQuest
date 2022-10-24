@@ -15,13 +15,13 @@ void Leader::UpdateBonus() {
 				if (rewards.first == "MeleeDamage") {
 					Bonus.meleedamage += rewards.second[i];
 				}
-				if (rewards.first == "Armor") {
+				if (rewards.first == "Armour") {
 					Bonus.armour += rewards.second[i];
 				}
 				if (rewards.first == "Health") {
 					Bonus.health += rewards.second[i];
 				}
-				if (rewards.first == "Movespeed") {
+				if (rewards.first == "MoveSpeed") {
 					Bonus.movespeed += rewards.second[i];
 				}
 				if (rewards.first == "Attackspeed") {

@@ -20,12 +20,14 @@ public:
 	void InitializeProduction(const std::string& object);
 	void SendUnit(std::shared_ptr<Unit> unit);
 	void BuildingBehaviour();
+	void CheckResearch(std::string name);
 	void Draw(olc::TileTransformedView* gfx) override;
 	void Update(float delta) override;
 	void AfterUpdate(float delta) override;
 	void Destroy() override;
-	void Stop();
+	
 	void BuildingEffect();
+	void Stop();
 	virtual ~Building();
 	bool bFriendly;
 	std::string name;
@@ -49,7 +51,9 @@ public:
 	std::queue<std::string> productionQue;
 	std::string researchproduced;
 	std::string unitproduced;
+	
 	std::vector<std::string> researchproduction;//Types of Research this building can proform
+
 	std::vector<std::string> unitproduction;//Type of units that can be made
 	std::vector<std::string> AttackTypes;
 	bool MakingUnit=true;

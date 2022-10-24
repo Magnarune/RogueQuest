@@ -263,12 +263,16 @@ void HudManager::ResearchAbilites(std::shared_ptr<Building> building) {
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, olc::vf2d(data.icon.sz) /2.f, decal, {0.f,0.f}, data.icon.fsz, rq ? olc::WHITE : olc::GREY);
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
+       
+        
         if (engine.inputmanager->Button({ 186.f + 16.f * (i % 3), IconY - 12.f + yoffset }, engine.GetMousePos(), { 16,16 }) && rq) {
            int cost= engine.leaders->LeaderList[building->Owner]->CheckCost(building->researchproduction[i]);
             engine.leaders->LeaderList[building->Owner]->Gold -= engine.researchmanager->Researchables[building->researchproduction[i]]->Cost[cost];
             building->productionQue.push(building->researchproduction[i]);
         }
     }
+
+
     engine.DrawPartialDecal({ 186.f + 48.f  , IconY - 12.f + 32.f }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
     engine.DrawPartialDecal({ 186.f + 48.f  , IconY - 12.f + 32.f }, { 16.f,16.f }, engine.hud->decals["Back"].get(), { 0.f,0.f }, { 45,45 });
     engine.DrawPartialDecal({ 186.f + 48.f  , IconY - 12.f + 32.f }, { 16.5f,16.5f }, engine.hud->decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
@@ -285,7 +289,9 @@ void HudManager::ProductionAbilites(std::shared_ptr<Building> building) {
             engine.hud->loadImage(_refname, data.head.tex_id);
         }
         olc::Decal* decal = engine.hud->decals[_refname].get();
-        bool rq = CheckRequirements(building->Owner, data);
+
+        bool rq = CheckRequirements(building->Owner, data);//this is the Bool Check
+
         float yoffset = i < 3 ? 0 : (i < 6 ? 16.f : 32.f);
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.f,16.f }, engine.hud->decals["Icon"].get(), { 0.f,0.f }, { 16,16 });
         engine.DrawPartialDecal({ 186.f + 16.f * (i % 3) , IconY - 12.f + yoffset }, { 16.f,16.f }, decal, data.head.tl, data.head.sz, rq ? olc::WHITE : olc::GREY);
@@ -334,12 +340,13 @@ bool HudManager::CheckRequirements(int Owner, cAssets::BuildingType object) {
 
 bool HudManager::CheckRequirements(int Owner, cAssets::ResearchType object) {
     auto& engine = Game_Engine::Current();
+
     for (int i = 0; i < object.Requirements.size(); i++)
         if (std::find(engine.leaders->LeaderList[Owner]->ResearchUpgrades.begin(),
             engine.leaders->LeaderList[Owner]->ResearchUpgrades.end(), object.Requirements[i]) == engine.leaders->LeaderList[Owner]->ResearchUpgrades.end())
             return false;
 
-    if (engine.leaders->LeaderList[Owner]->Gold < object.Cost)
+    if (engine.leaders->LeaderList[Owner]->Gold < object.Cost) //if you have the gold
         return false;
     return true;
 }

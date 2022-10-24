@@ -30,10 +30,12 @@ void UserInputManager::StandardUserInput() {
 
         if (!engine.ActivityDone)
             engine.buildingManager->DeselectBuildings();
+      
+
+        if (!engine.ActivityDone)
+            engine.buildingManager->SelectBuilding(Final);
         else
             engine.ActivityDone = false;
-
-        engine.buildingManager->SelectBuilding(Final);
     }
 
     if (engine.GetMouse(1).bPressed) {

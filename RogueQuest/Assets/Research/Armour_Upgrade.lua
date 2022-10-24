@@ -1,7 +1,7 @@
 return 
 {
 	Name = "Armour", -- used for Engine::GetResearch()
-	ResearchAmount = 5,
+	ResearchAmount = 5, --5 levels
 	offset = {0,0},
 	Icon =
 	{
@@ -11,16 +11,15 @@ return
 	},	
 	Parameters =
 	{
-		Oncer = false, --Only get one upgrade
-		InitialCost = {100,200,400, 800, 1500},
+		InitialCost = {100,200,400, 800, 1500}, --Cost Per LVL
 		ResearchTime = 22 --Seconds
 	},
 	Requirements =
 	{
-		Buildings = {"Castle","StoneTower"}
+		Buildings = {"Castle","StoneTower"} --What it checks for
 	},
 	Reward = 
 	{
-		Armour = {5, 10,20,50,100},
+		Armour = {5, 10,20,50,100}, --What generated Units get + base armour
 	}
 }

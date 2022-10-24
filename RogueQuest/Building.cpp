@@ -74,7 +74,6 @@ void Building::InitializeProduction(const std::string& objectname) {
 }
 
 void Building::UnProduceUnit() {
-	if (!productionQue.empty()) productionQue.pop();
 	building = false;
 	startbuilding = false;
 	m_fTimer = 0.f;
@@ -115,7 +114,7 @@ void Building::Update(float delta){
 			break;
 		case isResearch:
 			engine.leaders->AddResearch(Owner, engine.researchmanager->Researchables[researchproduced]);
-
+			CheckResearch(researchproduced);
 			building = false;
 			break;
 		}
@@ -165,4 +164,15 @@ void Building::Draw(olc::TileTransformedView* gfx){
 		gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x,maskpos.y + mask.rect.y });
 		gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x + mask.rect.x,maskpos.y  });
 	//}
+}
+
+void Building::CheckResearch(std::string name) {
+	auto& engine = Game_Engine::Current();
+	for (int i = 0; i < engine.leaders->LeaderList[Owner]->researchUpgrades.size(); i++){
+		if (engine.leaders->LeaderList[Owner]->researchUpgrades[i].lock()->name == name){
+			if (engine.leaders->LeaderList[Owner]->researchUpgrades[i].lock()->Level == engine.leaders->LeaderList[Owner]->researchUpgrades[i].lock()->researchlen - 1) {
+				auto erased = std::erase(researchproduction,name);
+			}
+		}			 
+	}
 }
