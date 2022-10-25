@@ -2,8 +2,8 @@
 #include "olcPixelGameEngine.h"
 
 class MainMenu {
-	virtual ~MainMenu();
 public:
+	virtual ~MainMenu();
 	MainMenu();
 	
 	
