@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Sara", -- used for Engine::GenerateUnit()
+	Description = "Sara: A careful healer great for keeping an army in shape! Costs: 12 Gold Foodcost: 5 Requires: Wands",
 	SpriteOrder= { 0 , 1 , 2 , 3 },--1 = North, 2 = South , 3 =East , 4 = West
 	Files = 
 	{

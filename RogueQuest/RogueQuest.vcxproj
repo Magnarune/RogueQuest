@@ -191,6 +191,7 @@
     <ClCompile Include="LeaderManager.cpp" />
     <ClCompile Include="Leaders.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MoveNodes.cpp" />
     <ClCompile Include="Options.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="Lua\include\lua.hpp" />
     <ClInclude Include="Lua\include\luaconf.h" />
     <ClInclude Include="Lua\include\lualib.h" />
+    <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="MoveNodes.h" />
@@ -238,6 +240,7 @@
     <ClInclude Include="Particles.h" />
     <ClInclude Include="Projectiles.h" />
     <ClInclude Include="Research.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="TaskManager.h" />
     <ClInclude Include="tempParticles.h" />
     <ClInclude Include="Unit.h" />
@@ -275,6 +278,12 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Assets\Projectiles\Arrows\arrow.lua" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RogueQuest.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="GameIcon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

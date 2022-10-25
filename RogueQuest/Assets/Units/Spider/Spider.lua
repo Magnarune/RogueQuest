@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Spider", -- used for Engine::GenerateUnit()
+	Description = "Spider: A sneaky buddy capable of swarming with low cost and high damage. Costs: 12 Gold Foodcost: 5 Requires: HellCircle",
 	SpriteOrder= { 0 , 1 , 2 , 3 },--1 = North, 2 = South , 3 =East , 4 = West
 	Files = 
 	{

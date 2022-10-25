@@ -23,6 +23,9 @@ public:
 	void DrawHud();
 	void DrawLeaderHud();
 	void DrawBuild();
+
+	void DrawDescription(std::string vecText, olc::vi2d Mouse);
+	std::string WrapText(std::string str, int width, bool proportional, olc::vd2d scale);
 	bool BuildMode = false;
 	std::shared_ptr<Building> potBuilding;
 	//olc::vf2d tl_MMap{11 , (float)gfx.ScreenHeight() * 0.823f - 10.f };

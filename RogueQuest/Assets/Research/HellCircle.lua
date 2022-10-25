@@ -1,6 +1,7 @@
 return 
 {
 	Name = "HellCircle", -- used for Engine::GetResearch()
+	Description = "HellCircle: Allows for the creation of Imps, Spiders, and Goblins Costs: 5000",
 	ResearchAmount = 1,
 	offset = {0,0},
 	Icon =

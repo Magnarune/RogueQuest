@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Castle", -- used for Engine::GenerateBuilding()
+	Description = "Town Hall: A safe place to rest at and build an empire from . Costs: 500 Gold",
 	offset = {0,0},
 	Icon = {
 		FileName = "Assets/Buildings/Castle/castleicon.png",

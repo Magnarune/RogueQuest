@@ -26,6 +26,7 @@ public:
             std::vector<int> Sprite_Order;
             olc::vf2d scale;
         };
+        std::string Description;
         int Cost;
         int Food;
         std::string projectileName;
@@ -52,6 +53,7 @@ public:
             olc::vf2d scale;
             std::map<std::string, LevelOffset> level_offsets;
         };
+        std::string Description;
         int Cost;
         std::vector<std::string> Requirements;
         std::map<std::string, TextureMetaData> texture_metadata;
@@ -82,6 +84,7 @@ public:
             size_t tex_id;
         } icon = {};
         std::vector<std::string> Requirements;
+        std::string Description;
         int Cost;
         
         sol::table lua_data;

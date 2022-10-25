@@ -66,11 +66,9 @@ void Building::InitializeProduction(const std::string& objectname) {
 		building = true;
 	} else
 		production = isNone;
-	if (production == isNone && !productionQue.empty()) {
-		
+	if (production == isNone && !productionQue.empty()) {		
 		building = false;
 	}
-
 }
 
 void Building::UnProduceUnit() {
@@ -114,6 +112,7 @@ void Building::Update(float delta){
 			break;
 		case isResearch:
 			engine.leaders->AddResearch(Owner, engine.researchmanager->Researchables[researchproduced]);
+			auto erase = std::erase(engine.hudManager->Hide_Research,researchproduced);
 			CheckResearch(researchproduced);
 			building = false;
 			break;
@@ -137,8 +136,7 @@ void Building::AfterUpdate(float delta) {
 
 void Building::BuildingEffect() {
 	auto& engine = Game_Engine::Current();
-	if (!fire) {
-		
+	if (!fire) {		
 		fire = true;
 	}
 }
@@ -170,7 +168,7 @@ void Building::CheckResearch(std::string name) {
 	auto& engine = Game_Engine::Current();
 	for (int i = 0; i < engine.leaders->LeaderList[Owner]->researchUpgrades.size(); i++){
 		if (engine.leaders->LeaderList[Owner]->researchUpgrades[i].lock()->name == name){
-			if (engine.leaders->LeaderList[Owner]->researchUpgrades[i].lock()->Level == engine.leaders->LeaderList[Owner]->researchUpgrades[i].lock()->researchlen - 1) {
+			if (engine.leaders->LeaderList[Owner]->researchUpgrades[i].lock()->Level == engine.leaders->LeaderList[Owner]->researchUpgrades[i].lock()->researchlen) {
 				auto erased = std::erase(researchproduction,name);
 			}
 		}			 

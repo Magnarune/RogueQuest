@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Goblin", -- used for Engine::GenerateUnit()
+	Description = "Goblin: A sneaky monster capable of swarming with low cost and high damage. Costs: 15 Gold Foodcost: 5 Requires: HellCircle",
 	SpriteOrder= { 2 , 3 , 0 , 1 },--0 = North, 1 = West , 2 =South , 3 = East  
 	Files = 
 	{
@@ -39,7 +40,7 @@ return
 	Parameters =
 	{
 		Food = 5,
-		Cost = 12,
+		Cost = 15,
 		Requirements = {"HellCircle",},
 		ProductionTime = 12,
 		Ranged = false,

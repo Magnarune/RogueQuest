@@ -31,6 +31,7 @@
 #include "MoveNodes.h"
 #include "Highlighting.h"
 #include "Research.h"
+#include "MainMenu.h"
 
 
 extern std::string StringifyObject(sol::object val);
@@ -59,10 +60,10 @@ public:
 	//Cursor BS
 	RECT my_rect;
 
-    enum MapModes
-    {
+    enum MapModes{
 		MODE_LOCAL_MAP,
-		MODE_OPTIONS_MENU
+		MODE_OPTIONS_MENU,
+		MODE_MAIN_MENU
     };
     int m_nGameMode = MODE_LOCAL_MAP;
 protected:
@@ -75,8 +76,10 @@ protected:
 	void OnFocusUpdated(bool focus);
     virtual bool UpdateLocalMap(float fElapsedTime);
 	virtual bool UpdateOptions(float fElapsedTime);
+	virtual bool UpdateMainMenu(float fElapsedTime);
 	virtual void DrawCursor();
 public:
+	std::unique_ptr<MainMenu> mainmenu;
 	std::unique_ptr<WorldManager> worldManager;
 	std::unique_ptr<UnitManager> unitManager;
 	std::unique_ptr<BuildingManager> buildingManager;

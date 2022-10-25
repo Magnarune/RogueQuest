@@ -1,6 +1,7 @@
 return 
 {
 	Name = "House", -- used for Engine::GenerateBuilding()
+	Description = "Home: Increases food suppy while keeping people happy. Costs: 120 Gold  Requires: Castle",
 	offset = {0,0},
 	Icon = {
 		FileName = "Assets/Buildings/House/House_Icon.png",

@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Imp", -- used for Engine::GenerateUnit()
+	Description = "Demon: A master level deamon with high health and high damage. Costs: 150 Gold Foodcost: 75 Requires: HellCircle",
 	SpriteOrder= { 1 , 3 , 0 , 2 },--0 = North, 1 = West , 2 =South , 3 = East  
 	Files = 
 	{
@@ -38,8 +39,8 @@ return
 	},
 	Parameters =
 	{
-		Food = 5,
-		Cost = 12,
+		Food = 75,
+		Cost = 150,
 		Requirements = {"HellCircle",},
 		ProductionTime = 15,
 		Ranged = false,

@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Armour", -- used for Engine::GetResearch()
+	Description = "Armour Upgrade: Increases Armour of all Units by {5, 10,20,50,100} and Costs: {100,200,400, 800, 1500}",
 	ResearchAmount = 5, --5 levels
 	offset = {0,0},
 	Icon =

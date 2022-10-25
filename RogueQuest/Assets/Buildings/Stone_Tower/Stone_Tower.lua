@@ -1,6 +1,7 @@
 return 
 {
 	Name = "StoneTower", -- used for Engine::GenerateBuilding()
+	Description = "Stone Tower: No better defence then good offense. Costs: 350 Gold  Requires: Castle",
 	offset = {0,32},
 	Icon = {
 		FileName = "Assets/Buildings/Stone_Tower/tower.png",

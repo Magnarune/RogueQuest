@@ -13,22 +13,22 @@ void Leader::UpdateBonus() {
 
 			for(auto& rewards : researchUpgrades[i].lock()->RewardList)	{
 				if (rewards.first == "MeleeDamage") {
-					Bonus.meleedamage += rewards.second[i];
+					Bonus.meleedamage += rewards.second[researchUpgrades[i].lock()->Level - 1];
 				}
 				if (rewards.first == "Armour") {
-					Bonus.armour += rewards.second[i];
+					Bonus.armour += rewards.second[researchUpgrades[i].lock()->Level - 1];
 				}
 				if (rewards.first == "Health") {
-					Bonus.health += rewards.second[i];
+					Bonus.health += rewards.second[researchUpgrades[i].lock()->Level - 1];
 				}
 				if (rewards.first == "MoveSpeed") {
-					Bonus.movespeed += rewards.second[i];
+					Bonus.movespeed += rewards.second[researchUpgrades[i].lock()->Level - 1];
 				}
 				if (rewards.first == "Attackspeed") {
-					Bonus.attackspeed += rewards.second[i];
+					Bonus.attackspeed += rewards.second[researchUpgrades[i].lock()->Level - 1];
 				}
 				if (rewards.first == "Movespeed") {
-					Bonus.movespeed += rewards.second[i];
+					Bonus.movespeed += rewards.second[researchUpgrades[i].lock()->Level - 1];
 				}
 			}
 		}

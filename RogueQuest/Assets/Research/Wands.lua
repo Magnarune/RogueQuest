@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Wands", -- used for Engine::GetResearch()
+	Description = "Wands: A wizards most trusted friend. Unlocks: Mage, Sara  Costs: 1500 Gold  Requires: Castle, Stone Tower",
 	ResearchAmount = 1,
 	offset = {0,0},
 	Icon =
@@ -20,6 +21,6 @@ return
 	},
 	Reward = 
 	{	
-		Unlocks = {"Mage",}
+		Unlocks = {"Mage", "Sara"}
 	}
 }

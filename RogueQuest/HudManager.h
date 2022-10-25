@@ -19,6 +19,10 @@ public:
 	void ResearchAbilites(std::shared_ptr<Building> buildinginfo);
 	void ProductionAbilites(std::shared_ptr<Building> buildinginfo);
 	void PrimaryBuildingSelection();//if you select buildings of differing types what abilities do you want shown
+
+	void ObjectDetails();
+
+
 	enum {
 		None,
 		Research,
@@ -29,7 +33,12 @@ public:
 
 	bool CheckRequirements(int owner, cAssets::BuildingType object);
 	bool CheckRequirements(int owner, cAssets::UnitType object);
-	bool CheckRequirements(int owner, cAssets::ResearchType object);
+	bool CheckRequirements(int owner, cAssets::ResearchType object, std::string name);
+
+
+	std::vector<std::string> Hide_Research; //If your are researching something dont let users research again 
+	
+	
 	HudManager();
 	~HudManager();
 

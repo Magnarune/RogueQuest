@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Builder", -- used for Engine::GenerateUnit()
+	Description = "Builder: A weak unit capable of making most structures in the town. Costs: 12 Gold Foodcost: 5 ",
 	SpriteOrder= { 0 , 1 , 2 , 3 },--1 = North, 2 = South , 3 =East , 4 = West
 	Files = 
 	{

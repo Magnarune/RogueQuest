@@ -75,6 +75,7 @@ bool Game_Engine::OnUserCreate() {
     leaders.reset(new LeaderManager); //Handler for the Leaders in the game
     highlightmanagment.reset(new Highlighting);
     researchmanager.reset(new Research);
+    mainmenu.reset(new MainMenu);
 
     
     // Configure Controllers
@@ -125,6 +126,9 @@ bool Game_Engine::OnUserUpdate(float fElapsedTime) {
         case MODE_OPTIONS_MENU:
             rval = UpdateOptions(fElapsedTime);
             break;
+        case MODE_MAIN_MENU:
+            rval = UpdateMainMenu(fElapsedTime);
+            break;
     }
 
     DrawCursor();
@@ -158,6 +162,11 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
 
 bool Game_Engine::UpdateOptions(float fElapsedTime) {
     optionsManager->MenuSelect();
+    return true;
+}
+
+bool Game_Engine::UpdateMainMenu(float fElapsedTime) {
+    mainmenu->MainMenuSelection(fElapsedTime);
     return true;
 }
 
@@ -203,6 +212,7 @@ bool Game_Engine::OnUserDestroy(){
     highlightmanagment.reset();
     config.reset();
     researchmanager.reset();
+    mainmenu.reset();
     return true;
 }
 

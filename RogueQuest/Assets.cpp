@@ -51,12 +51,19 @@ void cAssets::LoadUnitAssets(){
             }
 
             std::string name = UnitData["Name"];
-
+            
             UnitType::TextureMetaData meta;
+            UnitType unitType;
             for (int i = 1; i < 5; i++)
                 meta.Sprite_Order.push_back(UnitData["SpriteOrder"][i]);//Im in danger
+            
+            if (UnitData["Description"] != sol::nil) {
+                unitType.Description = UnitData["Description"];
+            } else
+                unitType.Description = "Not Added For this Unit";
 
-            UnitType unitType;
+
+
             FileSets = UnitData["Files"];
             for (int i = 0; i < FileSets.size(); ++i) {
                 sol::table fileset = FileSets[i + 1];
@@ -144,6 +151,10 @@ void cAssets::LoadBuildingAssets() {
             BuildingType::TextureMetaData meta;
 
             BuildingType buildingType;
+            if (BuildingData["Description"] != sol::nil) {
+                buildingType.Description = BuildingData["Description"];
+            } else
+                buildingType.Description = "Not Added For this Unit";
 
             if (BuildingData["Icon"] != sol::nil) {
                 buildingType.icon.fsz = to_vi2d(BuildingData["Icon"]["FileSize"]);
@@ -280,6 +291,12 @@ void cAssets::LoadResearchAssets() {
             std::string name = Researchdata["Name"];
             engine.researchmanager->ImportList.push_back(name);
             ResearchType researchType;
+            if (Researchdata["Description"] != sol::nil) {
+                researchType.Description = Researchdata["Description"];
+            } else
+                researchType.Description = "Not Added For this Unit";
+
+
                 // load the Name : TextureID for the Projectile   
 
             if (Researchdata["Icon"] != sol::nil) {

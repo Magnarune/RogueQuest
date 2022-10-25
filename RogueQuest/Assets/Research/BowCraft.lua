@@ -1,6 +1,7 @@
 return 
 {
 	Name = "BowCraft", -- used for Engine::GetResearch()
+	Description = "BowCraft: Unlocks Archers Costs: 1500",
 	ResearchAmount = 1,
 	offset = {0,0},
 	Icon =

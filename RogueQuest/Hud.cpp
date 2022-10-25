@@ -221,9 +221,53 @@ void Hud::DrawBuild() {
 }
 
 
+
+
 void Hud::DrawCenteredStringDecal(olc::vf2d pos, std::string str, olc::Pixel col, olc::vf2d scale) {
     auto& engine = Game_Engine::Current();
     olc::vf2d textOffset = olc::vf2d(engine.GetTextSize(str)) / 2 * scale;
-    //engine.DrawStringDecal(pos - textOffset , str, olc::BLACK, scale + olc::vf2d(0.01f,0.01f));
     engine.DrawStringDecal(pos - textOffset, str, col, scale);
+}
+
+void Hud::DrawDescription(std::string blah, olc::vi2d Mouse) {//Your making the Description
+    auto& engine = Game_Engine::Current();
+    float x = 30;
+    int width = engine.GetTextSize(blah).x;
+    int targetWidth = std::clamp(width, 30, 50);
+
+    blah = WrapText(blah, targetWidth, false, { 0.4f,0.4f });
+    int h = engine.GetTextSize(blah).y;
+    float y = (float)h * 0.4f;
+
+
+    engine.DrawPartialDecal({ (float)Mouse.x-2-(float)targetWidth ,(float)Mouse.y -4- y }, {(float)targetWidth+8, y + 8}, decals["Icon"].get(), { 0.f,0.f }, { 117.f,99.f },olc::Pixel(255,255,255,180));
+    engine.DrawPartialDecal({ (float)Mouse.x-2-(float)targetWidth ,(float)Mouse.y -4- y }, {(float)targetWidth+8, y+ 8}, decals["Box"].get(), { 0.f,0.f }, { 117.f,99.f },olc::Pixel(255, 255, 255, 200));
+    engine.DrawStringDecal({ (float)Mouse.x + 3 - (float)targetWidth,(float)Mouse.y- y}, blah, olc::WHITE, { 0.4f,0.4f });
+}
+
+std::string Hud::WrapText(std::string str, int width, bool proportional, olc::vd2d scale) {
+    auto& engine = Game_Engine::Current();
+    std::string newStr;
+    while (true) {
+        std::string word;
+        if (str.find(" ") == std::string::npos) {
+            word = str;
+        } else {
+            word = str.substr(0, str.find(" "));
+        }
+        olc::vi2d newSize = olc::vd2d(proportional ? engine.GetTextSizeProp(newStr + (newStr.size() > 0 ? " " : "") + word) :
+            engine.GetTextSize(newStr + (newStr.size() > 0 ? " " : "") + word)) * scale;
+
+        if (newSize.x > width) {
+            newStr += "\n" + word;
+        } else {
+            newStr += (newStr.size() > 0 ? " " : "") + word;
+        }
+        if (str.find(" ") == std::string::npos) {
+            break;
+        } else {
+            str.erase(0, str.find(" ") + 1);
+        }
+    }
+    return newStr;
 }

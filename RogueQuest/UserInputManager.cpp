@@ -119,3 +119,27 @@ bool UserInputManager::Button(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size) {
     else
         return false;
 }
+
+bool UserInputManager::InsideBox(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size) {
+    if (Mouse.x > pos.x && Mouse.y > pos.y &&
+        Mouse.x < pos.x + Size.x &&
+        Mouse.y < pos.y + Size.y) {
+        return true;
+    }
+    return false;
+}
+
+bool UserInputManager::Hover(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size, float timer, float felapstedtime) {
+    if (Mouse.x > pos.x && Mouse.y > pos.y &&
+        Mouse.x < pos.x + Size.x &&
+        Mouse.y < pos.y + Size.y) {
+        triggertime += felapstedtime;
+    } else {
+        triggertime = 0.f;
+    }
+
+    if (triggertime > timer){
+        return true;
+    }
+    return false;
+}

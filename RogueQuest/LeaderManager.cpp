@@ -111,18 +111,16 @@ void LeaderManager::AddResearch(int Owner, std::weak_ptr<Researchable> research)
 			
 	
 	
-	if(findval != LeaderList[Owner]->researchUpgrades.end())
-		for (int i = 0; i < LeaderList[Owner]->researchUpgrades.size(); i++) {
-			if (LeaderList[Owner]->researchUpgrades[i].lock() == research.lock()) {
-				LeaderList[Owner]->researchUpgrades[i].lock()->Level += 1;
-			}
+	if(findval == LeaderList[Owner]->researchUpgrades.end()){		
+		LeaderList[Owner]->researchUpgrades.push_back(research);		
+	}
+
+
+	for (int i = 0; i < LeaderList[Owner]->researchUpgrades.size(); i++) {
+		if (LeaderList[Owner]->researchUpgrades[i].lock() == research.lock()) {
+			LeaderList[Owner]->researchUpgrades[i].lock()->Level += 1;
 		}
-	else
-		LeaderList[Owner]->researchUpgrades.push_back(research);
-
-
-
-	
+	}
 	for (int i = 0; i < research.lock()->UnlockRewards.size(); i++) {
 		if (std::find(LeaderList[Owner]->Unlockes.begin(), LeaderList[Owner]->Unlockes.end(), research.lock()->UnlockRewards[i]) != LeaderList[Owner]->Unlockes.end())
 			continue;

@@ -1,6 +1,7 @@
 return 
 {
 	Name = "Archer", -- used for Engine::GenerateUnit()
+	Description = "Archer: A long ranged Unit that specializes in High damage but at the cost of low health. Costs: 22 Gold  Requires: BowCraft",
 	SpriteOrder= { 0 , 1 , 2 , 3 },--1 = North, 2 = South , 3 =East , 4 = West
 	Files = 
 	{
@@ -43,7 +44,7 @@ return
 		Requirements = {"BowCraft"},
 		Ranged = true,
 		Projectile = "Arrow",
-		CollisionRadius = 10,
+		CollisionRadius = 8,
 		Abilities = {
 			Tasks = {"Move", "Attack"} -- task names allowed to be delegated to this unit			
 		}
