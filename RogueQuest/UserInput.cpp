@@ -57,7 +57,7 @@ void UserInput::GetUserInput() {
     if (!engine.IsConsoleShowing()) {
         if (engine.IsFocused()) {
             CameraInput();
-            if (engine.GetMouse(0).bPressed && engine.GetMousePos().y > (float)engine.ScreenHeight() * 0.75f)
+            if ((engine.GetMouse(1).bPressed || engine.GetMouse(0).bPressed || engine.GetMouse(0).bReleased) && engine.GetMousePos().y > (float)engine.ScreenHeight() * 0.75f)
                 engine.ActivityDone = true;
 
 
@@ -69,7 +69,6 @@ void UserInput::GetUserInput() {
     }
 
 }
-
 
 void UserInput::DrawUserInput() {
     auto& engine = Game_Engine::Current();

@@ -14,23 +14,32 @@ WorldManager::~WorldManager() {
 	garbageList.clear();
 }
 
+void WorldManager::refreshObjectView() {
+    objectListView.clear();
+    objectListView.assign(objectList.begin(), objectList.end());
+}
+
+void WorldManager::addObjectToList(std::shared_ptr<WorldObject> obj) {
+    newObjectList.emplace_back(obj); // add to new object list
+}
+
 void WorldManager::Update(float delta) {//Update last frames
     //currentMap->UpdateMap(delta);
-
+    
     // sort the object list based on draw depth
-    std::ranges::sort(objectList, [](auto& a, auto& b) -> bool {
-        return a->updatePriority < b->updatePriority;
+    std::ranges::sort(objectListView, [](auto& a, auto& b) -> bool {
+        return a.get()->updatePriority < b.get()->updatePriority;
     });
-
-    for (auto& object : objectList) {
-		if (object == nullptr) continue;
-        object->Update(delta);
+    
+    for (auto& object : objectListView) {
+		if (object.get() == nullptr) continue;
+        object.get()->Update(delta);
 	}
 
     // after updates
-    for (auto& object : objectList) {
-		if (object == nullptr) continue;
-        object->AfterUpdate(delta);
+    for (auto& object : objectListView) {
+		if (object.get() == nullptr) continue;
+        object.get()->AfterUpdate(delta);
 	}
 }
 
@@ -38,14 +47,14 @@ void WorldManager::Draw() {
     Game_Engine& engine = Game_Engine::Current();
 
     // sort the object list based on draw depth
-    std::ranges::sort(objectList, [](auto& a, auto& b) -> bool {
-        return a->drawDepth < b->drawDepth;
+    std::ranges::sort(objectListView, [](auto& a, auto& b) -> bool {
+        return a.get()->drawDepth < b.get()->drawDepth;
     });
 
     currentMap->DrawMap(&engine.tv);
-    for (auto& object : objectList) {
-        if (object == nullptr) continue;
-        object->Draw(&engine.tv);
+    for (auto& object : objectListView) {
+        if (object.get() == nullptr) continue;
+        object.get()->Draw(&engine.tv);
     }
     engine.particles->DrawParticles();
 }
@@ -80,31 +89,19 @@ void WorldManager::CollectGarbage() {
             objectList.resize(objectList.size() - len); // slice off the head
             // for(int i=0; i < len; ++i) objectList.pop_back(); // slice off the garbage - resize instead?
         }
-       // if(garbageList == engine.unitManager->unitList)
-        std::shared_ptr<Collidable> cppdumbstuff;
-        std::shared_ptr<Unit> lunit;
-        std::shared_ptr<Building> lbuild;
-        for (int i = 0; i < garbageList.size(); i++) {
-            if (cb && cu)
-                continue;
-            if (cppdumbstuff = std::dynamic_pointer_cast<Collidable>(garbageList[i])) {
-                if (cppdumbstuff = std::dynamic_pointer_cast<Unit>(garbageList[i])) {
-                    if(cppdumbstuff->cType == Collidable::isUnit)
-                        cu = true;
-                }
-                if (cppdumbstuff = std::dynamic_pointer_cast<Building>(garbageList[i])) {
-                    cb = true;
-                }
-            }
-        }
         garbageList.clear();
-       // if(cb)
-            //engine.buildingManager->CollectGarbage(); //cleanup the building manager garbage
-        //if(cu)
-        cb, cu = false;
-    }
-            engine.unitManager->CollectGarbage(); // cleanup the unit manager garbage
 
+        engine.unitManager->CollectGarbage(); // cleanup the unit manager garbage
+        engine.buildingManager->CollectGarbage(); //cleanup the building manager garbage
+
+        refreshObjectView(); // remember to refresh the object view when modifying the list
+    }
+}
+
+void WorldManager::PopulateNewObjects() {
+    for(auto& obj : newObjectList) objectList.emplace_back(std::move(obj));
+    newObjectList.clear();
+    refreshObjectView();
 }
 
 std::shared_ptr<WorldObject> WorldManager::FindObject(size_t index) {
@@ -188,8 +185,8 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     unit->cType = Collidable::isUnit;
     unit->updatePriority = 0.1f; // highest priority
 
-    objectList.emplace_back(unit);
     engine.unitManager->addNewUnit(unit);
+    addObjectToList(unit);
     return unit;
 }
 
@@ -268,12 +265,12 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     build->cType = Collidable::isBuilding;
     build->updatePriority = 0.9f; // lower priority
 
-    objectList.emplace_back(build);
     engine.buildingManager->addNewBuilding(build);
+    addObjectToList(build);
     return build;
 }
 
-std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& name, olc::vf2d pos, std::weak_ptr<WorldObject> Target) {
+std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& name, std::shared_ptr<WorldObject> pos, std::weak_ptr<WorldObject> Target) {
     Game_Engine& engine = Game_Engine::Current();
     auto to_vi2d = [](sol::table obj) -> olc::vi2d {
         int32_t x = obj[1],
@@ -285,13 +282,17 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
     // make projectile
     std::shared_ptr<Projectile> proj;
     proj.reset(new Projectile());
-    proj->predPosition = proj->Position = pos;
+    proj->predPosition = proj->Position = pos->Position;
    
     proj->TargetObj = Target;
     proj->Damage = data.lua_data["Stats"]["Damage"];
     proj->PSpeed = data.lua_data["Stats"]["Speed"];
     proj->Spinning = data.lua_data["Stats"]["Spin"];
-
+    //this is fucking bullshit
+    std::shared_ptr<Unit> unit;
+    if (unit = std::dynamic_pointer_cast<Unit>(pos)) {
+        proj->Damage += unit->fAttackDamage;
+    }
     // TO DO: implement this part properly
     /*
     // make sure to update this when adding new GFXStates - enums don't magically connect to a string
@@ -319,7 +320,7 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
     proj->cType = Collidable::isProjectile;
     proj->updatePriority = 0.5f; // mid priority
 
-    objectList.emplace_back(proj);
+    addObjectToList(proj);
     return proj;
 }
 

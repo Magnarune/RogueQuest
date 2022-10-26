@@ -18,16 +18,8 @@ void BuildingManager::addNewBuilding(std::weak_ptr<Building> Building) {
 }
 
 void  BuildingManager::CollectGarbage() {
-    auto it = std::find_if(BuildingList.begin(), BuildingList.end(), [](const auto& building) { return building.expired(); });
-    if (it++ != BuildingList.end()) {
-        std::vector<std::weak_ptr<Building>> copyList;
-        for (auto& building : BuildingList) {
-            if (!building.expired()) copyList.emplace_back(std::move(building));
-        }
-        BuildingList = std::move(copyList);
-    }
+	std::erase_if(BuildingList, [](const auto& build) { return build.expired(); });
 }
-
 
 void BuildingManager::SelectBuilding(olc::vf2d Mouse) {
     for (auto& _build : BuildingList) {

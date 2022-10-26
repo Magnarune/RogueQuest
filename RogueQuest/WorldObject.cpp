@@ -80,6 +80,7 @@ void Collidable::AfterUpdate(float delta) {
 
 bool Collidable::CheckCollision(float delta) {
 	auto& engine = Game_Engine::Current();
+	if (mask.type == Mask::MASK_NONE) return false; // don't continue if we don't even have a mask
 
 	const olc::vf2d& nextPos = predPosition; // next frame position
 	auto checkCvC = [&](std::shared_ptr<Collidable> other, float r1, float r2, olc::vf2d origin) {
@@ -167,7 +168,6 @@ bool Collidable::CheckCollision(float delta) {
 
 
 	return engine.worldManager->IterateObjects([&](std::shared_ptr<WorldObject> _obj){
-		if(mask.type == Mask::MASK_NONE) return false; // don't continue if we don't even have a mask
 		auto obj = std::dynamic_pointer_cast<Collidable>(_obj);
 		if(!obj || obj.get() == this) return true;
 		if(obj->mask.type == Mask::MASK_NONE) return true; // skip non-masked
@@ -194,5 +194,4 @@ bool Collidable::CheckCollision(float delta) {
 
 		throw std::runtime_error("Invalid collision detection reached");
 	});
-	return true;
 }

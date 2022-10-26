@@ -43,24 +43,30 @@ void Hud::ImportHudAssets() {
     loadImage("Icon", "Assets/Gui/Icon_backround.png");
     loadImage("mBox", "Assets/Gui/MiniBox.png");
 
-    loadImage("Attack", "Assets/Gui/PowerUp_04.png");
-    loadImage("Move", "Assets/Gui/Move.png");
-    loadImage("AtkSpeed", "Assets/Gui/sword_icon.png");
+    loadImage("Attack", "Assets/Gui/PowerUp_04.png");//Unit values
+    loadImage("Move", "Assets/Gui/Move.png");//Unit values
+    loadImage("AtkSpeed", "Assets/Gui/sword_icon.png");//Unit values
 
     loadImage("Health", "Assets/Gui/Red.png");
     loadImage("HealthBox","Assets/Gui/EmptyBar.png");
-    loadImage("HealthBoxBackground", "Assets/Gui/BackRoundBar.png");
-    loadImage("MiniMap", "Assets/Gui/Minimap.png");
+    loadImage("HealthBoxBackground", "Assets/Gui/BackRoundBar.png");//
 
-    loadImage("flag","Assets/Gui/flag.png");
-    loadImage("TopBorder", "Assets/Gui/TopBorder.png");
-    loadImage("Food", "Assets/Gui/Food.png");
-    loadImage("Tree", "Assets/Gui/Tree.png");
-    loadImage("Gold", "Assets/Gui/Goldicon.png");
+    loadImage("MiniMap", "Assets/Gui/Minimap.png");//MiniMap Picture --Remove and make math for this
+
+    loadImage("flag","Assets/Gui/flag.png");//flag were units go to
+
+    //LeaderHud
+    loadImage("TopBorder", "Assets/Gui/TopBorder.png"); //top Border
+    loadImage("Food", "Assets/Gui/Food.png");//food icon
+    loadImage("Tree", "Assets/Gui/Tree.png");//tree icon
+    loadImage("Gold", "Assets/Gui/Goldicon.png");//gold icon
     
     loadImage("Units",    "Assets/Research/Icons/Make_Units_Icon.png");//Icons for buildings
     loadImage("Research", "Assets/Research/Icons/Research_Icon.png"); //Icon for Research
-    loadImage("Back", "Assets/Research/Icons/No.png");//
+    loadImage("Back", "Assets/Research/Icons/No.png"); //Back Icon for Objects
+
+    //hover unit info box
+    loadImage("Sigbox", "Assets/Gui/Borderbox.png");
 
 }
 
@@ -146,6 +152,17 @@ void Hud::DrawHud(){
         engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
     }
     DrawCenteredStringDecal({ 24.f,5.f }, "Options", olc::WHITE, { 0.5,0.5 });
+
+    //if (engine.GetMousePos().x < 55.5 && engine.GetMousePos().y < 10) {
+    //    engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
+    //    if (engine.GetMouse(0).bPressed)
+    //        LeaderInfo = true;
+    //} else {
+    //    engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
+    //}
+    //DrawCenteredStringDecal({ 24.f,5.f }, "Options", olc::WHITE, { 0.5,0.5 });
+
+
     
 
     
@@ -189,8 +206,6 @@ void Hud::DrawLeaderHud() {
     DrawCenteredStringDecal(olc::vf2d(SWitdh / 1.5f + 9.f, 6.f), std::to_string(engine.leaders->LeaderList[1]->Gold), olc::YELLOW, {0.4f,0.4f});
     DrawCenteredStringDecal(olc::vf2d(SWitdh / 1.5f + 32.f, 6.f), std::to_string(engine.leaders->LeaderList[1]->Lumber), olc::GREEN, {0.4f,0.4f});
     DrawCenteredStringDecal(olc::vf2d(SWitdh / 1.5f + 52.f, 6.f), std::to_string(engine.leaders->LeaderList[1]->Food ),olc::RED, {0.4f,0.4f});
-
-
 }
 
 void Hud::CalculateMiniMap(int x, int y, const Map &cur_map) {
@@ -220,9 +235,6 @@ void Hud::DrawBuild() {
     engine.tv.DrawPartialDecal( ((Center)), olc::vf2d(engine.hud->potBuilding->Size), decal, {0,0}, data.icon.fsz, engine.unitManager->CheckBuildObstruction(potBuilding) ? olc::PixelF(0.f, 255.f, 0.f, 0.7f) : olc::PixelF(1.f, 0.f, 0.f, 0.7f));
 }
 
-
-
-
 void Hud::DrawCenteredStringDecal(olc::vf2d pos, std::string str, olc::Pixel col, olc::vf2d scale) {
     auto& engine = Game_Engine::Current();
     olc::vf2d textOffset = olc::vf2d(engine.GetTextSize(str)) / 2 * scale;
@@ -234,14 +246,11 @@ void Hud::DrawDescription(std::string blah, olc::vi2d Mouse) {//Your making the 
     float x = 30;
     int width = engine.GetTextSize(blah).x;
     int targetWidth = std::clamp(width, 30, 50);
-
     blah = WrapText(blah, targetWidth, false, { 0.4f,0.4f });
     int h = engine.GetTextSize(blah).y;
     float y = (float)h * 0.4f;
-
-
     engine.DrawPartialDecal({ (float)Mouse.x-2-(float)targetWidth ,(float)Mouse.y -4- y }, {(float)targetWidth+8, y + 8}, decals["Icon"].get(), { 0.f,0.f }, { 117.f,99.f },olc::Pixel(255,255,255,180));
-    engine.DrawPartialDecal({ (float)Mouse.x-2-(float)targetWidth ,(float)Mouse.y -4- y }, {(float)targetWidth+8, y+ 8}, decals["Box"].get(), { 0.f,0.f }, { 117.f,99.f },olc::Pixel(255, 255, 255, 200));
+    DrawDescriptionBorder(decals["Sigbox"].get(), { (float)Mouse.x - 2 - (float)targetWidth ,(float)Mouse.y - 4 - y }, { (float)targetWidth + 8, y + 8 }, {0.2f,0.2f});
     engine.DrawStringDecal({ (float)Mouse.x + 3 - (float)targetWidth,(float)Mouse.y- y}, blah, olc::WHITE, { 0.4f,0.4f });
 }
 
@@ -270,4 +279,24 @@ std::string Hud::WrapText(std::string str, int width, bool proportional, olc::vd
         }
     }
     return newStr;
+}
+
+void Hud::DrawDescriptionBorder(olc::Decal* box, const olc::vf2d& pos, const olc::vf2d& size , const olc::vf2d& borderScale){
+    auto& engine = Game_Engine::Current();
+    olc::vd2d scaledCorner = { 13 * (float)borderScale.x,13 * (float)borderScale.y };
+  engine.DrawPartialDecal(pos, scaledCorner, box, { 0,0 }, { 13,13 }); //Upper-Left Corner
+    olc::vd2d ULOffset = { 13 * (float)borderScale.x,0 };
+    engine.DrawPartialDecal(pos + ULOffset, { (float)size.x - 26 * (float)borderScale.x,13 * (float)borderScale.y }, box, { 13,0 }, { 91,13 }); //Top
+    olc::vd2d UROffset = { size.x - 13 * (float)borderScale.x,0 };
+    engine.DrawPartialDecal(pos + UROffset, scaledCorner, box, { 104,0 }, { 13,13 }); //Upper-Right Corner
+    olc::vd2d ULBottomOffset = { 0,13 * (float)borderScale.y };
+    engine.DrawPartialDecal(pos + ULBottomOffset, { 13 * (float)borderScale.x,(float)size.y - 25 * (float)borderScale.y }, box, { 0,13 }, { 13,73 });//Left
+    olc::vd2d BLOffset = { 0,size.y - 13 * (float)borderScale.y };
+    engine.DrawPartialDecal(pos + BLOffset, scaledCorner, box, { 0,86 }, { 13,13 }); //Bottom-Left Corner
+    olc::vd2d BLLeftOffset = { 13 * (float)borderScale.x,size.y - (13 + 0.05) * (float)borderScale.y };
+    engine.DrawPartialDecal(pos + BLLeftOffset, { (float)size.x - 26 * (float)borderScale.x,13 * (float)borderScale.y }, box, { 13,86 }, { 91,13 }); //Bottom
+    olc::vd2d BROffset = { size.x - 13 * (float)borderScale.x,size.y - 13 * (float)borderScale.y };
+    engine.DrawPartialDecal(pos + BROffset, scaledCorner, box, { 104,86 }, { 13,13 }); //Bottom-Right Corner
+    olc::vd2d TROffset = { size.x - 13 * (float)borderScale.x,13 * (float)borderScale.y };
+    engine.DrawPartialDecal(pos + TROffset, { 13 * (float)borderScale.x,(float)size.y - 25 * (float)borderScale.y }, box, { 104,13 }, { 13,73 });//Right
 }

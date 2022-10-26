@@ -197,7 +197,7 @@ void HudManager::BuildingSelected() {
                     engine.hud->loadImage(_refname, data.icon.tex_id);
                 }
                 olc::Decal* decal = engine.hud->decals[_refname].get();
-                engine.hud->DrawCenteredStringDecal({ 109.f,   IconY - 11.f }, "Producing: " + build->researchproduced, olc::BLUE, { 0.4f,0.4f });
+                engine.hud->DrawCenteredStringDecal({ 109.f,   IconY - 11.f }, "Researching: " + build->researchproduced, olc::BLUE, { 0.4f,0.4f });
                 engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBoxBackground"].get(), { 0,0.f }, { 128,32 });
                 engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f * productionMod,4.f }, engine.hud->decals["Health"].get(), { 0.f,0.f }, { 128,32 }, olc::BLUE);
                 engine.DrawPartialDecal({ 92.f, IconY - 9.f }, { 44.f,4.f }, engine.hud->decals["HealthBox"].get(), { 0,0 }, { 128,32 });
@@ -210,7 +210,7 @@ void HudManager::BuildingSelected() {
         }
         
         if (engine.inputmanager->Button({ 104.f , IconY - 4.f }, engine.GetMousePos(), { 16.f,16.f }))
-            build->UnProduceUnit();
+            build->UnProduceObject();
 
 
         if (build->productionQue.size() < 10) {
@@ -301,6 +301,7 @@ void HudManager::ResearchAbilites(std::shared_ptr<Building> building) {
             Hide_Research.push_back(building->researchproduction[i]);
            int cost= engine.leaders->LeaderList[building->Owner]->CheckCost(building->researchproduction[i]);
             engine.leaders->LeaderList[building->Owner]->Gold -= engine.researchmanager->Researchables[building->researchproduction[i]]->Cost[cost];
+            building->Refunds.push(engine.researchmanager->Researchables[building->researchproduction[i]]->Cost[cost]);
             building->productionQue.push(building->researchproduction[i]);
         }
     }
@@ -355,6 +356,7 @@ void HudManager::ProductionAbilites(std::shared_ptr<Building> building) {
 
         if (engine.inputmanager->Button({ 186.f + 16.f * (i % 3), IconY - 12.f + yoffset }, engine.GetMousePos(), { 16,16 }) && rq) {
             engine.leaders->LeaderList[building->Owner]->Gold -= data.Cost;
+            building->Refunds.push(data.Cost);
             building->productionQue.push(building->unitproduction[i]);
         }
     }

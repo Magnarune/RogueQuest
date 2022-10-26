@@ -16,7 +16,7 @@ public:
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
 
 	void UpgradeBuilding();
-	void UnProduceUnit();
+	void UnProduceObject();
 	void InitializeProduction(const std::string& object);
 	void SendUnit(std::shared_ptr<Unit> unit);
 	void BuildingBehaviour();
@@ -24,7 +24,6 @@ public:
 	void Draw(olc::TileTransformedView* gfx) override;
 	void Update(float delta) override;
 	void AfterUpdate(float delta) override;
-	void Destroy() override;
 	
 	void BuildingEffect();
 	void Stop();
@@ -33,6 +32,7 @@ public:
 	std::string name;
 	olc::vi2d Size; //Width and height
 	//
+	std::queue<int> Refunds;
 	olc::vf2d sentUnitPos;
 	// unit production vars
 	olc::vi2d offset;

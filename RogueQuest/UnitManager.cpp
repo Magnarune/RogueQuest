@@ -206,12 +206,16 @@ UnitManager::UnitManager() {
                 unit->Gather();
             }
             
-            if (unit->Gold > 0 && unit->Target !=  unit->HomeBase.lock()->Position ) {//Change Take to Delivery
-                unit->Target = unit->HomeBase.lock()->Position ;
-                unit->ActionZone = olc::vf2d(unit->HomeBase.lock()->Size) /2.f  +olc::vf2d(12.f, 12.f);
-                return true;//This is Dangerous but will work for now
+            if (unit->HomeBase.lock()) {
+                if (unit->Gold > 0 && unit->Target != unit->HomeBase.lock()->Position) {//Change Take to Delivery
+                    unit->Target = unit->HomeBase.lock()->Position;
+                    unit->ActionZone = olc::vf2d(unit->HomeBase.lock()->Size) / 2.f + olc::vf2d(12.f, 12.f);
+                    return true;//This is Dangerous but will work for now
 
-           }
+                }
+            } else
+                return true;
+
             if (unit->Gold > 0) {//If I have gold and have triggered preform task
                 unit->Deliver();
 
@@ -302,7 +306,7 @@ void UnitManager::addNewUnit(std::weak_ptr<Unit> unit) {
 
 void UnitManager::Update(float delta) {
     Game_Engine& engine = Game_Engine::Current();
-    engine.leaders->FoodMaintenance(unitList);
+    //engine.leaders->FoodMaintenance();
   
 }
 
@@ -310,25 +314,6 @@ void UnitManager::Update(float delta) {
 void UnitManager::CollectGarbage() {//edited    
 
     std::erase_if(unitList, [](const auto& unit) { return unit.expired(); });
-  /*  std::vector<std::weak_ptr<Unit>> Newlist;
-    for (auto& unit : unitList) {
-        if (unit.lock())
-            Newlist.push_back(unit);       
-    }
-    unitList.swap(Newlist);*/
-    
-
-
-    //auto IsDead = [](const auto& unit) {return unit.expired()};
-    //unitList.erase(std::remove_if(unitList.begin(), unitList.end(), IsDead), unitList.end());
-    //auto it = std::find_if(unitList.begin(), unitList.end(), [](const auto& unit){ return unit.expired(); });
-    //if(it++ != unitList.end()){
-    //    std::vector<std::weak_ptr<Unit>> copyList;
-    //    for(auto& unit : unitList){
-    //        if(!unit.expired()) copyList.emplace_back(std::move(unit));
-    //    }
-    //    unitList = std::move(copyList);
-    //}
 
 }
 
@@ -372,34 +357,51 @@ void UnitManager::CheckTaskAbility(std::shared_ptr<Collidable> object, bool A_Cl
         }
         if (testbuilding.lock()) {
             //If it was an ally
-                if (!A_Click) {
-                    if (testbuilding.lock()->Owner == unit->Owner) {
-                        if (std::find(abilities.begin(), abilities.end(), "Gather") != abilities.end() && testbuilding.lock()->isMine)
-                            engine.unitManager->DelegateTask("Gather",
+            if (!A_Click) {
+                if (testbuilding.lock()->Owner == unit->Owner) {
+                    if (std::find(abilities.begin(), abilities.end(), "Gather") != abilities.end() && testbuilding.lock()->isMine)
+                        engine.unitManager->DelegateTask("Gather",
+                            std::make_pair(testbuilding, engine.tv.ScreenToWorld(engine.GetMousePos())));
+                    else
+                        if (std::find(abilities.begin(), abilities.end(), "Repair") != abilities.end())
+                            engine.unitManager->DelegateTask("Repair",
                                 std::make_pair(testbuilding, engine.tv.ScreenToWorld(engine.GetMousePos())));
                         else
-                            if (std::find(abilities.begin(), abilities.end(), "Repair") != abilities.end())
-                                engine.unitManager->DelegateTask("Repair",
-                                    std::make_pair(testbuilding, engine.tv.ScreenToWorld(engine.GetMousePos())));
-                            else
-                                if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
-                                    engine.unitManager->DelegateTask("Move",
-                                        std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), A_Click));
-                    }
+                            if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
+                                engine.unitManager->DelegateTask("Move",
+                                    std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), A_Click));
                 } else {
                     engine.unitManager->DelegateTask("AttackTarget",
                         std::make_pair(testbuilding, testunit));
                 }
-
-        } else
-            if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end() && !A_Click)
-                engine.unitManager->DelegateTask("Move",
-                    std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), true));
-            else {
+            } else
+            {
                 engine.unitManager->DelegateTask("AttackTarget",
                     std::make_pair(testbuilding, testunit));
             }
 
+        }
+        if (testunit.lock()) {
+
+            if (!A_Click) {
+                if (testunit.lock()->Owner == unit->Owner) {
+                    if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end() && !A_Click)
+                        engine.unitManager->DelegateTask("Move",
+                            std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), true));
+                } else {
+                    engine.unitManager->DelegateTask("AttackTarget",
+                        std::make_pair(testbuilding, testunit));
+                }
+                
+            } else 
+            {
+                engine.unitManager->DelegateTask("AttackTarget",
+                    std::make_pair(testbuilding, testunit));
+            }
+
+
+
+        }
     }
 }
 
@@ -743,7 +745,7 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestEnemy(int owner,olc::vf2d 
                     testobjects.push_back(build);
                 return true; // continue
             } else {
-                return true;//Bugged here fix later
+                //Bugged here fix later
                 for (int i = 0; i < build->FriendList.size(); i++) {
                     if (build->FriendList[i] == owner || build->Owner == 0)
                         if (abs(build->FriendList[i]) + build->FriendList[i] == 0)

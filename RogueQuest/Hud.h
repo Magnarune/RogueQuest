@@ -14,17 +14,18 @@ public:
 	virtual ~Hud();
 
 	void ImportHudAssets();
-
 	void Update(float delta);
 	void RefreshMiniMap();
 	void CalculateMiniMap(int x, int y, const Map& current_map);
 	void DrawCenteredStringDecal(olc::vf2d pos, std::string str, olc::Pixel col = olc::WHITE, olc::vf2d scale = { 1,1 });
 	void DrawMiniMap();
 	void DrawHud();
+	void DrawLeaderInfoHud();
 	void DrawLeaderHud();
 	void DrawBuild();
-
+	bool LeaderInfo = false;
 	void DrawDescription(std::string vecText, olc::vi2d Mouse);
+	void DrawDescriptionBorder(olc::Decal* box, const olc::vf2d& pos, const olc::vf2d& size, const olc::vf2d& borderScale = { 1.f,1.f });
 	std::string WrapText(std::string str, int width, bool proportional, olc::vd2d scale);
 	bool BuildMode = false;
 	std::shared_ptr<Building> potBuilding;

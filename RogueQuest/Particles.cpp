@@ -75,11 +75,11 @@ void Particles::GenerateEffect(std::string Effectname, std::shared_ptr<Collidabl
 }
 
 void Particles::GenerateBlood(olc::vf2d spawn) {
-	for (int i = 0; i < 15; i++) {
-		olc::vf2d Rand{ float(rand() % 4 - 2), float(rand() % 4 - 2) + 3.f };
-		EffectPositions.push_back(spawn + Rand);
-	}
-	Instance.push_back(0.25f);
+	//for (int i = 0; i < 15; i++) {
+	//	olc::vf2d Rand{ float(rand() % 4 - 2), float(rand() % 4 - 2) + 3.f };
+	//	EffectPositions.push_back(spawn + Rand);
+	//}
+	//Instance.push_back(0.25f);
 }
 
 void Particles::UpdateParticles(float delta) {

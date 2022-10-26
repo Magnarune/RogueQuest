@@ -25,12 +25,19 @@ Options::Options() {
         engine.config->SaveValue("Evil", checked);
     }, olc::vf2d(9.f,30.f), engine.config->GetValue<bool>("Evil"));
 
-    optionsMenu["ScreenLocked"] = Option(Option::Checkbox, "Is screen Locked", [&](Option& opt) {
-        auto& engine = Game_Engine::Current();
-        bool checked = std::get<bool>(opt.value);
-        engine.SetLocked(checked);
-        }, olc::vf2d(9.f, 60.f), engine.config->GetValue<bool>("ScreenLocked"));
-
+    //            name of option          option type      label/string desc
+    optionsMenu["ScreenLocked"] = Option(Option::Checkbox, "Is screen Locked",
+    //  lambda - callback onChange
+        [&](Option& opt) {  //So after the mouse pressed 
+            auto& engine = Game_Engine::Current();
+            // get the current state of the option - here it's a checkbox so a boolean value is our state type
+            bool checked = std::get<bool>(opt.value);
+            // no when is the Option "checked" changed from old value to new
+            engine.SetLocked(checked);
+        },
+        
+        // Position on screen top left           Default option starting value
+        olc::vf2d(9.f, 60.f), engine.config->GetValue<bool>("ScreenLocked"));
 
 
     mainMenu["btnGameOpt"] = Option(Option::Button, "Game Options", [&](Option& opt){
@@ -56,7 +63,7 @@ void Options::MenuSelect() {
     if (engine.GetMousePos().x < 169.5f && engine.GetMousePos().y < 13.f && engine.GetMousePos().x > 90.f) {
         engine.DrawPartialDecal({ 90.f,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,206 }, { 300,52 });
         engine.DrawStringDecal({ 102.f,4.f }, "Back to Game", olc::WHITE, { 0.5,0.5 });
-        if (engine.GetMouse(0).bPressed) { engine.m_nGameMode = engine.MODE_LOCAL_MAP; SetGuiMenu("MainMenu"); }//Back to game Button This should be a function
+        if (engine.GetMouse(0).bPressed) { engine.m_nGameMode = engine.MODE_LOCAL_MAP; SetGuiMenu("MainMenu"); }
     }
     else {
         engine.DrawPartialDecal({ 90.f,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,128 }, { 300,52 });
@@ -83,16 +90,14 @@ void Options::DrawGui(OptionsList& options){
 
         olc::vf2d mpos = olc::vf2d(engine.GetMousePos());
         std::function<void()> localchange = [](){};
-
         bool hover = (mpos.x >= option.position.x && mpos.y >= option.position.y && mpos.x < option.position.x + size.x && mpos.y < option.position.y + size.y);
-
         switch(option.type){
             case Option::Checkbox:{
                 engine.DrawPartialDecal(option.position, { 5,5 }, engine.hud->decals["Gui"].get(), { 152.f,17.f }, { 17.f,17.f });
                 if(std::get<bool>(option.value))
                     engine.DrawPartialDecal(option.position, { 5,5 }, engine.hud->decals["Gui"].get(), { 152.f,61.f }, { 17.f,17.f });
                 engine.DrawStringDecal(option.position - olc::vf2d({ 16.f, 12.f }), option.label, olc::WHITE, {0.4f,0.4f});
-                localchange = [&](){ option.value = !std::get<bool>(option.value); };
+                localchange = [&](){ option.value = !std::get<bool>(option.value); };//Where Option gets altered
             break;}
             case Option::Button:{
                 olc::vf2d src = hover ? olc::vf2d(15.f,206.f) : olc::vf2d(15.f,128.f);

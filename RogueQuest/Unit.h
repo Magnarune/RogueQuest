@@ -135,7 +135,6 @@ public:
 	} UTask;
 
 public:
-	void Destroy() override;
 	void KnockBack(float damage, olc::vf2d velocity);
 
 protected:

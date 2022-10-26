@@ -65,7 +65,7 @@ public:
 		MODE_OPTIONS_MENU,
 		MODE_MAIN_MENU
     };
-    int m_nGameMode = MODE_LOCAL_MAP;
+    int m_nGameMode = MODE_MAIN_MENU;
 protected:
     virtual bool OnUserCreate() override;
     virtual bool OnUserUpdate(float fElapsedTime) override;   

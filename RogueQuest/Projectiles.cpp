@@ -5,11 +5,6 @@ Projectile::Projectile() : Collidable() {
 }
 
 Projectile::~Projectile(){
-    TargetObj.reset();
-}
-
-void Projectile::Destroy() {
-    Collidable::Destroy();
 }
 
 void Projectile::Update(float fElapsedtime) {

@@ -48,8 +48,8 @@ public:
     template<typename T>
     bool SaveValue(const std::string& name, const T& value) {
         if(!valid) return false;
-        root["name"] = value;
-        data.insert_or_assign(name, root["name"]);
+        root[name] = value;
+        data.insert_or_assign(name, root[name]);
         return true;
     }
 

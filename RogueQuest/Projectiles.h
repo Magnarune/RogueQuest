@@ -11,7 +11,6 @@ class Projectile : public Collidable {
 public:
 	virtual ~Projectile();
 
-	void Destroy() override;
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override { return false; };
 	void Update(float fElapsedtime) override;
 	void Draw(olc::TileTransformedView* gfx) override;

@@ -40,7 +40,6 @@ public:
     };
     
     std::map<std::string, RegisteredTask> taskTypes;
-    std::vector<std::string> tasklist{"Move","Attack","Build","Repair", "Gather"};
     void RegisterTask(const std::string& name, RegisteredTask regtask);
     std::shared_ptr<Task> PrepareTask(const std::string& name, const std::any& data);
 

@@ -17,10 +17,6 @@ void Building::UpgradeBuilding() {
 		curStage += 1;
 }
 
-void Building::Destroy() {
-	Collidable::Destroy();
-}
-
 void Building::BuildingBehaviour() {
 	auto& engine = Game_Engine::Current();
 	if (execTimeout.getMilliseconds() > 400) {
@@ -29,11 +25,11 @@ void Building::BuildingBehaviour() {
 	}
 	if (AttackTypes.size() > 1){
 		if (BuildTarget.lock() && AttackCD < 0.f) {
-			engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position, BuildTarget);
+			engine.worldManager->GenerateProjectile(AttackTypes[curStage], engine.buildingManager->This_Building(Position), BuildTarget);
 			AttackCD = AttackSpeed;
 		}
 		if (UnitTarget.lock() && AttackCD <= 0.f) {
-			engine.worldManager->GenerateProjectile(AttackTypes[curStage], Position, UnitTarget);
+			engine.worldManager->GenerateProjectile(AttackTypes[curStage],  engine.buildingManager->This_Building(Position), UnitTarget);
 			AttackCD = AttackSpeed;
 		}
 	}
@@ -71,7 +67,12 @@ void Building::InitializeProduction(const std::string& objectname) {
 	}
 }
 
-void Building::UnProduceUnit() {
+void Building::UnProduceObject() {
+	auto& engine = Game_Engine::Current();
+	if (!Refunds.empty()) {
+		engine.leaders->LeaderList[Owner]->Gold += Refunds.front();
+		Refunds.pop();
+	}
 	building = false;
 	startbuilding = false;
 	m_fTimer = 0.f;
@@ -109,19 +110,23 @@ void Building::Update(float delta){
 		case isUnit:
 			SendUnit(engine.worldManager->GenerateUnit(unitproduced, Owner, Position + olc::vf2d({ -10.f, float(rand() % Size.y) })));
 			building = false;
+			Refunds.pop();
 			break;
 		case isResearch:
 			engine.leaders->AddResearch(Owner, engine.researchmanager->Researchables[researchproduced]);
 			auto erase = std::erase(engine.hudManager->Hide_Research,researchproduced);
 			CheckResearch(researchproduced);
 			building = false;
+			Refunds.pop();
 			break;
 		}
 	}
 
-	if(Health <= 0.f)
-		Collidable::Destroy();
-		m_fTimer += delta;
+	if(Health <= 0.f){
+		Destroy();
+	}
+	
+	m_fTimer += delta;
 
 	Collidable::Update(delta); // Inherit
 
@@ -153,14 +158,13 @@ void Building::Draw(olc::TileTransformedView* gfx){
 
 	gfx->DrawPartialDecal(Position -SpriteOrigin - olc::vf2d(offset), meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size,
 						 (bSelected ? olc::WHITE : engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
-	gfx->DrawLineDecal(Position, Position + olc::vf2d(3, 3));
-	gfx->DrawLineDecal(Position - SpriteOrigin, Position - SpriteOrigin + olc::vf2d(3, 3));
+
 	//if (engine.hud->BuildMode) {
-	auto maskpos = Position - SpriteOrigin;
-		gfx->DrawLineDecal(maskpos, { maskpos.x + mask.rect.x,maskpos.y });//collision box
-		gfx->DrawLineDecal(maskpos, { maskpos.x ,maskpos.y + mask.rect.y });
-		gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x,maskpos.y + mask.rect.y });
-		gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x + mask.rect.x,maskpos.y  });
+	//auto maskpos = Position - SpriteOrigin;
+	//	gfx->DrawLineDecal(maskpos, { maskpos.x + mask.rect.x,maskpos.y });//collision box
+	//	gfx->DrawLineDecal(maskpos, { maskpos.x ,maskpos.y + mask.rect.y });
+	//	gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x,maskpos.y + mask.rect.y });
+	//	gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x + mask.rect.x,maskpos.y  });
 	//}
 }
 

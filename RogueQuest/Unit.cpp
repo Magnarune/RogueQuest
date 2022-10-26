@@ -8,18 +8,6 @@ Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
 }
 
 Unit::~Unit() {
-	HoldTask.reset();
-	repairedbuilding.reset();
-	std::shared_ptr<TaskManager::Task> trash;
-	currentTask.swap(trash);
-	std::queue<std::shared_ptr<TaskManager::Task>> cq;
-	if (!taskQueue.empty())
-		cq.swap(taskQueue);
-	if(targetBuilding.lock())
-		targetBuilding.reset();
-	if(targetUnit.lock())
-		targetUnit.reset();
-	//Direction.clear();
 }
 
 void Unit::Stop() {
@@ -27,15 +15,17 @@ void Unit::Stop() {
 	std::shared_ptr<TaskManager::Task> trash;
 	currentTask.swap(trash);
 	std::queue<std::shared_ptr<TaskManager::Task>> cq;
-	if(!taskQueue.empty())
-	cq.swap(taskQueue);
+	if(!taskQueue.empty()){
+		cq.swap(taskQueue);
+	}
 	targetBuilding.reset();
 	targetUnit.reset();
 	ULogic = Passive;
 	Target = std::nullopt;
 	Velocity = { 0.f,0.f };
-	if(Graphic_State != Dead)
+	if(Graphic_State != Dead){
 		Graphic_State = Walking;
+	}
 	repairedbuilding.reset();
 	Taskpaused = false;
 
@@ -102,10 +92,6 @@ void Unit::KnockBack(float damage, olc::vf2d velocity) {
 	Health -= damage;
 }
 
-void Unit::Destroy() {
-	Collidable::Destroy(); // inherit
-}
-
 void Unit::Update(float delta) {
 	auto& engine = Game_Engine::Current();
 	if(fAttackCD > 0)
@@ -115,28 +101,29 @@ void Unit::Update(float delta) {
 		if (ULogic == Aggressive) {
 			UnitSearch();
 		}
-	} else
+	} else {
 		UnitHunting();
+	}
 
-		if ((currentTask && currentTask->checkCompleted()) || Health < 0) {
-			Target = std::nullopt;
-			currentTask.reset();
-			if (Taskpaused == true) {
-				if (HoldTask) {
-					currentTask = HoldTask;
-					currentTask->initTask();
-					HoldTask.reset();
-				}
-				Taskpaused = false;
-			}
-		}
-		if (!currentTask) {
-			if (taskQueue.size()) {
-				currentTask = taskQueue.front();
-				taskQueue.pop();
+	if ((currentTask && currentTask->checkCompleted()) || Health < 0) {
+		Target = std::nullopt;
+		currentTask.reset();
+		if (Taskpaused == true) {
+			if (HoldTask) {
+				currentTask = HoldTask;
 				currentTask->initTask();
+				HoldTask.reset();
 			}
+			Taskpaused = false;
 		}
+	}
+	if (!currentTask) {
+		if (taskQueue.size()) {
+			currentTask = taskQueue.front();
+			taskQueue.pop();
+			currentTask->initTask();
+		}
+	}
 	
 	if (Graphic_State != Dead) 
 		UpdatePosition(delta);
@@ -210,7 +197,7 @@ void Unit::PerformAttack() {
 
 	if (targetUnit.lock()) {
 		if (bIsRanged) {
-			engine.worldManager->GenerateProjectile(unitType.projectileName, Position, targetUnit);
+			engine.worldManager->GenerateProjectile(unitType.projectileName, engine.unitManager->This_shared_pointer(Position), targetUnit);
 		}
 		else {
 			targetUnit.lock()->Health -= fAttackDamage;
@@ -220,7 +207,7 @@ void Unit::PerformAttack() {
 	}
 	else if (targetBuilding.lock()) {
 		if (bIsRanged) {
-			engine.worldManager->GenerateProjectile(unitType.projectileName, Position, targetBuilding);
+			engine.worldManager->GenerateProjectile(unitType.projectileName, engine.unitManager->This_shared_pointer(Position), targetBuilding);
 		}
 		else {
 			targetBuilding.lock()->Health -= fAttackDamage;
@@ -365,14 +352,14 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 		(bSelected ? olc::WHITE: engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
 	
 	if (bSelected == true) {//Debug Selection
-		static Circle debugCircle{ 512.f };
-		debugCircle.position = Position ;	
+		//static Circle debugCircle{ 512.f };
+		//debugCircle.position = Position ;	
 
-		debugCircle.radius = olc::vf2d(mask.radius, mask.radius);
-		debugCircle.col = olc::Pixel(0x700F0AAA);
-		debugCircle.Draw();
-		//DrawCircleDecal(Position, AgroRange, olc::DARK_RED, gfx);
-		DrawCircleDecal(Position, mask.radius, olc::GREEN, gfx);
+		//debugCircle.radius = olc::vf2d(mask.radius, mask.radius);
+		//debugCircle.col = olc::Pixel(0x700F0AAA);
+		//debugCircle.Draw();
+		////DrawCircleDecal(Position, AgroRange, olc::DARK_RED, gfx);
+		//DrawCircleDecal(Position, mask.radius, olc::GREEN, gfx);
 		//DrawCircleDecal(Position, fAttackRange, olc::BLACK, gfx);
 
 		if (Target.has_value()) {

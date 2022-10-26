@@ -60,8 +60,7 @@ bool Game_Engine::OnUserCreate() {
 
     // Setup Controllers    
     TextureCache::InitCache(); // initialize texture cache
-    config.reset(new Config("Config.lua",true)); // config manager
-    bIsLocked = config->GetValue<bool>("ScreenLocked");
+    config.reset(new Config("Config.lua", true)); // config manager
     worldManager.reset(new WorldManager); // create the world manager
     unitManager.reset(new UnitManager); // create the unit manager
     buildingManager.reset(new BuildingManager); //create the build manager
@@ -79,6 +78,7 @@ bool Game_Engine::OnUserCreate() {
 
     
     // Configure Controllers
+    mainmenu->ImportMainMenuAssets();
     assetManager->LoadUnitAssets();     // Load all the Lua files
     assetManager->LoadBuildingAssets(); // Load all the Buildings files
     assetManager->LoadProjectileAssets(); // Load all Projectile files
@@ -104,6 +104,9 @@ bool Game_Engine::OnUserCreate() {
     tv.SetWorldOffset(Camera.vPOS);
     InitiateGame();
     curCursor = assetManager->GetCursor("default");
+
+    bIsLocked = config->GetValue<bool>("ScreenLocked");
+
     SetLocked(bIsLocked);
     return true;
 }
@@ -143,6 +146,7 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
         buildingManager->Update(fElapsedTime);
         unitManager->Update(fElapsedTime);
         worldManager->Update(fElapsedTime);
+        worldManager->PopulateNewObjects();
         particles->UpdateParticles(fElapsedTime);
         hud->Update(fElapsedTime); // hud update should be last for game updates (I think)
     }
@@ -160,7 +164,7 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     return true;
 };
 
-bool Game_Engine::UpdateOptions(float fElapsedTime) {
+bool Game_Engine::UpdateOptions( float fElapsedTime) {
     optionsManager->MenuSelect();
     return true;
 }
@@ -373,9 +377,9 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
     const auto& House = worldManager->GenerateBuilding("House", 1, { 25 * 32.f  ,  19 * 32.f });
     House->Health = House->maxHealth;
     House->curStage = 1;
-   const auto& Tower =  worldManager->GenerateBuilding("StoneTower", 1, { 20 * 32.f  ,  19 * 32.f });
-   Tower->Health = Tower->maxHealth;
-   Tower->curStage = 2;
+    const auto& Tower =  worldManager->GenerateBuilding("StoneTower", 1, { 20 * 32.f  ,  19 * 32.f });
+    Tower->Health = Tower->maxHealth;
+    Tower->curStage = 2;
 
     for(int i=0; i< 20; i++)
         worldManager->GenerateUnit("Archer", 1, {3.f*(float)i+19.f * 32.f,10 * 32.f });

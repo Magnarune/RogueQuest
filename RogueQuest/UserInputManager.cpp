@@ -47,40 +47,8 @@ void UserInputManager::StandardUserInput() {
         } else
             engine.ActivityDone = false;
     }
-        //if (engine.GetMouse(1).bPressed) {
-    //    if (!engine.ActivityDone) {
-    //        if (!engine.GetKey(olc::SHIFT).bHeld)
-    //            engine.unitManager->StopUnits();
-
-    //        // this is what delegating a task will look similar to
-    //        engine.unitManager->DelegateTask("Move",
-    //            std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld));
-
-    //        //engine.unitManager->MoveUnits(engine.tv.ScreenToWorld(engine.GetMousePos()), engine.GetKey(olc::Key::A).bHeld);
-    //        //
-    //    }
-    //    else engine.ActivityDone = false;
-    //}
-    
-
-    if (engine.GetKey(olc::SPACE).bPressed) {
-        engine.unitManager->ParseObject(engine.unitManager->FindObject(engine.tv.ScreenToWorld(engine.GetMousePos())), build, unit);
-        if (build.lock())
-            engine.unitManager->DelegateTask("Gather",
-            std::make_pair( build, engine.tv.ScreenToWorld(engine.GetMousePos())));
-    }
-
-    if (engine.GetKey(olc::R).bPressed) {
-  
-        engine.unitManager->ParseObject(engine.unitManager->FindObject(engine.tv.ScreenToWorld(engine.GetMousePos())), build, unit);   
-        if (build.lock())
-            engine.unitManager->DelegateTask("Repair",
-                std::make_pair(build, engine.tv.ScreenToWorld(engine.GetMousePos())));    
-    }
-
     if (engine.GetKey(olc::S).bPressed)
         engine.unitManager->StopUnits();
-
 }
 
 void UserInputManager::GetBuildModeUserInput() {
@@ -101,12 +69,10 @@ void UserInputManager::GetBuildModeUserInput() {
 }
 
 void UserInputManager::DecideUnitAction() {
-    auto& engine = Game_Engine::Current();
-   
-    engine.unitManager->CheckTaskAbility(engine.unitManager->FindObject(engine.tv.ScreenToWorld(engine.GetMousePos())),engine.GetKey(olc::A).bHeld);
-    
-   
+    auto& engine = Game_Engine::Current();   
+    engine.unitManager->CheckTaskAbility(engine.unitManager->FindObject(engine.tv.ScreenToWorld(engine.GetMousePos())),engine.GetKey(olc::A).bHeld);  
 }
+
 
 bool UserInputManager::Button(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size) {
     auto& engine = Game_Engine::Current();
@@ -119,7 +85,6 @@ bool UserInputManager::Button(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size) {
     else
         return false;
 }
-
 bool UserInputManager::InsideBox(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size) {
     if (Mouse.x > pos.x && Mouse.y > pos.y &&
         Mouse.x < pos.x + Size.x &&
@@ -128,7 +93,6 @@ bool UserInputManager::InsideBox(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size)
     }
     return false;
 }
-
 bool UserInputManager::Hover(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size, float timer, float felapstedtime) {
     if (Mouse.x > pos.x && Mouse.y > pos.y &&
         Mouse.x < pos.x + Size.x &&
