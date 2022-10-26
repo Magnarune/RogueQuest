@@ -165,13 +165,11 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
 };
 
 bool Game_Engine::UpdateOptions( float fElapsedTime) {
-    optionsManager->MenuSelect();
-    return true;
+    return optionsManager->MenuSelect();
 }
 
 bool Game_Engine::UpdateMainMenu(float fElapsedTime) {
-    mainmenu->MainMenuSelection(fElapsedTime);
-    return true;
+return mainmenu->MainMenuSelection(fElapsedTime);
 }
 
 void Game_Engine::DrawCursor() {//Assets\Gui\Cursors\cursor.png

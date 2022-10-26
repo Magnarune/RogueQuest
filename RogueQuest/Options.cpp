@@ -15,8 +15,9 @@ Options::Options() {
     auto& engine = Game_Engine::Current();
     engine.hud->ImportHudAssets();
 
-    mainMenu["btnExit"] = Option(Option::Button, "Exit", [&](Option& opt){
+    mainMenu["btnExit"] = Option(Option::Button, " Exit Game", [&](Option& opt){
         // exit game
+        Exit_Game = false;
     }, olc::vf2d(90.f, 120.f));
     
     optionsMenu["chkEvil"] = Option(Option::Checkbox, "Is Evil (debug)", [&](Option& opt){
@@ -55,7 +56,7 @@ Options::Options() {
 Options::~Options(){
 }
 
-void Options::MenuSelect() {
+bool Options::MenuSelect() {
     auto& engine = Game_Engine::Current();
     if (engine.GetKey(olc::Key::ESCAPE).bPressed) { engine.m_nGameMode = engine.MODE_LOCAL_MAP; SetGuiMenu("MainMenu"); }
     engine.DrawDecal({ 0,0 }, engine.hud->decals["Background"].get());//Background
@@ -69,10 +70,11 @@ void Options::MenuSelect() {
         engine.DrawPartialDecal({ 90.f,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,128 }, { 300,52 });
         engine.DrawStringDecal({ 102.f,4.f }, "Back to Game", olc::WHITE, { 0.5,0.5 });
     }
-
+    
     if(currentMenu != nullptr){
         DrawGui(*currentMenu); // draw what the current options list is
     }
+    return Exit_Game;
 }
 
 void Options::DrawGui(OptionsList& options){

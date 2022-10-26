@@ -46,8 +46,8 @@ private:
 
 public:
 
-	void MenuSelect();
-
+	bool MenuSelect();
+	bool Exit_Game = true;
 	inline void SetGuiMenu(const std::string& name) { currentMenu = menus.count(name) ? menus.at(name) : nullptr; }
 
 	Options();

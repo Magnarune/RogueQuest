@@ -11,18 +11,26 @@ public:
 	MainMenu();
 	
 	
+	//void MenuButton(olc::vf2d button, olc::vi2d mouse, olc::vf2d size);
+	bool MenuButton(olc::vf2d button, olc::vi2d mouse, olc::vf2d size, bool hover = false);
 	
-	void MainMenuSelection(float delta);
+	bool MainMenuSelection(float delta);
 
-	void StartMenu(float delta);
+	bool StartMenu(float delta);
 	void SetupGame(float delta);
 	void CreateGame();
 	void SettingMenu(float delta);
 	void ExitProgram();
 
+	float Occialtions(float delta,float speed, float& timer, float& occilationvalue, float turnaround , bool& swap );
 
+	float TSDN=0.f;//Title Screen Day Night Cycle
+	float TSOV = 0.f; //TitleScreen return value
+	bool TS = false; //TitleScreen flipper
 
-
+	float occilate= 0.f;
+	float timer = 0.f;
+	bool down = false;
 	enum {
 		None,
 		Setup_Game,
