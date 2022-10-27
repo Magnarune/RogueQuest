@@ -25,7 +25,7 @@ void WorldManager::addObjectToList(std::shared_ptr<WorldObject> obj) {
 
 void WorldManager::Update(float delta) {//Update last frames
     //currentMap->UpdateMap(delta);
-    
+    auto& engine = Game_Engine::Current();
     // sort the object list based on draw depth
     std::ranges::sort(objectListView, [](auto& a, auto& b) -> bool {
         return a.get()->updatePriority < b.get()->updatePriority;
@@ -41,7 +41,16 @@ void WorldManager::Update(float delta) {//Update last frames
 		if (object.get() == nullptr) continue;
         object.get()->AfterUpdate(delta);
 	}
+
     currentMap->UpdateTimeofDay(delta);
+
+    if (worldclock.getSeconds() > 1.0) {
+        
+
+        for (auto& leader : engine.leaders->LeaderList)
+            leader->FindHomeBase();
+        worldclock.restart();
+    }
 }
 
 void WorldManager::Draw() {

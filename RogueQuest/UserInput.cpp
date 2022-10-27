@@ -43,20 +43,57 @@ void UserInput::CameraInput(){
     engine.tv.SetWorldOffset(engine.Camera.vPOS - CenterofScreen);//SET WORLD OFFSET TO CAM POS
     
 
-    //This right here is for if you have a mini map and want to move the screen based on the mini map box
-    if (engine.GetMouse(1).bHeld && engine.GetMousePos().x > 11 && engine.GetMousePos().y > (float)engine.ScreenHeight() * 0.823f - 10.f && engine.GetMousePos().x < 57 && engine.GetMousePos().y < (float)engine.ScreenHeight() * 0.823f + 36.f) {//If your Right Click && mouse box is in mini map box
-        olc::vf2d MouseNorm = { ((float)engine.GetMousePos().x - 6.f) / 46.f, ((float)engine.GetMousePos().y - (float)engine.ScreenHeight() * 0.823f + 15.f) / (46.f) };//Normilze full map coord
-        engine.ActivityDone = true;//Don't unselect units just be cause you use minimap
-        engine.Camera.vPOS = { (MouseNorm.x * (float)engine.worldManager->curMap().layerSize.x * 32.f) - float(engine.ScreenWidth() / 2.f),(MouseNorm.y * (float)engine.worldManager->curMap().layerSize.y * 32.f) - float(engine.ScreenHeight() / 2.f) };//Set Cam pos
-        engine.tv.SetWorldOffset(engine.Camera.vPOS - CenterofScreen);//Set WORLD OFFSET TO CAM
-    }
 }
+//Top Left == pos
+void UserInput::MiniMapBox() {
+    auto& engine = Game_Engine::Current();
+    //This right here is for if you have a mini map and want to move the screen based on the mini map box
+    
+
+    olc::vi2d mpos = engine.GetMousePos();
+    olc::vf2d pos = engine.hud->minimapPosition;  
+    olc::vf2d size = engine.hud->minimapSize;
+    if (engine.GetMouse(1).bHeld && mpos.x > pos.x && mpos.y > pos.y && mpos.x < size.x+pos.x && mpos.y < size.y+pos.y) {
+        engine.ActivityDone = true;//Don't unselect units just be cause you use minimap
+        olc::vf2d MouseNorm = { ((float)mpos.x -pos.x) / size.x, ((float)mpos.y - (float)pos.y) /size.y};
+
+        engine.Camera.vPOS = { (MouseNorm.x * (float)engine.worldManager->curMap().layerSize.x * 32.f) - float(engine.ScreenWidth() / 2.f),(MouseNorm.y * (float)engine.worldManager->curMap().layerSize.y * 32.f) - float(engine.ScreenHeight() / 2.f) };//Set Cam pos
+        engine.tv.SetWorldOffset(engine.Camera.vPOS - CenterofScreen);
+
+    }
+
+
+    //if (engine.GetMouse(1).bHeld && engine.GetMousePos().x > 11 &&
+    //    engine.GetMousePos().y > (float)engine.ScreenHeight() * 0.823f - 10.f
+    //    && engine.GetMousePos().x < 57
+    //    && engine.GetMousePos().y < (float)engine.ScreenHeight() * 0.823f + 36.f)
+    //{//If your Right Click && mouse box is in mini map box
+    //    olc::vf2d MouseNorm = { ((float)engine.GetMousePos().x - 6.f) / 46.f, ((float)engine.GetMousePos().y - (float)engine.ScreenHeight() * 0.823f + 15.f) / (46.f) };//Normilze full map coord
+    //   
+    //    engine.Camera.vPOS = { (MouseNorm.x * (float)engine.worldManager->curMap().layerSize.x * 32.f) - float(engine.ScreenWidth() / 2.f),(MouseNorm.y * (float)engine.worldManager->curMap().layerSize.y * 32.f) - float(engine.ScreenHeight() / 2.f) };//Set Cam pos
+    //    engine.tv.SetWorldOffset(engine.Camera.vPOS - CenterofScreen);//Set WORLD OFFSET TO CAM
+    //}
+}
+
 
 void UserInput::GetUserInput() {
     auto& engine = Game_Engine::Current();
     if (!engine.IsConsoleShowing()) {
         if (engine.IsFocused()) {
             CameraInput();
+            MiniMapBox();
+            if (engine.GetKey(olc::ESCAPE).bPressed)
+                engine.m_nGameMode = engine.MODE_OPTIONS_MENU;
+            if (engine.GetKey(olc::F1).bPressed) {
+                if (!engine.leaders->LeaderList[1]->HomeBase.expired()) {
+                    engine.unitManager->DeselectUnits();
+                    engine.buildingManager->DeselectBuildings();
+                    engine.buildingManager->SelectBuilding(engine.leaders->LeaderList[1]->HomeBase.lock()->Position);
+                }
+            }
+
+
+
             if ((engine.GetMouse(1).bPressed || engine.GetMouse(0).bPressed || engine.GetMouse(0).bReleased) && engine.GetMousePos().y > (float)engine.ScreenHeight() * 0.75f)
                 engine.ActivityDone = true;
 

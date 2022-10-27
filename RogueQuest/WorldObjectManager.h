@@ -9,6 +9,7 @@
 // #include "Building.h"
 #include "BuildingManager.h"
 // #include "Projectiles.h"
+#include "clock.h"
 #include <vector>
 #include <memory>
 #include <algorithm>
@@ -38,7 +39,7 @@ class WorldManager {
 
 	void refreshObjectView();
 	void addObjectToList(std::shared_ptr<WorldObject> obj);
-
+	Clock worldclock;
 public:
 	std::shared_ptr<Map> currentMap;
 	WorldManager();

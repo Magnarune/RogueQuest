@@ -9,6 +9,13 @@ public:
 
 void CameraInput();
 
+//Boxes 
+void MiniMapBox();
+
+
+
+
+void Doubleclick();
 void GetUserInput();
 void DrawUserInput();
 

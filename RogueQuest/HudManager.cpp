@@ -353,12 +353,6 @@ void HudManager::ProductionAbilites(std::shared_ptr<Building> building) {
         }
 
 
-
-
-
-
-
-
         if (engine.inputmanager->Button({ X + 16.f * (i % 3), IconY - 12.f + yoffset }, engine.GetMousePos(), { 16,16 }) && rq) {
             engine.leaders->LeaderList[building->Owner]->Gold -= data.Cost;
             building->Refunds.push(data.Cost);

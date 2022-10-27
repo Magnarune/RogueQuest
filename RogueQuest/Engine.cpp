@@ -121,7 +121,7 @@ bool Game_Engine::OnUserUpdate(float fElapsedTime) {
         OnFocusUpdated(_lastfocus);
     }
 
-    if (GetKey(olc::Key::F1).bPressed) ConsoleShow(olc::Key::ESCAPE);
+    if (GetKey(olc::Key::F12).bPressed) ConsoleShow(olc::Key::ESCAPE);
 
     switch (m_nGameMode){
         case MODE_LOCAL_MAP:

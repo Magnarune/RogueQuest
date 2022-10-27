@@ -4,6 +4,7 @@
 #include "Research.h"
 #include "Unit.h"
 #include "clock.h"
+
 class LeaderManager {
 public:
 	LeaderManager();
@@ -40,6 +41,8 @@ public:
 
 	void Gold(int owner, int cost);
 	void Food(int owner, int Food);
+
+	void FindHomeBase();
 	void FoodMaintenance( std::vector<std::weak_ptr<Unit>> unilist);
 	void BuildingMaintenance(std::vector<std::weak_ptr<Building>> buildlist);
 };

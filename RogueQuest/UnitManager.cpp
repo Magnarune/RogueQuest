@@ -306,7 +306,7 @@ void UnitManager::addNewUnit(std::weak_ptr<Unit> unit) {
 
 void UnitManager::Update(float delta) {
     Game_Engine& engine = Game_Engine::Current();
-    //engine.leaders->FoodMaintenance();
+    engine.leaders->FoodMaintenance(unitList); 
   
 }
 

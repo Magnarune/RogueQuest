@@ -1,4 +1,5 @@
 #include "Leaders.h"
+#include "Engine.h"
 Leader::Leader() {
 
 }
@@ -43,3 +44,4 @@ int Leader::CheckCost(std::string name) {
 	}
 	return 0;
 }
+

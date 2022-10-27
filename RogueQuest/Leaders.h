@@ -7,6 +7,7 @@ class Leader {
 public:
 	Leader();
 	virtual ~Leader();
+	void FindHomeBase();
 	void UpdateBonus();
 	int CheckCost(std::string name);
 

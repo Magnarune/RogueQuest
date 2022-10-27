@@ -172,14 +172,14 @@ void Hud::DrawMiniMap() {
 
     if(!minimapDecal) return;
 
-    olc::vf2d minimapSize(80.f,80.f); // draw size
-    olc::vf2d frameSize(5.f,6.f); // minimap frame size
-    olc::vf2d minimapScale(minimapSize / olc::vf2d(float(minimapCanvas->width), float(minimapCanvas->height))); // draw scale based on image size to target size
+    minimapSize=olc::vf2d(70.f, 70.f); // draw size
+    frameSize=olc::vf2d(5.f,6.f); // minimap frame size
+    minimapScale=olc::vf2d(minimapSize / olc::vf2d(float(minimapCanvas->width), float(minimapCanvas->height))); // draw scale based on image size to target size
 
-    olc::vf2d minimapPosition(frameSize.x, float(engine.ScreenHeight()) - minimapSize.y - frameSize.y); // screen position
+    minimapPosition=olc::vf2d(frameSize.x, float(engine.ScreenHeight()) - minimapSize.y - frameSize.y); // screen position
 
     engine.DrawDecal(minimapPosition, minimapDecal.get(), minimapScale);
-    engine.DrawPartialDecal(minimapPosition - frameSize, minimapSize + frameSize * 2.f, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f }, 0xFFFFFFFF);
+    engine.DrawPartialDecal(minimapPosition - frameSize - olc::vf2d(2.f,2.8f), minimapSize + olc::vf2d(4.8f, 6.2f) + frameSize * 2.f, decals["Gui"].get(), {872.f,218.f}, {115.f,97.f}, 0xFFFFFFFF);
 }
 
 void Hud::DrawHud(){
