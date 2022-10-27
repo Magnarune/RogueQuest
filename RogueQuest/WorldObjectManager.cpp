@@ -41,6 +41,7 @@ void WorldManager::Update(float delta) {//Update last frames
 		if (object.get() == nullptr) continue;
         object.get()->AfterUpdate(delta);
 	}
+    currentMap->UpdateTimeofDay(delta);
 }
 
 void WorldManager::Draw() {
@@ -52,6 +53,7 @@ void WorldManager::Draw() {
     });
 
     currentMap->DrawMap(&engine.tv);
+    //engine.DrawStringDecal(engine.GetMousePos(), std::to_string(currentMap->darkness_timer));
     for (auto& object : objectListView) {
         if (object.get() == nullptr) continue;
         object.get()->Draw(&engine.tv);

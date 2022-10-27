@@ -33,7 +33,35 @@ void Hud::loadImage(const std::string& name, size_t tex_id) {
 };
 
 void Hud::ImportHudAssets() {
+    //This should be it's own Import but I dont feel it's smart to clutter this with yet another importer
+    // Can be moved later See Creator
+    //---------------Map Day Night Cycle -----//
+    loadImage("day1",  "Assets/Gui/DayNight/Visible #139.png");
+    loadImage("day2",  "Assets/Gui/DayNight/Visible #140.png");
+    loadImage("day3",  "Assets/Gui/DayNight/Visible #141.png");
+    loadImage("day4",  "Assets/Gui/DayNight/Visible #142.png");
+    loadImage("day5",  "Assets/Gui/DayNight/Visible #143.png");
+    loadImage("day6",  "Assets/Gui/DayNight/Visible #144.png");
+    loadImage("day7",  "Assets/Gui/DayNight/Visible #145.png");
+    loadImage("day8",  "Assets/Gui/DayNight/Visible #146.png");
+    loadImage("day9",  "Assets/Gui/DayNight/Visible #147.png");
+    loadImage("day10", "Assets/Gui/DayNight/Visible #148.png");
+    loadImage("day11", "Assets/Gui/DayNight/Visible #149.png");
+    loadImage("day12", "Assets/Gui/DayNight/Visible #150.png");
+    loadImage("day13", "Assets/Gui/DayNight/Visible #151.png");
+    loadImage("day14", "Assets/Gui/DayNight/Visible #128.png");
+    loadImage("day15", "Assets/Gui/DayNight/Visible #129.png");
+    loadImage("day16", "Assets/Gui/DayNight/Visible #130.png");
+    loadImage("day17", "Assets/Gui/DayNight/Visible #131.png");
+    loadImage("day18", "Assets/Gui/DayNight/Visible #132.png");
+    loadImage("day19", "Assets/Gui/DayNight/Visible #133.png");
+    loadImage("day20", "Assets/Gui/DayNight/Visible #134.png");
+    loadImage("day21", "Assets/Gui/DayNight/Visible #135.png");
+    loadImage("day22", "Assets/Gui/DayNight/Visible #136.png");
+    loadImage("day23", "Assets/Gui/DayNight/Visible #137.png");
+    loadImage("day24", "Assets/Gui/DayNight/Visible #138.png");
 
+    //T------------------------------------T
     loadImage("Hud", "Assets/Gui/Hudbackround.png");
 	loadImage("Plus", "Assets/Gui/Plus.png");
 	loadImage("Pixel","Assets/Gui/Pixel.png");
@@ -144,8 +172,8 @@ void Hud::DrawMiniMap() {
 
     if(!minimapDecal) return;
 
-    olc::vf2d minimapSize(108.f,108.f); // draw size
-    olc::vf2d frameSize(5.5f,6.5f); // minimap frame size
+    olc::vf2d minimapSize(80.f,80.f); // draw size
+    olc::vf2d frameSize(5.f,6.f); // minimap frame size
     olc::vf2d minimapScale(minimapSize / olc::vf2d(float(minimapCanvas->width), float(minimapCanvas->height))); // draw scale based on image size to target size
 
     olc::vf2d minimapPosition(frameSize.x, float(engine.ScreenHeight()) - minimapSize.y - frameSize.y); // screen position
@@ -161,11 +189,11 @@ void Hud::DrawHud(){
     const auto& bcount = engine.buildingManager->GetSelectedBuildingCount();
     float X = (float)engine.ScreenWidth() * 0.758f;
     float Y = (float)engine.ScreenHeight() * 0.75f;
-    engine.DrawPartialDecal({ 0.f,Y }, { (float)engine.ScreenWidth(),(float)engine.ScreenHeight() * 0.75f }, decals["Hud"].get(), { 0,96 }, { 96,96 });
+    float Xb = (float)engine.ScreenHeight() * 0.58f;
+    engine.DrawPartialDecal({ Xb,Y-2.f }, { 115.f,(float)engine.ScreenHeight() * 0.748f }, decals["Hud"].get(), { 0,96 }, { 96,96 });
     float Xa = (float)engine.ScreenWidth() * 0.35f;
     engine.DrawDecal({X,Y+1.f }, decals["HudBox"].get(),{0.66f,0.63f});
     engine.DrawPartialDecal({ Xa,(float)engine.ScreenHeight() * 0.75f }, { 96,60.f }, decals["Hud"].get(), { 224,223 }, { 96,97 });
-
 
     //Options Icon top left
     if (engine.GetMousePos().x < 55.5 && engine.GetMousePos().y < 10) {
@@ -217,6 +245,9 @@ void Hud::DrawLeaderHud() {
 
         engine.DrawPartialDecal({ 0.f,0.f }, topBarSize, decals["Background"].get(), { 0.f,0.f }, { 512.f,40.f });
         engine.DrawPartialDecal({0.f, topBarSize.y - 1.f}, {topBarSize.x, 3.f}, decals["TopBorder"].get(), {0.f,0.f}, {90.f,16.f});
+        //DayNight Info
+        engine.DrawPartialDecal(olc::vf2d((float)engine.ScreenWidth() / 2.f, 0.f), { 25.f,15.f }, 
+            decals["day" + std::to_string(engine.worldManager->currentMap->PhaseofDay)].get(), { 0.f,0.f }, { 112,73 });
 
      // economy list
         float kerning = 1.5f;
@@ -228,7 +259,7 @@ void Hud::DrawLeaderHud() {
             {decals["Food"].get(), {ysize, ysize}, {topBarSize.y * 1.42f, ysize}, engine.leaders->LeaderList[1]->Food, olc::RED },
             {decals["Tree"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, engine.leaders->LeaderList[1]->Lumber, olc::GREEN },
             {decals["Gold"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, engine.leaders->LeaderList[1]->Gold, olc::YELLOW },
-            {decals["flag"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, engine.unitManager->GetSelectedUnitCount(), olc::BLUE },
+            {decals["flag"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, (int)engine.unitManager->GetSelectedUnitCount(), olc::BLUE },
         }};
 
         olc::Decal* decBorder = decals["mBox"].get();

@@ -41,11 +41,13 @@ public:
 
     //MapUpdate
     bool Cycle =false;
-    float DayLength =10;
+    float DayLength =0.f;
     float darkness_timer =0;
     olc::Pixel Darkness{0,0,0,0};//Inverse
-    float NightLength =30;
-
+    float NightLength =30.f;
+    float DayNightPeriod = 4.f * 3.14159265f;
+    const float TPI = 2.f * 3.14159265f;
+    int PhaseofDay = 1;
     //Rain
     struct Rain
     {

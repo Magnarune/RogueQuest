@@ -18,11 +18,6 @@ Options::Options() {
 
     engine.hud->ImportHudAssets();
 
-    mainMenu["btnExit"] = Option(Option::Button, " Exit Game", [&](Option& opt){
-        // exit game
-        Exit_Game = false;
-    }, olc::vf2d(X, 120.f));
-    
     optionsMenu["chkEvil"] = Option(Option::Checkbox, "Is Evil (debug)", [&](Option& opt){
         auto& engine = Game_Engine::Current();
         bool checked = std::get<bool>(opt.value);
@@ -43,6 +38,11 @@ Options::Options() {
         // Position on screen top left           Default option starting value
         olc::vf2d(9.f, 60.f), engine.config->GetValue<bool>("ScreenLocked"));
 
+    mainMenu["btnExit"] = Option(Option::Button, " Exit Game", [&](Option& opt){
+        // exit game
+        Exit_Game = false;
+    }, olc::vf2d(X, 120.f));
+    
 
     mainMenu["btnGameOpt"] = Option(Option::Button, "Main Menu", [&](Option& opt) {
         engine.mainmenu->GameStarted = false;

@@ -36,40 +36,27 @@ void Map::UpdateRain(float fElapsedtime) {
     }
 }
 
-void Map::UpdateTimeofDay(float felapsedtime) {
-    if (!Cycle) {
-        if (DayLength > 0.f) {//It's Day time
-            DayLength -= felapsedtime;
+void Map::UpdateTimeofDay(float felapsedtime) {//0 -> 100
+    DayLength += felapsedtime;
+    darkness_timer = sinf(DayLength /DayNightPeriod) / 2.f + 0.5f;//starts at one goes to 1   
+    
+    if (darkness_timer > 0.9f)//Max darkness
+        Cycle = false;
+    else
+        Cycle = true;
+    if (DayLength < TPI*DayNightPeriod + 0.0001f && DayLength > TPI*DayNightPeriod - 0.0001f)
+        DayLength = 0.f;
 
-        } else {
-            if (Darkness.r >= 1) {//Turn it to night
-                darkness_timer += 1.f*felapsedtime;
-                if (((int)darkness_timer % 2) == 0)
-                    Darkness += olc::Pixel{ 1,1,1,0 };
-            } else {//It is now Night
-                darkness_timer = 0;
-                DayLength = 100;
-                Cycle = true;
-                Darkness = olc::Pixel{ 100,100,100,0 };
-            }
-        }
-    }
+    PhaseofDay = (int)(23 * darkness_timer + 1);
+
     if (Cycle) {
-        if (NightLength > 0.f) {//It's Night time
-            NightLength -= felapsedtime;
-        } else {
-            if (Darkness.r <= 0) {//Turn it to Day
-                darkness_timer += 1.f*felapsedtime;
-                if (((int)darkness_timer % 2) == 0)
-                    Darkness -= olc::Pixel{ 1,1,1,0 };
-            } else {//It is now Day
-                darkness_timer = 0;
-                NightLength = 30;
-                Cycle = false;
-                Darkness = olc::Pixel{ 0,0,0,0 };
-            }
-        }
+        Darkness =  olc::Pixel(uint8_t(100 * darkness_timer),uint8_t(100 * darkness_timer),uint8_t(100 * darkness_timer),uint8_t(255));
     }
+
+   
+    
+    
+
 }
 
 void Map::UpdateMap(float felapsedtime) {

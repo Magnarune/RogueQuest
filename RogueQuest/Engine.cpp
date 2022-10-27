@@ -161,6 +161,8 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     hud->DrawHud();
     hud->DrawMiniMap();
 
+
+    
     DrawStringDecal(GetMousePos() - olc::vi2d(-5, -20), std::to_string((float)GetMousePos().x / (float)ScreenWidth()) + "/" + std::to_string((float)GetMousePos().y / (float)ScreenHeight()));
  
     return true;
