@@ -339,12 +339,15 @@ void WorldManager::ImportMapData() {
 }
 
 bool WorldManager::ChangeMap(const std::string& name) {
+    auto& engine = Game_Engine::Current();
     auto it = std::find_if(mapList.begin(), mapList.end(), [&](const auto& map){ return map->name == name; });
     if(it == mapList.end()){
         std::cout << "Map " << name << " does not exist\n";
         return false;
     }
     currentMap = *it;
+
+    engine.hud->PreRenderMiniMap(*currentMap);
     return true;
 }
 

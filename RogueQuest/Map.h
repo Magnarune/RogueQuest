@@ -36,7 +36,7 @@ public:
     std::vector<std::vector<int>> layerData; // gid list representing the tile map
     olc::vi2d tileSize;//Size of tiles
     //Camera Update
-    olc::vi2d topleftTile;//Top left tile on screen
+    olc::vi2d topLeftTile;//Top left tile on screen
     olc::vi2d bottomRightTile;//Bottom right tile on screen
 
     //MapUpdate
@@ -57,8 +57,8 @@ public:
     olc::Decal* RainDcl;
 
     // private drawing methods
-    TileSet GetTileSet(int id);
-    olc::vi2d GetTile(int id);
+    TileSet GetTileSet(int id) const;
+    olc::vi2d GetTile(int id) const;
 
 public:
     void UpdateRain(float fElapsedTime);

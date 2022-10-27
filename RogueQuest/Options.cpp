@@ -13,12 +13,15 @@ Options::Options() {
 
 
     auto& engine = Game_Engine::Current();
+    float X = (float)engine.ScreenWidth() * 0.4125f;
+    float Y = (float)engine.ScreenHeight() * .014815f;
+
     engine.hud->ImportHudAssets();
 
     mainMenu["btnExit"] = Option(Option::Button, " Exit Game", [&](Option& opt){
         // exit game
         Exit_Game = false;
-    }, olc::vf2d(90.f, 120.f));
+    }, olc::vf2d(X, 120.f));
     
     optionsMenu["chkEvil"] = Option(Option::Checkbox, "Is Evil (debug)", [&](Option& opt){
         auto& engine = Game_Engine::Current();
@@ -41,13 +44,19 @@ Options::Options() {
         olc::vf2d(9.f, 60.f), engine.config->GetValue<bool>("ScreenLocked"));
 
 
+    mainMenu["btnGameOpt"] = Option(Option::Button, "Main Menu", [&](Option& opt) {
+        engine.mainmenu->GameStarted = false;
+        engine.m_nGameMode = engine.MODE_MAIN_MENU;
+
+        },  { X, Y+90.f });
+
     mainMenu["btnGameOpt"] = Option(Option::Button, "Game Options", [&](Option& opt){
         SetGuiMenu("OptionsMenu");
-    }, {90.f,60.f});
+    }, {X,Y+60.f});
 
     mainMenu["btnSoundOpt"] = Option(Option::Button, "Sound Options", [&](Option& opt){
         SetGuiMenu("SoundMenu");
-    }, {90.f,30.f});
+    }, {X,Y+30.f});
 
     soundMenu["lblNotDoneYet"] = Option(Option::Label, "Not Added Yet!", [&](Option& opt){},
         { (float)engine.ScreenWidth() / 4.f, (float)engine.ScreenHeight() / 2.f });
@@ -58,17 +67,31 @@ Options::~Options(){
 
 bool Options::MenuSelect() {
     auto& engine = Game_Engine::Current();
-    if (engine.GetKey(olc::Key::ESCAPE).bPressed) { engine.m_nGameMode = engine.MODE_LOCAL_MAP; SetGuiMenu("MainMenu"); }
-    engine.DrawDecal({ 0,0 }, engine.hud->decals["Background"].get());//Background
+    float X = (float)engine.ScreenWidth()* 0.4125f;
+    float Y = (float)engine.ScreenHeight() * .014815f;
 
-    if (engine.GetMousePos().x < 169.5f && engine.GetMousePos().y < 13.f && engine.GetMousePos().x > 90.f) {
-        engine.DrawPartialDecal({ 90.f,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,206 }, { 300,52 });
-        engine.DrawStringDecal({ 102.f,4.f }, "Back to Game", olc::WHITE, { 0.5,0.5 });
-        if (engine.GetMouse(0).bPressed) { engine.m_nGameMode = engine.MODE_LOCAL_MAP; SetGuiMenu("MainMenu"); }
+    if (engine.GetKey(olc::Key::ESCAPE).bPressed) {
+        if (!engine.mainmenu->GameStarted)
+            engine.m_nGameMode = engine.MODE_MAIN_MENU;
+        else engine.m_nGameMode = engine.MODE_LOCAL_MAP;
+        SetGuiMenu("MainMenu");
+    }
+    engine.DrawDecal({ 0,0 }, engine.hud->decals["Background"].get());//Background
+    engine.DrawStringDecal(engine.GetMousePos() - olc::vi2d(-5, -20), std::to_string((float)engine.GetMousePos().x / (float)engine.ScreenWidth()) + "/" + std::to_string((float)engine.GetMousePos().y / (float)engine.ScreenHeight()));
+
+    if (engine.GetMousePos().x <X+70.f && engine.GetMousePos().y < 13.f && engine.GetMousePos().x > X) {
+        engine.DrawPartialDecal({ X,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,206 }, { 300,52 });
+        engine.DrawStringDecal({ X+17,4.f }, "Back", olc::WHITE, { 0.5,0.5 });
+        if (engine.GetMouse(0).bPressed) { 
+            if (!engine.mainmenu->GameStarted) 
+                engine.m_nGameMode = engine.MODE_MAIN_MENU;
+            else engine.m_nGameMode = engine.MODE_LOCAL_MAP; 
+            SetGuiMenu("MainMenu");
+        }
     }
     else {
-        engine.DrawPartialDecal({ 90.f,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,128 }, { 300,52 });
-        engine.DrawStringDecal({ 102.f,4.f }, "Back to Game", olc::WHITE, { 0.5,0.5 });
+        engine.DrawPartialDecal({ X,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,128 }, { 300,52 });
+        engine.DrawStringDecal({  X+12.f,4.f }, "Back to Game", olc::WHITE, { 0.5,0.5 });
     }
     
     if(currentMenu != nullptr){
@@ -93,6 +116,7 @@ void Options::DrawGui(OptionsList& options){
         olc::vf2d mpos = olc::vf2d(engine.GetMousePos());
         std::function<void()> localchange = [](){};
         bool hover = (mpos.x >= option.position.x && mpos.y >= option.position.y && mpos.x < option.position.x + size.x && mpos.y < option.position.y + size.y);
+
         switch(option.type){
             case Option::Checkbox:{
                 engine.DrawPartialDecal(option.position, { 5,5 }, engine.hud->decals["Gui"].get(), { 152.f,17.f }, { 17.f,17.f });

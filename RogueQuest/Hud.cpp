@@ -1,8 +1,9 @@
 #include "Hud.h"
 #include "Engine.h"
+
 Hud::Hud() {
- 
 }
+
 
 Hud::~Hud() {   
     potBuilding.reset();
@@ -51,8 +52,6 @@ void Hud::ImportHudAssets() {
     loadImage("HealthBox","Assets/Gui/EmptyBar.png");
     loadImage("HealthBoxBackground", "Assets/Gui/BackRoundBar.png");//
 
-    loadImage("MiniMap", "Assets/Gui/Minimap.png");//MiniMap Picture --Remove and make math for this
-
     loadImage("flag","Assets/Gui/flag.png");//flag were units go to
 
     //LeaderHud
@@ -71,76 +70,101 @@ void Hud::ImportHudAssets() {
 }
 
 void Hud::Update(float delta) {
-    //if("Map Has CHANGED")
-        //UpdateMiniMap(gfx);
-
-
-    //DrawMiniMap(gfx);
+    if(minimapRefreshTimer.getSeconds() > 1.0) {
+        RefreshMiniMap();
+        minimapRefreshTimer.restart();
+    }
 }
 
-void Hud::RefreshMiniMap() {
+void Hud::PreRenderMiniMap(const Map &cur_map) {
     auto& engine = Game_Engine::Current();
-    // * what in the * //
-  //  MiniMap = new olc::Sprite(engine.worldManager->curMap().layerSize.x, engine.worldManager->curMap().layerSize.y);
-    //engine.SetDrawTarget(MiniMap);
-    for (int x = 0; x < engine.worldManager->curMap().layerSize.x; x++) {
-        for (int y = 0; y < engine.worldManager->curMap().layerSize.y; y++) {
-            CalculateMiniMap(x, y, engine.worldManager->curMap());
-            engine.Draw(x, y, olc::RED);
+    auto& curMap = engine.worldManager->curMap();
+
+    minimapCanvas.reset(new olc::Sprite(curMap.layerSize.x,curMap.layerSize.y));
+
+    minimapTileCanvas.reset(new olc::Sprite(minimapCanvas->width, minimapCanvas->height));
+    minimapDecal.reset(new olc::Decal(minimapCanvas.get()));
+    
+    engine.SetPixelMode(olc::Pixel::ALPHA);
+    engine.SetDrawTarget(minimapTileCanvas.get());
+    engine.Clear(olc::BLANK);
+    for(int i = 0; i < curMap.mapLayers; i++) {
+        for (int x = 0; x < curMap.layerSize.x; x++) {
+            for (int y = 0; y < curMap.layerSize.y; y++) {
+                float alpha = 1.f - float(i) / float(curMap.mapLayers); // less alpha for higher layers
+                
+                int tile = curMap.layerData[i][x + y * curMap.layerSize.x]; // get tile
+                if(tile == 0) continue;
+
+                olc::vi2d tspc = curMap.GetTile(tile) * curMap.tileSize; // get tileset pixel coord
+                const olc::Sprite& tspr = *curMap.GetTileSet(tile).decal->sprite;
+
+                olc::Pixel col = tspr.GetPixel(tspc + curMap.tileSize / 2); // get pixel color
+
+                engine.Draw(x, y, col);
+            }
         }
     }
     engine.SetDrawTarget(nullptr);
 }
 
-void Hud::DrawMiniMap() {
-    //MiniMap Border
-    auto& engine = Game_Engine::Current();//46x46 Rect
-    if(engine.worldManager->currentMap->name == "Terra")
-        engine.DrawPartialDecal({ 6.9f ,(float)engine.ScreenHeight() * 0.825f - 15.1f }, { 54.8f,55.3f }, decals["MiniMap"].get(), { 0.f,0.f }, { 497.f,497.f });
-    engine.DrawPartialDecal({ 6.9f ,(float)engine.ScreenHeight() * 0.825f -15.1f }, { 54.8f,55.3f }, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f });
-  
-    //ZOOMBOX
- /*engine.DrawPartialDecal({ 11.f + 1.4375f * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * 1.5333f },
-     { 11.f + 1.4375f * (float)engine.worldManager->curMap().topleftTile.x - 11.f + 1.4375f * (float)engine.worldManager->curMap().topleftTile.x ,
-     (float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) - (float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * 1.5333f }, decals["mBox"].get(), { 0,0 }, { 104,104 });*/
+void Hud::RefreshMiniMap() {
+    auto& engine = Game_Engine::Current();
+    auto& curMap = engine.worldManager->curMap();
 
-    float CalculateX = 46.f / engine.worldManager->curMap().layerSize.x;
-    float CalculateY = 46.f / engine.worldManager->curMap().layerSize.y;
+    if(!minimapCanvas) return;
     
-    engine.DrawLineDecal({ 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * CalculateY },
-        { 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY });
-    engine.DrawLineDecal({ 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x,(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().topleftTile.y) * CalculateY },
-        { 11.f + CalculateX * float(engine.worldManager->curMap().bottomRightTile.x) ,(float)engine.ScreenHeight() * 0.823f - 10.0f + (float)engine.worldManager->curMap().topleftTile.y * CalculateY });
+    // draw background tileset
+    (*minimapCanvas) = *minimapTileCanvas->Duplicate(); // refresh tilemap to canvas
 
-    engine.DrawLineDecal({ 11.f + CalculateX * float(engine.worldManager->curMap().bottomRightTile.x),(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY },
-        { 11.f + CalculateX * float(engine.worldManager->curMap().bottomRightTile.x),(float)engine.ScreenHeight() * 0.823f - 10.0f + (float)engine.worldManager->curMap().topleftTile.y * CalculateY });
-    engine.DrawLineDecal({ 11.f + CalculateX * float(engine.worldManager->curMap().bottomRightTile.x),(float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY },
-        { 11.f + CalculateX * (float)engine.worldManager->curMap().topleftTile.x ,    (float)engine.ScreenHeight() * 0.823f - 10.0f + float(engine.worldManager->curMap().bottomRightTile.y) * CalculateY });
-                //Camera position in minimap
+    engine.SetDrawTarget(minimapCanvas.get()); // draw units
 
-    // TO DO: This is really bad - even still (was worse)
-    //      Fix by pre-rendering to canvas then using that canvas as the minimap
-    //   < Don't worry about this until later >
-
+    // draw units
     engine.unitManager->IterateAllUnits([&](auto unit){
         const auto& pos = unit->Position;
-        engine.DrawPartialDecal({ 11.f + CalculateX * pos.x / 32.f ,((float)engine.ScreenHeight() * 0.823f - 10.0f + pos.y / 32.f * CalculateY)}, { CalculateX ,CalculateY },
-                                    decals["Pixel"].get(), {0.f,0.f}, {1.f,1.f}, olc::GREY);
+        auto tilepos = olc::vi2d(pos / olc::vf2d(curMap.tileSize));
+
+        engine.FillRect(tilepos - olc::vi2d(5,5), {10,10}, 0xFF2050F2);
         return true;
     });
 
-    // engine.DrawPartialDecal({ 11.f + 1.4375f * engine.Camera.vPOS.x / 32.f ,((float)engine.ScreenHeight() * 0.823f - 10.0f + engine.Camera.vPOS.y / 32.f * 1.5333f) }, { 1.4375f,1.5333f }, decals["Pixel"].get(), { 0.f,0.f }, { 1.f,1.f }, olc::RED);
+    // draw camera
+    engine.FillRect(curMap.topLeftTile, curMap.bottomRightTile - curMap.topLeftTile, 0x40FFFFFF);
+    engine.DrawRect(curMap.topLeftTile, curMap.bottomRightTile - curMap.topLeftTile);
 
+    engine.SetDrawTarget(nullptr);
+
+    minimapDecal->Update();
+}
+
+void Hud::DrawMiniMap() {
+    //MiniMap Border
+    auto& engine = Game_Engine::Current();
+    auto& curMap = engine.worldManager->curMap();
+
+    if(!minimapDecal) return;
+
+    olc::vf2d minimapSize(108.f,108.f); // draw size
+    olc::vf2d frameSize(5.5f,6.5f); // minimap frame size
+    olc::vf2d minimapScale(minimapSize / olc::vf2d(float(minimapCanvas->width), float(minimapCanvas->height))); // draw scale based on image size to target size
+
+    olc::vf2d minimapPosition(frameSize.x, float(engine.ScreenHeight()) - minimapSize.y - frameSize.y); // screen position
+
+    engine.DrawDecal(minimapPosition, minimapDecal.get(), minimapScale);
+    engine.DrawPartialDecal(minimapPosition - frameSize, minimapSize + frameSize * 2.f, decals["Gui"].get(), { 872.f,218.f }, { 115.f,97.f }, 0xFFFFFFFF);
 }
 
 void Hud::DrawHud(){
     auto& engine = Game_Engine::Current();
+
     const auto& ucount = engine.unitManager->GetSelectedUnitCount();
     const auto& bcount = engine.buildingManager->GetSelectedBuildingCount();
-
-    engine.DrawPartialDecal({ 1.f,(float)engine.ScreenHeight() * 0.75f }, { (float)engine.ScreenWidth(),(float)engine.ScreenHeight() * 0.75f }, decals["Hud"].get(), { 0,96 }, { 96,96 });
-    engine.DrawDecal({ 152.f,177.f }, decals["HudBox"].get(),{0.66f,0.63f});
-    engine.DrawPartialDecal({ 59.f,(float)engine.ScreenHeight() * 0.75f }, { 96,60.f }, decals["Hud"].get(), { 224,223 }, { 96,97 });
+    float X = (float)engine.ScreenWidth() * 0.758f;
+    float Y = (float)engine.ScreenHeight() * 0.75f;
+    engine.DrawPartialDecal({ 0.f,Y }, { (float)engine.ScreenWidth(),(float)engine.ScreenHeight() * 0.75f }, decals["Hud"].get(), { 0,96 }, { 96,96 });
+    float Xa = (float)engine.ScreenWidth() * 0.35f;
+    engine.DrawDecal({X,Y+1.f }, decals["HudBox"].get(),{0.66f,0.63f});
+    engine.DrawPartialDecal({ Xa,(float)engine.ScreenHeight() * 0.75f }, { 96,60.f }, decals["Hud"].get(), { 224,223 }, { 96,97 });
 
 
     //Options Icon top left
@@ -151,7 +175,7 @@ void Hud::DrawHud(){
     } else {
         engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
     }
-    DrawCenteredStringDecal({ 24.f,5.f }, "Options", olc::WHITE, { 0.5,0.5 });
+    engine.DrawCenteredStringDecal({ 24.f,5.f }, "Options", olc::WHITE, { 0.5,0.5 });
 
     //if (engine.GetMousePos().x < 55.5 && engine.GetMousePos().y < 10) {
     //    engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
@@ -162,8 +186,6 @@ void Hud::DrawHud(){
     //}
     //DrawCenteredStringDecal({ 24.f,5.f }, "Options", olc::WHITE, { 0.5,0.5 });
 
-
-    
 
     
     if (ucount == 1) //If you select one unit
@@ -179,46 +201,65 @@ void Hud::DrawHud(){
         DrawBuild();
 }
 
+struct Item {
+    olc::Decal* decIcon;
+    olc::vf2d iconSize, borderSize;
+    int value;
+    olc::Pixel color;
+};
+
 void Hud::DrawLeaderHud() {
     auto& engine = Game_Engine::Current();
-    
-    float SWitdh = (float)engine.ScreenWidth();
-
-    
-    engine.DrawPartialDecal({ 0.f,0.f }, olc::vf2d({ SWitdh, 10.f }), decals["Background"].get(), { 0.f,0.f }, { 512.f,40.f });
-    engine.DrawPartialDecal(olc::vf2d(0.f, 9.f), olc::vf2d((float)engine.ScreenWidth(), 2.f), decals["TopBorder"].get(), {0.f,0.f}, {90.f,16.f});
-
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 2.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 25.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 46.f, 1.f), olc::vf2d(13.f, 9.f), decals["mBox"].get(), {0.f,0.f}, {104.f,104.f});
-
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 2.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 16.f, 1.f), olc::vf2d(8.f, 8.f), decals["Gold"].get(), { 0.f,0.f }, { 16.f,16.f });
-
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 25.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 35.5f, 0.f), olc::vf2d(10.f, 10.f), decals["Tree"].get(), { 0.f,0.f }, { 46.f,46.f });
-
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 46.f, 0.5f), olc::vf2d(13.f, 10.f), decals["HealthBoxBackground"].get(), {0.f,0.f}, {128.f,32.f});
-
-    engine.DrawPartialDecal(olc::vf2d(SWitdh / 1.5f + 59.f, 0.2f), olc::vf2d(12.f, 12.f), decals["Food"].get(), { 0.f,0.f }, { 48.f,48.f });
 
 
-    DrawCenteredStringDecal(olc::vf2d(SWitdh / 1.5f + 9.f, 6.f), std::to_string(engine.leaders->LeaderList[1]->Gold), olc::YELLOW, {0.4f,0.4f});
-    DrawCenteredStringDecal(olc::vf2d(SWitdh / 1.5f + 32.f, 6.f), std::to_string(engine.leaders->LeaderList[1]->Lumber), olc::GREEN, {0.4f,0.4f});
-    DrawCenteredStringDecal(olc::vf2d(SWitdh / 1.5f + 52.f, 6.f), std::to_string(engine.leaders->LeaderList[1]->Food ),olc::RED, {0.4f,0.4f});
-}
+    { // border
+        olc::vf2d topBarSize(float(engine.ScreenWidth()), 8.f);
 
-void Hud::CalculateMiniMap(int x, int y, const Map &cur_map) {
-    auto& engine = Game_Engine::Current();
-    /* int y = 0;
- for (int i = 0; i < engine.worldManager->curMap().layerSize.x * engine.worldManager->curMap().layerSize.y; i++) {
-     if (i > 0 && i % engine.worldManager->curMap().layerSize.x == 0) {
-         y++;
-     }
-     float X = 11.f + i % engine.worldManager->curMap().layerSize.x;
+        engine.DrawPartialDecal({ 0.f,0.f }, topBarSize, decals["Background"].get(), { 0.f,0.f }, { 512.f,40.f });
+        engine.DrawPartialDecal({0.f, topBarSize.y - 1.f}, {topBarSize.x, 3.f}, decals["TopBorder"].get(), {0.f,0.f}, {90.f,16.f});
 
-     engine.DrawPartialDecal({ 11.f + 1.4375f * (i % engine.worldManager->curMap().layerSize.x),((float)engine.ScreenHeight() * 0.823f - 10.0f + y * 1.5333f) }, { 1.4375f,1.5333f }, decals["Pixel"].get(), { 0.f,0.f }, { 1.f,1.f }, olc::GREEN);
- }*/
+     // economy list
+        float kerning = 1.5f;
+        olc::vf2d listPosition(topBarSize.x - 4.f, 1.f);
+        olc::vf2d frameSize(4.f,0.f);
+
+        float ysize = (topBarSize.y - listPosition.y) * 0.94f;
+        std::array<Item, 4> itemList {{
+            {decals["Food"].get(), {ysize, ysize}, {topBarSize.y * 1.42f, ysize}, engine.leaders->LeaderList[1]->Food, olc::RED },
+            {decals["Tree"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, engine.leaders->LeaderList[1]->Lumber, olc::GREEN },
+            {decals["Gold"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, engine.leaders->LeaderList[1]->Gold, olc::YELLOW },
+            {decals["flag"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, engine.unitManager->GetSelectedUnitCount(), olc::BLUE },
+        }};
+
+        olc::Decal* decBorder = decals["mBox"].get();
+        olc::Decal* decBackground = decals["HealthBoxBackground"].get();
+
+        int i = 1;
+        for(const Item& item : itemList) {
+            const std::string& valueStr = std::to_string(item.value);
+            olc::vf2d pos = listPosition;
+            float itemWidth = (item.iconSize.x + item.borderSize.x + frameSize.x * 2.f);
+
+            pos.x -= i * itemWidth * kerning;
+
+            olc::vf2d valuePos(pos);
+            olc::vf2d iconPos(valuePos);
+            iconPos.x += frameSize.x + item.borderSize.x + 2.f;
+
+            olc::vf2d borderPos(valuePos - frameSize);
+            olc::vf2d textSize = olc::vf2d(engine.GetTextSize(valueStr));
+            
+            olc::vf2d tscale((item.borderSize + frameSize - olc::vf2d(2.f,2.f)) / textSize);
+            float textScale = std::max(std::min(std::min(tscale.x, tscale.y), 0.75f), 0.25f);
+
+            engine.DrawPartialDecal(borderPos, item.borderSize + frameSize * 2.f, decBackground, {0.f,4.f}, {128.f,24.f});
+            engine.DrawPartialDecal(borderPos, item.borderSize + frameSize * 2.f, decBorder, {0.f,0.f}, {104.f,104.f});
+            engine.DrawPartialDecal(iconPos, item.iconSize, item.decIcon, { 0.f,0.f }, olc::vf2d(float(item.decIcon->sprite->width), float(item.decIcon->sprite->height)));
+            engine.DrawCenteredStringDecal(valuePos + item.borderSize / 2.f, valueStr, item.color, olc::vf2d(textScale,textScale));
+
+            ++i;
+        }
+    }
 }
 
 void Hud::DrawBuild() {
@@ -235,34 +276,29 @@ void Hud::DrawBuild() {
     engine.tv.DrawPartialDecal( ((Center)), olc::vf2d(engine.hud->potBuilding->Size), decal, {0,0}, data.icon.fsz, engine.unitManager->CheckBuildObstruction(potBuilding) ? olc::PixelF(0.f, 255.f, 0.f, 0.7f) : olc::PixelF(1.f, 0.f, 0.f, 0.7f));
 }
 
-void Hud::DrawCenteredStringDecal(olc::vf2d pos, std::string str, olc::Pixel col, olc::vf2d scale) {
-    auto& engine = Game_Engine::Current();
-    olc::vf2d textOffset = olc::vf2d(engine.GetTextSize(str)) / 2 * scale;
-    engine.DrawStringDecal(pos - textOffset, str, col, scale);
-}
-
-void Hud::DrawDescription(std::string blah, olc::vi2d Mouse) {//Your making the Description
+void Hud::DrawDescription(const std::string& str, olc::vi2d Mouse) {//Your making the Description
     auto& engine = Game_Engine::Current();
     float x = 30;
-    int width = engine.GetTextSize(blah).x;
+    int width = engine.GetTextSize(str).x;
     int targetWidth = std::clamp(width, 30, 50);
-    blah = WrapText(blah, targetWidth, false, { 0.4f,0.4f });
-    int h = engine.GetTextSize(blah).y;
+    
+    std::string drawStr = WrapText(str, targetWidth, false, { 0.4f,0.4f });
+    int h = engine.GetTextSize(drawStr).y;
     float y = (float)h * 0.4f;
     engine.DrawPartialDecal({ (float)Mouse.x-2-(float)targetWidth ,(float)Mouse.y -4- y }, {(float)targetWidth+8, y + 8}, decals["Icon"].get(), { 0.f,0.f }, { 117.f,99.f },olc::Pixel(255,255,255,180));
     DrawDescriptionBorder(decals["Sigbox"].get(), { (float)Mouse.x - 2 - (float)targetWidth ,(float)Mouse.y - 4 - y }, { (float)targetWidth + 8, y + 8 }, {0.2f,0.2f});
-    engine.DrawStringDecal({ (float)Mouse.x + 3 - (float)targetWidth,(float)Mouse.y- y}, blah, olc::WHITE, { 0.4f,0.4f });
+    engine.DrawStringDecal({ (float)Mouse.x + 3 - (float)targetWidth,(float)Mouse.y- y}, drawStr, olc::WHITE, { 0.4f,0.4f });
 }
 
-std::string Hud::WrapText(std::string str, int width, bool proportional, olc::vd2d scale) {
+std::string Hud::WrapText(const std::string& str, int width, bool proportional, olc::vd2d scale) {
     auto& engine = Game_Engine::Current();
-    std::string newStr;
+    std::string newStr, oldStr(str);
     while (true) {
         std::string word;
         if (str.find(" ") == std::string::npos) {
-            word = str;
+            word = oldStr;
         } else {
-            word = str.substr(0, str.find(" "));
+            word = oldStr.substr(0, str.find(" "));
         }
         olc::vi2d newSize = olc::vd2d(proportional ? engine.GetTextSizeProp(newStr + (newStr.size() > 0 ? " " : "") + word) :
             engine.GetTextSize(newStr + (newStr.size() > 0 ? " " : "") + word)) * scale;
@@ -272,10 +308,10 @@ std::string Hud::WrapText(std::string str, int width, bool proportional, olc::vd
         } else {
             newStr += (newStr.size() > 0 ? " " : "") + word;
         }
-        if (str.find(" ") == std::string::npos) {
+        if (oldStr.find(" ") == std::string::npos) {
             break;
         } else {
-            str.erase(0, str.find(" ") + 1);
+            oldStr.erase(0, oldStr.find(" ") + 1);
         }
     }
     return newStr;

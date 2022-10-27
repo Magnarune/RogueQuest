@@ -21,9 +21,10 @@ public:
 	void CreateGame();
 	void SettingMenu(float delta);
 	void ExitProgram();
-
-	float Occialtions(float delta,float speed, float& timer, float& occilationvalue, float turnaround , bool& swap );
-
+	
+	float Occialtions(float delta, float& timer,float rate);
+	
+	bool GameStarted = false;
 	float TSDN=0.f;//Title Screen Day Night Cycle
 	float TSOV = 0.f; //TitleScreen return value
 	bool TS = false; //TitleScreen flipper

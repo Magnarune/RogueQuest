@@ -16,6 +16,7 @@ Config::Config(const std::string& path, bool autosave): path(path), autosave(aut
 Config::~Config() {
     if(autosave)
         Export();
+
 }
 
 bool Config::Import() {

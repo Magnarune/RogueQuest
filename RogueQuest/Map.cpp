@@ -140,17 +140,17 @@ bool Map::ImportMap(const std::string& path) {
 
 void Map::DrawMap(olc::TileTransformedView* tv) {
 
-    topleftTile     = { (int)    (tv->GetWorldTL().x / tileSize.x),(int)    (tv->GetWorldTL().y / tileSize.y) };
+    topLeftTile     = { (int)    (tv->GetWorldTL().x / tileSize.x),(int)    (tv->GetWorldTL().y / tileSize.y) };
     bottomRightTile = { (int)ceil(tv->GetWorldBR().x / tileSize.x),(int)ceil(tv->GetWorldBR().y / tileSize.y) };
 
-    topleftTile.x = topleftTile.x < 0 ? 0 : topleftTile.x;
-    topleftTile.y = topleftTile.y < 0 ? 0 : topleftTile.y;
+    topLeftTile.x = topLeftTile.x < 0 ? 0 : topLeftTile.x;
+    topLeftTile.y = topLeftTile.y < 0 ? 0 : topLeftTile.y;
     bottomRightTile.x = bottomRightTile.x >= layerSize.x ? layerSize.x : bottomRightTile.x;
     bottomRightTile.y = bottomRightTile.y >= layerSize.y ? layerSize.y : bottomRightTile.y;
 
     for (int i = 0; i < mapLayers; i++) {
-        for (int y = topleftTile.y; y <= bottomRightTile.y; y++) {
-            for (int x = topleftTile.x; x <= bottomRightTile.x; x++) {
+        for (int y = topLeftTile.y; y <= bottomRightTile.y; y++) {
+            for (int x = topLeftTile.x; x <= bottomRightTile.x; x++) {
                 int pos = x + y * layerSize.x;
                 if (pos >= layerSize.x * layerSize.y) break;
                 int tile = layerData[i][pos];
@@ -163,7 +163,7 @@ void Map::DrawMap(olc::TileTransformedView* tv) {
     }
 }
 
-olc::vi2d Map::GetTile(int id) {
+olc::vi2d Map::GetTile(int id) const {
     const TileSet tileset = GetTileSet(id);
     id -= tileset.gid;
     olc::vi2d tileCount = { tileset.decal->sprite->width / tileSize.x,
@@ -173,7 +173,7 @@ olc::vi2d Map::GetTile(int id) {
 
 
  // Do Not Touch <<Please>> Magnarune
-Map::TileSet Map::GetTileSet(int id) {
+Map::TileSet Map::GetTileSet(int id) const {
     for (int i = 1; i <= tileSetsSize; ++i) {
         if ( id < vFirstGid[i - 1]) return TileSet{ decals[i - 2].get(), vFirstGid[i - 2] };
     }

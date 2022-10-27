@@ -90,7 +90,8 @@ bool Game_Engine::OnUserCreate() {
     particles->ImportEffectsAssets();
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
-    worldManager->ChangeMap("Terra");
+    
+    worldManager->ChangeMap("Terra");//here
 
     SetPixelMode(olc::Pixel::ALPHA);
     ConsoleCaptureStdOut(true);     
@@ -158,8 +159,9 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     userinputs->DrawUserInput();
     hud->DrawLeaderHud();
     hud->DrawHud();
-    
     hud->DrawMiniMap();
+
+    DrawStringDecal(GetMousePos() - olc::vi2d(-5, -20), std::to_string((float)GetMousePos().x / (float)ScreenWidth()) + "/" + std::to_string((float)GetMousePos().y / (float)ScreenHeight()));
  
     return true;
 };
@@ -397,6 +399,15 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
     worldManager->GenerateUnit("Builder", 0, { 19 * 32.f,30 * 32.f });
     for (int i = 0; i < 20; i++)
         worldManager->GenerateUnit("Archer", 0, { 3.f * (float)i + 19.f * 32.f,38 * 32.f });
+}
+
+
+
+
+
+void Game_Engine::DrawCenteredStringDecal(olc::vf2d pos, const std::string& str, olc::Pixel col, olc::vf2d scale) {
+    olc::vf2d textOffset = olc::vf2d(GetTextSize(str)) * scale / 2.f;
+    DrawStringDecal(pos - textOffset, str, col, scale);
 }
 
 /*

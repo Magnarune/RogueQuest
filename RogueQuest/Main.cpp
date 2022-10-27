@@ -3,12 +3,12 @@
 #include "Engine.h"
 
 int main()
-{//1024, 960 , 1 ,1 // 512, 480, 2, 2
+{//1024, 960 , 1 ,1 // 512, 480, 2, 2 //256 , 240 , 4 ,4
     {
 
        
         Game_Engine Game;
-        if (Game.Construct(256 , 240, 4, 4)) {
+        if (Game.Construct(480 , 270, 4, 4,false)) {
             Game.Start();
         }
     }

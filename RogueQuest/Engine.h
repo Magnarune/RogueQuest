@@ -53,6 +53,9 @@ public:
 	float StandardTime= 0.0f;
 
 	static inline Game_Engine& Current() { assert(self != nullptr); return *self; }
+
+	void DrawCenteredStringDecal(olc::vf2d pos, const std::string& str, olc::Pixel col = olc::WHITE, olc::vf2d scale = { 1,1 });
+
 	olc::TileTransformedView tv;
 
 	std::unique_ptr<Config> config;
