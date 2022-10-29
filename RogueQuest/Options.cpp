@@ -83,11 +83,17 @@ bool Options::MenuSelect() {
     if (engine.GetMousePos().x <X+70.f && engine.GetMousePos().y < 13.f && engine.GetMousePos().x > X) {
         engine.DrawPartialDecal({ X,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,206 }, { 300,52 });
         engine.DrawStringDecal({ X+17,4.f }, "Back", olc::WHITE, { 0.5,0.5 });
-        if (engine.GetMouse(0).bPressed) { 
-            if (!engine.mainmenu->GameStarted) 
-                engine.m_nGameMode = engine.MODE_MAIN_MENU;
-            else engine.m_nGameMode = engine.MODE_LOCAL_MAP; 
+        if (engine.GetMouse(0).bPressed) {
             SetGuiMenu("MainMenu");
+
+
+            if (currentMenu == &mainMenu) {
+                if (!engine.mainmenu->GameStarted)
+                    engine.m_nGameMode = engine.MODE_MAIN_MENU;
+                else
+                    engine.m_nGameMode = engine.MODE_LOCAL_MAP;
+            }
+            
         }
     }
     else {
