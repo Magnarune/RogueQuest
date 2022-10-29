@@ -10,7 +10,7 @@ class Options {
 public:
 	struct Option { // custom option type
 		//			 		 button			checkbox 	textbox		slider
-		typedef std::variant<std::monostate,bool,		std::string,double> ValueType;
+		typedef std::variant<std::monostate,bool,	std::string,double> ValueType;
 		typedef std::function<void(Option&)> CallbackType;
 
 		enum GuiType {
@@ -52,13 +52,5 @@ public:
 
 	Options();
 	virtual ~Options();
-
-	enum Options_Menu
-	{
-		MAIN_OPTIONS,
-		SOUND_OPTIONS,
-		GAME_OPTIONS
-	};
-	int Button = MAIN_OPTIONS;
 
 };

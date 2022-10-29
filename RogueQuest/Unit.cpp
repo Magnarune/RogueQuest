@@ -22,6 +22,7 @@ void Unit::Stop() {
 	targetUnit.reset();
 	ULogic = Passive;
 	Target = std::nullopt;
+	attackTarget = false;
 	Velocity = { 0.f,0.f };
 	if(Graphic_State != Dead){
 		Graphic_State = Walking;

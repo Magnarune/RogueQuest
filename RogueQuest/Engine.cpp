@@ -96,6 +96,7 @@ bool Game_Engine::OnUserCreate() {
     SetPixelMode(olc::Pixel::ALPHA);
     ConsoleCaptureStdOut(true);     
     Clear(olc::Pixel(100,164,44,255));
+    mainmenu->SetGuiMenu("MainMenu");
     optionsManager->SetGuiMenu("MainMenu");
     ShowSystemCursor(false); 
 
@@ -103,7 +104,7 @@ bool Game_Engine::OnUserCreate() {
     leaders->LeaderList[1]->Gold += 1000;
     Camera.vPOS = { 30.f,30.f };
     tv.SetWorldOffset(Camera.vPOS);
-    InitiateGame();
+
     curCursor = assetManager->GetCursor("default");
 
     bIsLocked = config->GetValue<bool>("ScreenLocked");
@@ -163,7 +164,7 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
 
 
     
-    DrawStringDecal(GetMousePos() - olc::vi2d(-5, -20), std::to_string((float)GetMousePos().x / (float)ScreenWidth()) + "/" + std::to_string((float)GetMousePos().y / (float)ScreenHeight()));
+   // DrawStringDecal(GetMousePos() - olc::vi2d(-5, -20), std::to_string((float)GetMousePos().x / (float)ScreenWidth()) + "/" + std::to_string((float)GetMousePos().y / (float)ScreenHeight()));
  
     return true;
 };
@@ -188,7 +189,7 @@ void Game_Engine::OnFocusUpdated(bool focus){
 
 void Game_Engine::SetLocked(bool locked, bool permanent) {
     config->SaveValue<bool>("ScreenLocked", locked);
-
+    bIsLocked = locked;
     if(permanent) bWasLocked = locked;
     if(locked && olc::platform){ // lock cursor
         HWND mHwnd = *(HWND*)olc::platform->GetWindowHandle();
@@ -384,7 +385,7 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
     Tower->curStage = 2;
 
     for(int i=0; i< 20; i++)
-        worldManager->GenerateUnit("Archer", 1, {3.f*(float)i+19.f * 32.f,10 * 32.f });
+        worldManager->GenerateUnit("Archer", 1, {3*i+19.f * 32.f,10 * 32.f });
     worldManager->GenerateUnit("Builder", 1, { 19 * 32.f,14 * 32.f });
 
     worldManager->GenerateBuilding("GoldMine", 0, { 16 * 32.f,30 * 32.f });
@@ -400,7 +401,7 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
     Towers->curStage = 2;
     worldManager->GenerateUnit("Builder", 0, { 19 * 32.f,30 * 32.f });
     for (int i = 0; i < 20; i++)
-        worldManager->GenerateUnit("Archer", 0, { 3.f * (float)i + 19.f * 32.f,38 * 32.f });
+        worldManager->GenerateUnit("Archer", 0, { 3* i + 19.f * 32.f,38 * 32.f });
 }
 
 

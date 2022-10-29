@@ -75,20 +75,37 @@ void UserInput::MiniMapBox() {
     //}
 }
 
-
 void UserInput::GetUserInput() {
     auto& engine = Game_Engine::Current();
+    CenterofScreen = engine.tv.ScaleToWorld(olc::vf2d(float(engine.ScreenWidth()) / 2.0f, float(engine.ScreenHeight()) / 2.0f));//Center of screen
     if (!engine.IsConsoleShowing()) {
         if (engine.IsFocused()) {
             CameraInput();
             MiniMapBox();
-            if (engine.GetKey(olc::ESCAPE).bPressed)
-                engine.m_nGameMode = engine.MODE_OPTIONS_MENU;
+
+            
+
+            if (engine.GetKey(olc::ESCAPE).bPressed) {
+                if (engine.hud->LeaderInfo)
+                    engine.hud->LeaderInfo = false;
+                else
+                    engine.m_nGameMode = engine.MODE_OPTIONS_MENU;
+            }
             if (engine.GetKey(olc::F1).bPressed) {
-                if (!engine.leaders->LeaderList[1]->HomeBase.expired()) {
+                
+                if (!engine.leaders->LeaderList[1]->HomeBase.expired() && engine.leaders->LeaderList[1]->HomeBase.lock()->bSelected==true) {
                     engine.unitManager->DeselectUnits();
                     engine.buildingManager->DeselectBuildings();
                     engine.buildingManager->SelectBuilding(engine.leaders->LeaderList[1]->HomeBase.lock()->Position);
+                    engine.Camera.vPOS = engine.leaders->LeaderList[1]->HomeBase.lock()->Position;
+                    engine.tv.SetWorldOffset(engine.Camera.vPOS - CenterofScreen);
+                
+                }
+                else if (!engine.leaders->LeaderList[1]->HomeBase.expired()) {
+                    engine.unitManager->DeselectUnits();
+                    engine.buildingManager->DeselectBuildings();
+                    engine.buildingManager->SelectBuilding(engine.leaders->LeaderList[1]->HomeBase.lock()->Position);
+
                 }
             }
 

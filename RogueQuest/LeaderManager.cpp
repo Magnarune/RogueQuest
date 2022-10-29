@@ -137,7 +137,7 @@ void LeaderManager::FindHomeBase() {
 	for (int Owner = 1; Owner < engine.leaders->LeaderList.size(); Owner++) {		
 		engine.buildingManager->IterateAllBuildings(([&](auto build) -> bool {
 
-			if (build->Name == "Castle" && build->Owner == Owner) {
+			if (build->name == "Castle" && build->Owner == Owner) {
 				engine.leaders->LeaderList[Owner]->HomeBase = build;
 				return false;
 			}

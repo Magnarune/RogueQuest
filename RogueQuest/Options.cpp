@@ -32,6 +32,7 @@ Options::Options() {
             // get the current state of the option - here it's a checkbox so a boolean value is our state type
             bool checked = std::get<bool>(opt.value);
             // no when is the Option "checked" changed from old value to new
+            
             engine.SetLocked(checked);
         },
         
@@ -44,11 +45,11 @@ Options::Options() {
     }, olc::vf2d(X, 120.f));
     
 
-    mainMenu["btnGameOpt"] = Option(Option::Button, "Main Menu", [&](Option& opt) {
+    mainMenu["btnMainOpt"] = Option(Option::Button, "Main Menu", [&](Option& opt) {
         engine.mainmenu->GameStarted = false;
+        engine.mainmenu->SetGuiMenu("MainMenu");
         engine.m_nGameMode = engine.MODE_MAIN_MENU;
-
-        },  { X, Y+90.f });
+        }, { X, Y + 90.f });
 
     mainMenu["btnGameOpt"] = Option(Option::Button, "Game Options", [&](Option& opt){
         SetGuiMenu("OptionsMenu");

@@ -83,10 +83,21 @@ void Hud::ImportHudAssets() {
     loadImage("flag","Assets/Gui/flag.png");//flag were units go to
 
     //LeaderHud
+    loadImage("LeaderInfo", "Assets/Gui/LeaderIcons/ParchmentBackground.png");//Leader Info Backround
     loadImage("TopBorder", "Assets/Gui/TopBorder.png"); //top Border
     loadImage("Food", "Assets/Gui/Food.png");//food icon
     loadImage("Tree", "Assets/Gui/Tree.png");//tree icon
     loadImage("Gold", "Assets/Gui/Goldicon.png");//gold icon
+
+    //leader "heads"
+    loadImage("Gav", "Assets/Gui/LeaderIcons/Gavin.png");
+    loadImage("Hunt", "Assets/Gui/LeaderIcons/Hunter.png");
+    loadImage("Jack", "Assets/Gui/LeaderIcons/Jackson.png");
+    loadImage("Lando", "Assets/Gui/LeaderIcons/Lando.png");
+    loadImage("Luke", "Assets/Gui/LeaderIcons/Luke.png");
+
+
+
     
     loadImage("Units",    "Assets/Research/Icons/Make_Units_Icon.png");//Icons for buildings
     loadImage("Research", "Assets/Research/Icons/Research_Icon.png"); //Icon for Research
@@ -199,22 +210,11 @@ void Hud::DrawHud(){
     if (engine.GetMousePos().x < 55.5 && engine.GetMousePos().y < 10) {
         engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
         if (engine.GetMouse(0).bPressed)
-            engine.m_nGameMode = engine.MODE_OPTIONS_MENU;
+            LeaderInfo = !LeaderInfo;
     } else {
         engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
     }
-    engine.DrawCenteredStringDecal({ 24.f,5.f }, "Options", olc::WHITE, { 0.5,0.5 });
-
-    //if (engine.GetMousePos().x < 55.5 && engine.GetMousePos().y < 10) {
-    //    engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
-    //    if (engine.GetMouse(0).bPressed)
-    //        LeaderInfo = true;
-    //} else {
-    //    engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
-    //}
-    //DrawCenteredStringDecal({ 24.f,5.f }, "Options", olc::WHITE, { 0.5,0.5 });
-
-
+    engine.DrawCenteredStringDecal({ 26.f,5.f }, "Leaders Info", olc::WHITE, { 0.4f,0.4f });
     
     if (ucount == 1) //If you select one unit
         engine.hudManager->UnitSelected();
@@ -224,10 +224,69 @@ void Hud::DrawHud(){
        engine.hudManager->BuildingSelected();
    if (bcount > 1)
        engine.hudManager->BuildingsSelected(bcount);
+   if (LeaderInfo)
+       DrawLeaderInfoHud();
    
     if (BuildMode)
         DrawBuild();
 }
+
+struct LeaderHeads {
+    olc::Decal* decIcon;
+    olc::vf2d iconSize, borderSize;
+    int value;
+    olc::Pixel color;
+};
+
+void Hud::DrawLeaderInfoHud() {
+    auto& engine = Game_Engine::Current();
+    olc::vf2d Start(0.f,10.f);
+    engine.DrawDecal(Start, decals["LeaderInfo"].get(),{0.4f,0.4f}, 0xEAFFFFFF);
+
+    float kerning = .5f;
+    olc::vf2d listPosition(Start.x + 4.f, Start.y+30.f);
+    olc::vf2d frameSize(1.f, 0.f);
+
+    float ysize = (Start.y - listPosition.y)*1.f;
+    std::array<LeaderHeads, 3> Leaderheads{ {
+        {decals["Gav"].get(), {ysize, ysize}, {Start.y * 1.42f, ysize}, engine.leaders->LeaderList[1]->Food, olc::RED },
+        {decals["Lando"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, engine.leaders->LeaderList[1]->Lumber, olc::GREEN },
+        {decals["Jack"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, engine.leaders->LeaderList[1]->Gold, olc::YELLOW },
+       
+    } };
+
+    olc::Decal* decBorder = decals["mBox"].get();
+    olc::Decal* decBackground = decals["HealthBoxBackground"].get();
+
+    int i = 1;
+    for (const LeaderHeads& item : Leaderheads) {
+        const std::string& valueStr = std::to_string(item.value);
+        olc::vf2d pos = listPosition;
+        float itemWidth = (item.iconSize.x + item.borderSize.x + frameSize.x * 2.f);
+
+        pos.y -= i * itemWidth * kerning;
+
+        olc::vf2d valuePos(pos);
+        olc::vf2d iconPos(valuePos);
+        iconPos.y += frameSize.x + item.borderSize.x + 2.f;
+
+        olc::vf2d borderPos(valuePos - frameSize);
+        olc::vf2d textSize = olc::vf2d(engine.GetTextSize(valueStr));
+
+        olc::vf2d tscale((item.borderSize + frameSize - olc::vf2d(2.f, 2.f)) / textSize);
+        float textScale = std::max(std::min(std::min(tscale.x, tscale.y), 0.75f), 0.25f);
+
+        engine.DrawPartialDecal(borderPos, item.borderSize + frameSize * 2.f, decBackground, { 0.f,4.f }, { 128.f,24.f });
+        engine.DrawPartialDecal(borderPos, item.borderSize + frameSize * 2.f, decBorder, { 0.f,0.f }, { 104.f,104.f });
+        engine.DrawPartialDecal(iconPos, item.iconSize, item.decIcon, { 0.f,0.f }, olc::vf2d(float(item.decIcon->sprite->width), float(item.decIcon->sprite->height)));
+        engine.DrawCenteredStringDecal(valuePos + item.borderSize / 2.f, valueStr, item.color, olc::vf2d(textScale, textScale));
+
+        ++i;
+    }
+
+}
+
+
 
 struct Item {
     olc::Decal* decIcon;

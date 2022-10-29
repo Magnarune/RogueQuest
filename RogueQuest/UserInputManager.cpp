@@ -30,7 +30,8 @@ void UserInputManager::StandardUserInput() {
 
         if (!engine.ActivityDone)
             engine.buildingManager->DeselectBuildings();
-      
+        if (!engine.ActivityDone)
+            engine.hudManager->selection = engine.hudManager->None;
 
         if (!engine.ActivityDone)
             engine.buildingManager->SelectBuilding(Final);
@@ -72,7 +73,6 @@ void UserInputManager::DecideUnitAction() {
     auto& engine = Game_Engine::Current();   
     engine.unitManager->CheckTaskAbility(engine.unitManager->FindObject(engine.tv.ScreenToWorld(engine.GetMousePos())),engine.GetKey(olc::A).bHeld);  
 }
-
 
 bool UserInputManager::Button(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size) {
     auto& engine = Game_Engine::Current();

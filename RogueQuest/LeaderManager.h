@@ -1,3 +1,4 @@
+#pragma once
 #include "olcPixelGameEngine.h"
 #include "Leaders.h"
 #include "Building.h"

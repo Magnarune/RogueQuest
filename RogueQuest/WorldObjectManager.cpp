@@ -45,10 +45,8 @@ void WorldManager::Update(float delta) {//Update last frames
     currentMap->UpdateTimeofDay(delta);
 
     if (worldclock.getSeconds() > 1.0) {
-        
 
-        for (auto& leader : engine.leaders->LeaderList)
-            leader->FindHomeBase();
+        engine.leaders->FindHomeBase();
         worldclock.restart();
     }
 }

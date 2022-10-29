@@ -115,6 +115,7 @@ public:
 	friend class Projectile;
 	friend class Leaders;
 	friend class LeaderManager;
+	friend class MainMenu;
 	
 };
 
