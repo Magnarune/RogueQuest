@@ -182,6 +182,8 @@
     <ClCompile Include="Building.cpp" />
     <ClCompile Include="BuildingManager.cpp" />
     <ClCompile Include="clock.cpp" />
+    <ClCompile Include="CollisionMap.cpp" />
+    <ClCompile Include="CollisionMapObject.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Effects.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -214,6 +216,8 @@
     <ClInclude Include="Building.h" />
     <ClInclude Include="BuildingManager.h" />
     <ClInclude Include="clock.h" />
+    <ClInclude Include="CollisionMap.h" />
+    <ClInclude Include="CollisionMapObject.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Effects.h" />
     <ClInclude Include="Engine.h" />
@@ -257,6 +261,7 @@
     <None Include="Assets\Buildings\Mine\GoldMine.lua" />
     <None Include="Assets\Buildings\Stone_Tower\Stone_Tower.lua" />
     <None Include="Assets\Gui\cursors.lua" />
+    <None Include="Assets\MapObjects\Trees\BasicTree.lua" />
     <None Include="Assets\Maps\BasicMap.lua" />
     <None Include="Assets\Maps\TerraProject2.lua" />
     <None Include="Assets\Projectiles\Axe\ThrowAxe.lua" />

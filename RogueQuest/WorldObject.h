@@ -49,7 +49,8 @@ public:
 	enum {
 		isUnit,
 		isBuilding,
-		isProjectile
+		isProjectile,
+		isMapObject
 	} cType;
 	olc::vf2d predPosition;
 	

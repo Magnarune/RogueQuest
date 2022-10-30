@@ -148,4 +148,5 @@ public:
     friend class Research;
     friend class Building;
     friend class WorldManager;
+    friend class CollisionMap;
 };

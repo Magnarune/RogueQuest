@@ -65,8 +65,9 @@ void Map::UpdateMap(float felapsedtime) {
 }
 
 bool Map::ImportMap(const std::string& path) {
+    auto& engine = Game_Engine::Current();
     if(valid) return false; // cannot import a map that has already been loaded
-
+    
     lua.open_libraries(sol::lib::base);
     lua.open_libraries(sol::lib::math);
     lua.open_libraries(sol::lib::package);
@@ -105,7 +106,7 @@ bool Map::ImportMap(const std::string& path) {
         tileSize = { mapData["tilewidth"] , mapData["tileheight"] };//32by 32
         layerSize = { mapData["width"], mapData["height"] };
         layerData.resize(mapLayers); //[0->1] Size of first collum
-        
+       
         for (int i = 0; i < mapLayers; i++) {
             layerData[i].resize(layerSize.x * layerSize.y); //make this [0-1] [0-959]
 
@@ -113,7 +114,8 @@ bool Map::ImportMap(const std::string& path) {
             
             for (int j = 0; j < layerSize.x * layerSize.y; j++) {
                 if (j >= layerSize.x * layerSize.y) break;
-                layerData[i][j] = data[j + 1];
+
+                layerData[i][j] = data[j + 1];             
             }
         }
     } catch(std::exception e){
@@ -135,7 +137,7 @@ void Map::DrawMap(olc::TileTransformedView* tv) {
     bottomRightTile.x = bottomRightTile.x >= layerSize.x ? layerSize.x : bottomRightTile.x;
     bottomRightTile.y = bottomRightTile.y >= layerSize.y ? layerSize.y : bottomRightTile.y;
 
-    for (int i = 0; i < mapLayers; i++) {
+    for (int i = 0; i < mapLayers-1; i++) {//-1 for now
         for (int y = topLeftTile.y; y <= bottomRightTile.y; y++) {
             for (int x = topLeftTile.x; x <= bottomRightTile.x; x++) {
                 int pos = x + y * layerSize.x;
@@ -158,8 +160,6 @@ olc::vi2d Map::GetTile(int id) const {
     return olc::vi2d{ id % tileCount.x, id / tileCount.x };
 }
 
-
- // Do Not Touch <<Please>> Magnarune
 Map::TileSet Map::GetTileSet(int id) const {
     for (int i = 1; i <= tileSetsSize; ++i) {
         if ( id < vFirstGid[i - 1]) return TileSet{ decals[i - 2].get(), vFirstGid[i - 2] };

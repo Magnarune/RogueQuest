@@ -39,11 +39,11 @@
             }
         },
         "//BLOODWORTHJR-PC/Users/BloodworthJr/source/repos/RogueQuest/RogueQuest/Assets/Maps/TerraProsject.tmx": {
-            "scale": 1.5,
-            "selectedLayer": 0,
+            "scale": 0.33,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 636,
-                "y": 769.6666666666665
+                "x": 6078.787878787879,
+                "y": 5846.969696969697
             }
         },
         "Map-Tiles/Dirt (Non-Winter).tsx": {
@@ -98,7 +98,7 @@
             "scale": 0.25,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 7998,
+                "x": 7996,
                 "y": 7998
             }
         },
@@ -109,6 +109,7 @@
     },
     "last.exportedFilePath": "//bloodworthjr-pc/Users/BloodworthJr/source/repos/RogueQuest/RogueQuest/Assets/Maps",
     "last.imagePath": "//bloodworthjr-pc/Users/BloodworthJr/source/repos/RogueQuest/RogueQuest/Assets/MapMaker/TileSets/GrassLand/Terrain",
+    "lastUsedTilesetExportFilter": "Lua files (*.lua)",
     "map.height": 500,
     "map.lastUsedExportFilter": "Lua files (*.lua)",
     "map.lastUsedFormat": "tmx",

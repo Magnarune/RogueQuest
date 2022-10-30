@@ -85,6 +85,10 @@ bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
 		// unit vs building
 		predPosition -= vOverlap;
 	}
+	if (std::shared_ptr<CollisionMapObject> mapobj = std::dynamic_pointer_cast<CollisionMapObject> (other))	{
+		predPosition -= vOverlap;
+
+	}
 	return true;
 }
 

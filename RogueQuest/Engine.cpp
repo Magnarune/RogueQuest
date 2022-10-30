@@ -57,8 +57,8 @@ Game_Engine::~Game_Engine() {
     self = nullptr;
 }
 bool Game_Engine::OnUserCreate() {
-
-    // Setup Controllers    
+    // Setup Controllers   
+    MapTextureCache::InitCache();
     TextureCache::InitCache(); // initialize texture cache
     config.reset(new Config("Config.lua", true)); // config manager
     worldManager.reset(new WorldManager); // create the world manager
@@ -75,9 +75,11 @@ bool Game_Engine::OnUserCreate() {
     highlightmanagment.reset(new Highlighting);
     researchmanager.reset(new Research);
     mainmenu.reset(new MainMenu);
+    cmapmanager.reset(new CollisionMap);
 
     
     // Configure Controllers
+    cmapmanager->ImportCollisionData();//Imports all the possible world map objects
     mainmenu->ImportMainMenuAssets();
     assetManager->LoadUnitAssets();     // Load all the Lua files
     assetManager->LoadBuildingAssets(); // Load all the Buildings files
@@ -110,6 +112,7 @@ bool Game_Engine::OnUserCreate() {
     bIsLocked = config->GetValue<bool>("ScreenLocked");
 
     SetLocked(bIsLocked);
+    cmapmanager->GenerateCollisionObject("Bussy Tree", { 3 * 190.4f,3 * 200.5f });
     return true;
 }
 
@@ -214,12 +217,14 @@ bool Game_Engine::OnUserDestroy(){
     userinputs.reset();
     inputmanager.reset();
     TextureCache::FreeCache();
+    MapTextureCache::FreeCache();
     particles.reset();
     leaders.reset();
     highlightmanagment.reset();
     config.reset();
     researchmanager.reset();
     mainmenu.reset();
+    cmapmanager.reset();
     return true;
 }
 
@@ -348,7 +353,18 @@ const std::map<std::string, CommandFunction> commands = {
         std::cout << "Building Crushed\n";
     }
     }},
-
+    { "Plant", [](std::stringstream& ss) {
+    auto& engine = Game_Engine::Current();
+    std::string name;
+    size_t index {};
+    ss >> name;
+    if (!ss.eof()) ss >> index;
+    auto Building = engine.buildingManager->GetBuilding(name, index);
+    if (Building) {
+        Building->Destroy();
+        std::cout << "Building Crushed\n";
+    }
+    } },
     /*
     {"", [](std::stringstream& ss){
         auto& engine = Game_Engine::Current();
@@ -372,8 +388,8 @@ bool Game_Engine::OnConsoleCommand(const std::string& stext) {
 }
 
 void Game_Engine::InitiateGame() {//For Debugging Ease
-    worldManager->GenerateBuilding("GoldMine", 1, { 16 * 32.f,14 * 32.f });
-    const auto& Castle = worldManager->GenerateBuilding("Castle", 1, { 25 * 32.f  ,  14 * 32.f });
+    worldManager->GenerateBuilding("GoldMine", 1, { 19 * 32.f,14 * 32.f });
+    const auto& Castle = worldManager->GenerateBuilding("Castle", 1, { 36 * 32.f  ,  14 * 32.f });
     Castle->Health = Castle->maxHealth;
     Castle->curStage = 1;
      

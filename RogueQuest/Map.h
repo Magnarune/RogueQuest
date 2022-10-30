@@ -20,7 +20,7 @@ public:
 	virtual ~Map();
 
     struct TileSet {
-        olc::Decal* decal; // do not store this ever
+        olc::Decal* decal; 
         int gid;
     };
 
@@ -73,4 +73,5 @@ public:
 
     friend class cAssets;
     friend class WorldManager;	
+    friend class CollisionMap;
 };

@@ -19,6 +19,8 @@
 #include "Assets.h"
 #include "Hud.h"
 #include "Map.h"
+#include "CollisionMapObject.h"
+#include "CollisionMap.h"
 #include "HudManager.h"
 #include "TaskManager.h"
 #include "Particles.h"
@@ -96,6 +98,7 @@ public:
 	std::unique_ptr<LeaderManager> leaders;
 	std::unique_ptr<Highlighting> highlightmanagment;
 	std::unique_ptr<Research> researchmanager;
+	std::unique_ptr<CollisionMap> cmapmanager;
 	//This needs to be initialized to map size
 	bool ActivityDone;
 	struct Cam{

@@ -33,6 +33,7 @@ void WorldManager::Update(float delta) {//Update last frames
     
     for (auto& object : objectListView) {
 		if (object.get() == nullptr) continue;
+        
         object.get()->Update(delta);
 	}
 
@@ -53,7 +54,6 @@ void WorldManager::Update(float delta) {//Update last frames
 
 void WorldManager::Draw() {
     Game_Engine& engine = Game_Engine::Current();
-
     // sort the object list based on draw depth
     std::ranges::sort(objectListView, [](auto& a, auto& b) -> bool {
         return a.get()->drawDepth < b.get()->drawDepth;
@@ -63,9 +63,20 @@ void WorldManager::Draw() {
     //engine.DrawStringDecal(engine.GetMousePos(), std::to_string(currentMap->darkness_timer));
     for (auto& object : objectListView) {
         if (object.get() == nullptr) continue;
+        if (!Checkonscreen(object)) continue;
         object.get()->Draw(&engine.tv);
     }
     engine.particles->DrawParticles();
+}
+
+bool WorldManager::Checkonscreen(std::shared_ptr<WorldObject> obj) {
+    auto& engine = Game_Engine::Current();
+    if (obj->Position.x > 32.f*(float)currentMap->topLeftTile.x &&
+        obj->Position.y > 32.f*(float)currentMap->topLeftTile.y &&
+        obj->Position.x < 32.f*(float)currentMap->bottomRightTile.x &&
+        obj->Position.y < 32.f*(float)currentMap->bottomRightTile.y)
+        return true;
+    return false;
 }
 
 void WorldManager::DestroyObject(WorldObject* self) {
@@ -357,6 +368,14 @@ bool WorldManager::ChangeMap(const std::string& name) {
     currentMap = *it;
 
     engine.hud->PreRenderMiniMap(*currentMap);
+    engine.cmapmanager->CLayerdata.clear();
+    engine.cmapmanager->CLayerdata.resize(currentMap->layerSize.x * currentMap->layerSize.y);
+    int last_layer = currentMap->layerData.size()-1;
+    for (int i = 0; i < currentMap->layerData[last_layer].size(); i++) {
+        engine.cmapmanager->CLayerdata[i] = currentMap->layerData[1][i];
+    }
+
+    engine.cmapmanager->PlaceMapObjects();//Gulp
     return true;
 }
 

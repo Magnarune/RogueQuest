@@ -33,9 +33,7 @@ class WorldManager {
 	std::vector<std::reference_wrapper<std::shared_ptr<WorldObject>>> objectListView; // view transform on object list
 	std::vector<std::shared_ptr<WorldObject>> garbageList;
 
-	// vague variables will lead to broken code later down the line - either rename these or label them with a comment properly
-	bool cu; // Garbage collector unit
-	bool cb; // Garbage collector building
+
 
 	void refreshObjectView();
 	void addObjectToList(std::shared_ptr<WorldObject> obj);
@@ -46,7 +44,7 @@ public:
 	virtual ~WorldManager();
     
 	void Update(float delta);
-	
+	bool Checkonscreen(std::shared_ptr<WorldObject> obj);
     void Draw();
 	void DestroyObject(WorldObject* self);
 	void CollectGarbage();
@@ -77,4 +75,5 @@ public:
 	friend class UnitManager;
 	friend class Hud;
 	friend class Projectile;
+	friend class CollisionMap;
 };
