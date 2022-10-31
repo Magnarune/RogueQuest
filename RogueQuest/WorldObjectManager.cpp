@@ -2,7 +2,10 @@
 #include "Engine.h"
 #include <ranges>
 
-WorldManager::WorldManager() {
+WorldManager::WorldManager() : quadtreelistviews(quadtreeList) {
+
+
+
     objectList.reserve(1024 * 512);
     garbageList.reserve(100);
     mapList.reserve(10);
@@ -15,12 +18,21 @@ WorldManager::~WorldManager() {
 }
 
 void WorldManager::refreshObjectView() {
-    objectListView.clear();
-    objectListView.assign(objectList.begin(), objectList.end());
+    //objectListView.clear();
+   // objectListView.assign(objectList.begin(), objectList.end());
+
+    quadtreelistviews.get().clear();
+    for (auto quad = quadtreeList.begin(); quad != quadtreeList.end(); ++quad)
+        quadtreelistviews.get().insert(quad->item,quad->item.get()->PosSize);
+
+
 }
 
-void WorldManager::addObjectToList(std::shared_ptr<WorldObject> obj) {
-    newObjectList.emplace_back(obj); // add to new object list
+void WorldManager::addObjectToList(std::shared_ptr<WorldObject> obj, olc::utils::geom2d::rect<float> size) {
+
+    newobjects.push_back({ obj, size });//hold items until new frame
+   
+   //newObjectList.emplace_back(obj); // add to new object list
 }
 
 void WorldManager::Update(float delta) {//Update last frames
@@ -30,23 +42,55 @@ void WorldManager::Update(float delta) {//Update last frames
     std::ranges::sort(objectListView, [](auto& a, auto& b) -> bool {
         return a.get()->updatePriority < b.get()->updatePriority;
     });
+
+    std::list<int> dance;
+    dance.sort();
     
-    for (auto& object : objectListView) {
+    //quadtreelistviews.get().
+    quadtreelistviews.get().sort();
+   
+   (quadtreelistviews, [](auto& a, auto& b)-> bool {
+
+        return a->item.get()->updatePriority < b->item.get()->updatePriority;
+        });
+    
+   /* for (auto& object : objectListView) {
 		if (object.get() == nullptr) continue;
         
         object.get()->Update(delta);
-	}
+	}*/
+
+    for (auto quad = quadtreelistviews.get().begin(); quad != quadtreelistviews.get().end(); ++quad) {
+        if (quad->item.get() == nullptr) continue;
+        quad->item.get()->Update(delta);
+    }      
+
 
     // after updates
-    for (auto& object : objectListView) {
-		if (object.get() == nullptr) continue;
-        object.get()->AfterUpdate(delta);
-	}
+ //   for (auto& object : objectListView) {
+	//	if (object.get() == nullptr) continue;
+ //       object.get()->AfterUpdate(delta);
+ //      
+	//}
+    for (auto quad = quadtreelistviews.get().begin(); quad != quadtreelistviews.get().end(); ++quad) {
+        if (quad->item.get() == nullptr) continue;
+        quad->item.get()->AfterUpdate(delta);
+        quad->item.get()->PosSize.pos = quad->item.get()->Position;
+        
+    }
 
-    currentMap->UpdateTimeofDay(delta);
+
+
+    
+
+    olc::utils::geom2d::rect<float> entiremap = { olc::vf2d(0.f,0.f), olc::vf2d(currentMap->layerSize)};
+   
+    for (auto& object : quadtreeList.search(entiremap)) { 
+        quadtreeList.relocate(object, object->item.get()->PosSize);
+    }
+  
 
     if (worldclock.getSeconds() > 1.0) {
-
         engine.leaders->FindHomeBase();
         worldclock.restart();
     }
@@ -59,14 +103,29 @@ void WorldManager::Draw() {
         return a.get()->drawDepth < b.get()->drawDepth;
     });
 
+
+
+
     currentMap->DrawMap(&engine.tv);
     //engine.DrawStringDecal(engine.GetMousePos(), std::to_string(currentMap->darkness_timer));
-    for (auto& object : objectListView) {
+    olc::utils::geom2d::rect<float> screen = {engine.tv.GetWorldTL(),engine.tv.GetWorldBR()- engine.tv.GetWorldTL()};
+   // olc::utils::geom2d::rect<float> rAreaToSearch(vTopLeft, vSize);
+    for (const auto& object : quadtreeList.search(screen))    {
+        if (object->item.get() == nullptr) continue;
+        object->item.get()->Draw(&engine.tv);
+        
+    }
+  /*  for (const auto& object : statictreeList.search(screen)) {
+        if (object->item.get() == nullptr) continue;
+        object->item.get()->Draw(&engine.tv);
+
+    }*/
+    
+   /* for (auto& object : objectListView) {
         if (object.get() == nullptr) continue;
         if (!Checkonscreen(object)) continue;
-        object.get()->Draw(&engine.tv);
     }
-    engine.particles->DrawParticles();
+    engine.particles->DrawParticles();*/
 }
 
 bool WorldManager::Checkonscreen(std::shared_ptr<WorldObject> obj) {
@@ -119,9 +178,15 @@ void WorldManager::CollectGarbage() {
 }
 
 void WorldManager::PopulateNewObjects() {
-    for(auto& obj : newObjectList) objectList.emplace_back(std::move(obj));
+  /*  for(auto& obj : newObjectList) objectList.emplace_back(std::move(obj));
     newObjectList.clear();
+    refreshObjectView();*/
+    for(auto& obj : newobjects)
+        quadtreeList.insert(obj.first, obj.second);
+    newobjects.clear();
     refreshObjectView();
+
+
 }
 
 std::shared_ptr<WorldObject> WorldManager::FindObject(size_t index) {
@@ -129,6 +194,7 @@ std::shared_ptr<WorldObject> WorldManager::FindObject(size_t index) {
 }
 
 bool WorldManager::IterateObjects(std::function<bool(std::shared_ptr<WorldObject>)> cb) {
+
     for(auto& object : objectList) {
         if(object == nullptr) continue;
         if(!cb(object)) break;
@@ -136,6 +202,13 @@ bool WorldManager::IterateObjects(std::function<bool(std::shared_ptr<WorldObject
     return true; // iterate completed successfully
 }
 
+bool WorldManager::IterateObjectQT(std::function<bool(std::shared_ptr<WorldObject>)> cb, olc::utils::geom2d::rect<float> searchsize) {    
+    for (const auto& object : quadtreeList.search(searchsize)) {
+        if (object->item.get() == nullptr) continue;
+        if (!cb(object->item)) break;
+    }
+    return true; // iterate completed successfully
+}
 
 /* Factory Function */
 
@@ -206,7 +279,8 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     unit->updatePriority = 0.1f; // highest priority
 
     engine.unitManager->addNewUnit(unit);
-    addObjectToList(unit);
+    unit->PosSize = { unit->Position,olc::vf2d(unit->Unit_Collision_Radius,unit->Unit_Collision_Radius)};
+    addObjectToList(unit,unit->PosSize);
     return unit;
 }
 
@@ -286,7 +360,8 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     build->updatePriority = 0.9f; // lower priority
 
     engine.buildingManager->addNewBuilding(build);
-    addObjectToList(build);
+    build->PosSize = { build->Position,build->Size };
+    addObjectToList(build, build->PosSize);
     return build;
 }
 
@@ -339,11 +414,10 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
     //proj->SetMask(Collidable::Mask(olc::vf2d(proj->Size))); // TO DO: Figure out what the mask will be / and how to implement it
     proj->cType = Collidable::isProjectile;
     proj->updatePriority = 0.5f; // mid priority
-
-    addObjectToList(proj);
+    proj->PosSize = { proj->Position,olc::vf2d(32.f,32.f) };
+    addObjectToList(proj,proj->PosSize);
     return proj;
 }
-
 
 void WorldManager::ImportMapData() {
     // to do: iterate map folder and find maps
@@ -355,6 +429,7 @@ void WorldManager::ImportMapData() {
 
     for(const auto& path : paths) {
         mapList.emplace_back(std::make_shared<Map>("Assets/Maps/" + path));
+        
     }
 }
 
@@ -366,8 +441,15 @@ bool WorldManager::ChangeMap(const std::string& name) {
         return false;
     }
     currentMap = *it;
+    olc::utils::geom2d::rect<float> cash = { olc::vf2d( 0.f,0.f ),olc::vf2d((float)currentMap->layerSize.x, (float)currentMap->layerSize.y)};
+    
 
+    quadtreeList.clear();
+    quadtreeList.resize(cash);
     engine.hud->PreRenderMiniMap(*currentMap);
+
+
+
     engine.cmapmanager->CLayerdata.clear();
     engine.cmapmanager->CLayerdata.resize(currentMap->layerSize.x * currentMap->layerSize.y);
     int last_layer = currentMap->layerData.size()-1;

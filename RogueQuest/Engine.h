@@ -6,6 +6,9 @@
 #include <map>
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_TransformedView.h"
+#include "olcUTIL_Geometry2D.h"
+#include "olcUTIL_QuadTree.h"
+
 #include "sol/sol.hpp"
 
 #include "WorldObject.h"

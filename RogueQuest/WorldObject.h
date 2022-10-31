@@ -4,7 +4,7 @@
 #include "clock.h"
 #include <variant>
 #include <map>
-
+#include "olcUTIL_Geometry2D.h"
 
 class WorldObject : std::enable_shared_from_this<WorldObject> {
 public:
@@ -14,7 +14,7 @@ public:
 
 	olc::vf2d Position {};
 	olc::vf2d Velocity {};
-	
+	olc::utils::geom2d::rect<float> PosSize;
 	float m_fTimer {};		
 	float drawDepth;
 	float updatePriority;

@@ -7,12 +7,15 @@
 #include "sol/sol.hpp"
 #include "Assets.h"
 
-
+//quadtree
+#include "olcUTIL_Geometry2D.h"
+#include "olcUTIL_QuadTree.h"
 
 class Map {
 	sol::state lua;
     bool valid;
     std::vector<std::unique_ptr<olc::Decal>> decals;
+    std::vector<olc::utils::QuadTreeContainer<std::pair<int,olc::vf2d>>> mapquadtreeList;
 
 public:
 	Map();
@@ -23,7 +26,6 @@ public:
         olc::Decal* decal; 
         int gid;
     };
-
     //Import
     sol::table mapData, tileSets;
     //MetaData

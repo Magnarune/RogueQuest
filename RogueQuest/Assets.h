@@ -108,7 +108,8 @@ public:
 	olc::vi2d vTileSize;
     int Animation {};
     inline bool BuildingExists(const std::string& name) { return !!buildCache.count(name); }
-    inline const BuildingType& GetBuildingData(const std::string& name) { return buildCache.at(name); }
+    inline const BuildingType& GetBuildingData(const std::string& name) {
+        return buildCache.at(name); }
 
     inline bool UnitExists(const std::string& name) { return !!unitCache.count(name); }
     inline const UnitType& GetUnitData(const std::string& name) { return unitCache.at(name); }

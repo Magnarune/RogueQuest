@@ -238,8 +238,11 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="MoveNodes.h" />
+    <ClInclude Include="ObjectQuadTree.h" />
     <ClInclude Include="olcPGEX_TransformedView.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
+    <ClInclude Include="olcUTIL_Geometry2D.h" />
+    <ClInclude Include="olcUTIL_QuadTree.h" />
     <ClInclude Include="Options.h" />
     <ClInclude Include="Particles.h" />
     <ClInclude Include="Projectiles.h" />

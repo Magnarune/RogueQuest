@@ -165,9 +165,9 @@ bool Collidable::CheckCollision(float delta) {
 		}
 		return true;
 	};
+	
 
-
-	return engine.worldManager->IterateObjects([&](std::shared_ptr<WorldObject> _obj){
+	return engine.worldManager->IterateObjectQT([&](std::shared_ptr<WorldObject> _obj) {
 		auto obj = std::dynamic_pointer_cast<Collidable>(_obj);
 		if(!obj || obj.get() == this) return true;
 		if(obj->mask.type == Mask::MASK_NONE) return true; // skip non-masked
@@ -193,5 +193,5 @@ bool Collidable::CheckCollision(float delta) {
 		}
 
 		throw std::runtime_error("Invalid collision detection reached");
-	});
+		}, (olc::utils::geom2d::rect<float>{Position,olc::vf2d(256,256)}));
 }

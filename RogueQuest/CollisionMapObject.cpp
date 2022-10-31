@@ -12,11 +12,10 @@ bool CollisionMapObject::OnCollision(std::shared_ptr<Collidable> other, olc::vf2
 }
 
 void CollisionMapObject::Update(float delta) {
-	Collidable::Update(delta); // Inherit
+	
 }
 
 void CollisionMapObject::AfterUpdate(float delta) {
-	Collidable::AfterUpdate(delta);
 }
 
 
