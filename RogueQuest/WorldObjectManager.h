@@ -32,14 +32,15 @@ class Building;
 
 class WorldManager {
 	std::vector<std::shared_ptr<Map>> mapList; // Maybe
-	std::vector<std::shared_ptr<WorldObject>> objectList; // living objects
 	std::vector<std::shared_ptr<WorldObject>> newObjectList; // new objects live here
+	std::vector<std::shared_ptr<WorldObject>> objectList; // living objects
 	std::vector<std::reference_wrapper<std::shared_ptr<WorldObject>>> objectListView; // view transform on object list
-
+	olc::utils::QuadTreeContainer<std::reference_wrapper<std::shared_ptr<WorldObject>>> QuadList;// idk...
+	
 	//QuadTree
 	 // The object goes into the tree
 	
-	std::vector<std::shared_ptr<WorldObject>> sigSorter;//Sorts the QuadTreeList 
+	//std::vector<std::shared_ptr<WorldObject>> sigSorter;//Sorts the QuadTreeList 
 	std::vector<std::pair<std::shared_ptr<WorldObject>, olc::utils::geom2d::rect<float>>> newobjects;//new objects to be added
 	olc::utils::QuadTreeContainer<std::shared_ptr<WorldObject>> quadtreeList; // The object goes into the tree
 
