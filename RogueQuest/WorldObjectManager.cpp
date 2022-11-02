@@ -2,93 +2,59 @@
 #include "Engine.h"
 #include <ranges>
 
-WorldManager::WorldManager() : quadtreelistviews(quadtreeList) {
-
-
-
-    objectList.reserve(1024 * 512);
+WorldManager::WorldManager() {
+    auto& engine = Game_Engine::Current();
+    
+    
     garbageList.reserve(100);
     mapList.reserve(10);
 }
 
 WorldManager::~WorldManager() {
+    sigSorter.clear();
     mapList.clear();
 	objectList.clear();
 	garbageList.clear();
 }
 
 void WorldManager::refreshObjectView() {
-    //objectListView.clear();
-   // objectListView.assign(objectList.begin(), objectList.end());
-
-    quadtreelistviews.get().clear();
-    for (auto quad = quadtreeList.begin(); quad != quadtreeList.end(); ++quad)
-        quadtreelistviews.get().insert(quad->item,quad->item.get()->PosSize);
-
-
+    auto& engine = Game_Engine::Current();
+    sigSorter.clear();
+    screen = { engine.tv.GetWorldTL(),engine.tv.GetWorldBR() - engine.tv.GetWorldTL() };
+    for (auto& founditems : quadtreeList.search(screen)) {
+        sigSorter.push_back(founditems->item);
+    }
+    
+    std::ranges::sort(sigSorter, [](auto& a, auto& b) -> bool {
+     return a.get()->drawDepth < b.get()->drawDepth;
+    });  
 }
 
 void WorldManager::addObjectToList(std::shared_ptr<WorldObject> obj, olc::utils::geom2d::rect<float> size) {
-
-    newobjects.push_back({ obj, size });//hold items until new frame
-   
+    newobjects.push_back({ obj, size });//hold items until new frame   
    //newObjectList.emplace_back(obj); // add to new object list
 }
 
 void WorldManager::Update(float delta) {//Update last frames
     //currentMap->UpdateMap(delta);
     auto& engine = Game_Engine::Current();
-    // sort the object list based on draw depth
-    std::ranges::sort(objectListView, [](auto& a, auto& b) -> bool {
-        return a.get()->updatePriority < b.get()->updatePriority;
-    });
 
-    std::list<int> dance;
-    dance.sort();
-    
-    //quadtreelistviews.get().
-    quadtreelistviews.get().sort();
-   
-   (quadtreelistviews, [](auto& a, auto& b)-> bool {
-
-        return a->item.get()->updatePriority < b->item.get()->updatePriority;
-        });
-    
-   /* for (auto& object : objectListView) {
-		if (object.get() == nullptr) continue;
-        
-        object.get()->Update(delta);
-	}*/
-
-    for (auto quad = quadtreelistviews.get().begin(); quad != quadtreelistviews.get().end(); ++quad) {
+    //this is all Update
+    for (auto quad = quadtreeList.begin(); quad != quadtreeList.end(); ++quad) {
         if (quad->item.get() == nullptr) continue;
         quad->item.get()->Update(delta);
-    }      
+      
+    } 
 
-
-    // after updates
- //   for (auto& object : objectListView) {
-	//	if (object.get() == nullptr) continue;
- //       object.get()->AfterUpdate(delta);
- //      
-	//}
-    for (auto quad = quadtreelistviews.get().begin(); quad != quadtreelistviews.get().end(); ++quad) {
+    for (auto quad = quadtreeList.begin(); quad != quadtreeList.end(); ++quad) {
         if (quad->item.get() == nullptr) continue;
         quad->item.get()->AfterUpdate(delta);
-        quad->item.get()->PosSize.pos = quad->item.get()->Position;
-        
-    }
-
-
-
-    
-
-    olc::utils::geom2d::rect<float> entiremap = { olc::vf2d(0.f,0.f), olc::vf2d(currentMap->layerSize)};
-   
-    for (auto& object : quadtreeList.search(entiremap)) { 
-        quadtreeList.relocate(object, object->item.get()->PosSize);
-    }
-  
+        quad->item.get()->PosSize.pos = quad->item.get()->Position;        
+        if (quad->item.get()->IhaveMoved) {
+            quad->item.get()->IhaveMoved = false;
+            quadtreeList.relocate(quad, quad->item.get()->PosSize);            
+        }
+    } 
 
     if (worldclock.getSeconds() > 1.0) {
         engine.leaders->FindHomeBase();
@@ -98,34 +64,16 @@ void WorldManager::Update(float delta) {//Update last frames
 
 void WorldManager::Draw() {
     Game_Engine& engine = Game_Engine::Current();
-    // sort the object list based on draw depth
-    std::ranges::sort(objectListView, [](auto& a, auto& b) -> bool {
-        return a.get()->drawDepth < b.get()->drawDepth;
-    });
-
-
-
 
     currentMap->DrawMap(&engine.tv);
-    //engine.DrawStringDecal(engine.GetMousePos(), std::to_string(currentMap->darkness_timer));
-    olc::utils::geom2d::rect<float> screen = {engine.tv.GetWorldTL(),engine.tv.GetWorldBR()- engine.tv.GetWorldTL()};
-   // olc::utils::geom2d::rect<float> rAreaToSearch(vTopLeft, vSize);
-    for (const auto& object : quadtreeList.search(screen))    {
-        if (object->item.get() == nullptr) continue;
-        object->item.get()->Draw(&engine.tv);
-        
+ 
+   
+    refreshObjectView();
+    for (auto& sigs : sigSorter) {
+        sigs->Draw(&engine.tv);
     }
-  /*  for (const auto& object : statictreeList.search(screen)) {
-        if (object->item.get() == nullptr) continue;
-        object->item.get()->Draw(&engine.tv);
-
-    }*/
     
-   /* for (auto& object : objectListView) {
-        if (object.get() == nullptr) continue;
-        if (!Checkonscreen(object)) continue;
-    }
-    engine.particles->DrawParticles();*/
+
 }
 
 bool WorldManager::Checkonscreen(std::shared_ptr<WorldObject> obj) {
@@ -138,55 +86,51 @@ bool WorldManager::Checkonscreen(std::shared_ptr<WorldObject> obj) {
     return false;
 }
 
-void WorldManager::DestroyObject(WorldObject* self) {
-    auto me = std::find_if(objectList.begin(), objectList.end(), [&](const auto& obj){ return obj.get() == self; });
-    assert(me != objectList.end()); // destroying an object should always find it in the list!
-    garbageList.emplace_back(std::move(*me)); // move to garbage for final living space before death
+void WorldManager::DestroyObject(WorldObject* self) {//seaches entire list to destroy item s
+    auto me = std::find_if(quadtreeList.begin(), quadtreeList.end(), [&](const auto& obj){ return obj.item.get() == self; });
+    assert(me != quadtreeList.end()); // destroying an object should always find it in the list!
+  //  garbageList.emplace_back(std::move(*me)); // move to garbage for final living space before death
 }
 
 void WorldManager::CollectGarbage() {
     auto& engine = Game_Engine::Current();
 
-    size_t len = garbageList.size();
-    if(len){ // if there is garbage, we need to clean the missing links
-        size_t pos = 1;
+    //size_t len = garbageList.size();
+    //if(len){ // if there is garbage, we need to clean the missing links
+    //    size_t pos = 1;
 
-        auto itr = objectList.begin();
-        if(std::find_if(objectList.begin(), objectList.end(), [](const auto& obj){ return obj.get() != nullptr; }) == objectList.end()){
-            objectList.clear();
-        } else {
-            do {
-                if(!!itr->get()) continue; // keep valid objectList
-                do { // keep swapping until there's no more invalid object here
-                    if(objectList.begin() == objectList.end() - pos || itr == objectList.end() - pos) break;
-                    std::swap(*itr, *(objectList.end() - pos) ); // move garbage to end of list
-                    ++pos; // increase found garbage
-                } while(!itr->get());
+    //    auto itr = quadtreeList.begin();
+    //    if(std::find_if(quadtreeList.begin(), quadtreeList.end(), [](const auto& obj){ return obj.item.get() != nullptr; }) == quadtreeList.end()){
+    //        objectList.clear();
+    //    } else {
+    //        do {
+    //            if(!!itr->item.get()) continue; // keep valid objectList
+    //            do { // keep swapping until there's no more invalid object here
+    //                if(quadtreeList.begin() == quadtreeList.end() - pos || itr->pItem.iterator == quadtreeList.end() - pos) break;
+    //                std::swap(*itr->pItem.iterator, *(quadtreeList.end() - pos)); // move garbage to end of list
+    //                ++pos; // increase found garbage
+    //            } while(!itr->item.get());
 
-            } while(itr + 1 != objectList.end() && pos <= len && ++itr != objectList.end() - len); // continue looking for missing link garbage
-
-            objectList.resize(objectList.size() - len); // slice off the head
-            // for(int i=0; i < len; ++i) objectList.pop_back(); // slice off the garbage - resize instead?
-        }
-        garbageList.clear();
+    //        } while(itr->pItem.iterator + 1 != quadtreeList.end() && pos <= len && ++itr->pItem.iterator != quadtreeList.end() - len); // continue looking for missing link garbage
+    //        //this is wrong
+    //       // quadtreeList.resize(quadtreeList.size() - len); // slice off the head
+    //        // for(int i=0; i < len; ++i) objectList.pop_back(); // slice off the garbage - resize instead?
+    //    }
+    //    
+    // quadtreeList.clear();
 
         engine.unitManager->CollectGarbage(); // cleanup the unit manager garbage
         engine.buildingManager->CollectGarbage(); //cleanup the building manager garbage
 
         refreshObjectView(); // remember to refresh the object view when modifying the list
-    }
+   // }
 }
 
 void WorldManager::PopulateNewObjects() {
-  /*  for(auto& obj : newObjectList) objectList.emplace_back(std::move(obj));
-    newObjectList.clear();
-    refreshObjectView();*/
-    for(auto& obj : newobjects)
+    for(auto& obj : newobjects)//add the vector of new items to quad tree
         quadtreeList.insert(obj.first, obj.second);
     newobjects.clear();
     refreshObjectView();
-
-
 }
 
 std::shared_ptr<WorldObject> WorldManager::FindObject(size_t index) {
@@ -202,10 +146,11 @@ bool WorldManager::IterateObjects(std::function<bool(std::shared_ptr<WorldObject
     return true; // iterate completed successfully
 }
 
-bool WorldManager::IterateObjectQT(std::function<bool(std::shared_ptr<WorldObject>)> cb, olc::utils::geom2d::rect<float> searchsize) {    
-    for (const auto& object : quadtreeList.search(searchsize)) {
-        if (object->item.get() == nullptr) continue;
-        if (!cb(object->item)) break;
+bool WorldManager::IterateObjectQT(std::function<bool(std::shared_ptr<WorldObject>)> cb, olc::utils::geom2d::rect<float> searchsize) {
+    auto object = quadtreeList.search(searchsize);
+    for (auto& obj :object) {    
+        if (obj->item == nullptr) continue;
+        if (!cb(obj->item)) break;
     }
     return true; // iterate completed successfully
 }
@@ -442,17 +387,13 @@ bool WorldManager::ChangeMap(const std::string& name) {
     }
     currentMap = *it;
     olc::utils::geom2d::rect<float> cash = { olc::vf2d( 0.f,0.f ),olc::vf2d((float)currentMap->layerSize.x, (float)currentMap->layerSize.y)};
-    
-
-    quadtreeList.clear();
+   
     quadtreeList.resize(cash);
     engine.hud->PreRenderMiniMap(*currentMap);
 
-
-
     engine.cmapmanager->CLayerdata.clear();
     engine.cmapmanager->CLayerdata.resize(currentMap->layerSize.x * currentMap->layerSize.y);
-    int last_layer = currentMap->layerData.size()-1;
+    int last_layer = int(currentMap->layerData.size()-1);
     for (int i = 0; i < currentMap->layerData[last_layer].size(); i++) {
         engine.cmapmanager->CLayerdata[i] = currentMap->layerData[1][i];
     }

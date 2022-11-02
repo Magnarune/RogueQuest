@@ -112,12 +112,6 @@ namespace olc::utils
 				if (m_pChild[i]) m_pChild[i]->items(listItems);
 		}
 
-		void sort() { // order sequence
-			sort(less<>{});
-		}
-
-		
-
 		void clear()
 		{
 			m_pItems.clear();
@@ -153,7 +147,7 @@ namespace olc::utils
 
 	protected:
 		size_t m_depth = 0;
-		size_t m_maxdepth = 8;
+		size_t m_maxdepth = 10;
 
 		// Area of this quadnode
 		geom2d::rect<CTYPE> m_rect;
@@ -247,29 +241,6 @@ namespace olc::utils
 			return m_allItems.end();
 		}
 
-		template <class _Pr2>
-		void sort(_Pr2 _Pred) { // order sequence
-			auto& _My_data = _Mypair._Myval2;
-			_Scary_val::_Sort(_My_data._Myhead->_Next, _My_data._Mysize, _Pass_fn(_Pred));
-		}
-
-		void reverse() noexcept { // reverse sequence
-			const _Nodeptr _Phead = _Mypair._Myval2._Myhead;
-			_Nodeptr _Pnode = _Phead;
-
-			for (;;) { // flip pointers in a node
-				const _Nodeptr _Pnext = _Pnode->_Next;
-				_Pnode->_Next = _Pnode->_Prev;
-				_Pnode->_Prev = _Pnext;
-
-				if (_Pnext == _Phead) {
-					break;
-				}
-
-				_Pnode = _Pnext;
-			}
-		}
-
 		typename IQuadtreeContainer::const_iterator cbegin()
 		{
 			return m_allItems.cbegin();
@@ -295,8 +266,8 @@ namespace olc::utils
 			return root.area();
 		}
 
+		IQuadtreeContainer m_allItems;
 	protected:
 		DynamicQuadTree<typename IQuadtreeContainer::iterator> root;
-		IQuadtreeContainer m_allItems;
 	};
 }

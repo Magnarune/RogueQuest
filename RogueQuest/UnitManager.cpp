@@ -583,6 +583,9 @@ bool UnitManager::IterateSelectedUnits(std::function<bool(std::shared_ptr<Unit>)
 }
 
 bool UnitManager::IterateAllUnits(std::function<bool(std::shared_ptr<Unit>)> cb) {
+    
+    
+    
     for(auto& unit : unitList) {
         if(unit.expired()) continue;
         if(!cb(unit.lock())){
@@ -674,7 +677,6 @@ void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<
     }
 }
 
-
 std::vector<std::shared_ptr<Collidable>> UnitManager::FindObjects(olc::vf2d pos, float SearchRadius) {
     testobjects.clear();
     auto& engine = Game_Engine::Current();
@@ -719,31 +721,33 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestEnemy(int owner,olc::vf2d 
     float Smallest = SearchRadius * SearchRadius;  
     testobjects.clear();
 
-    IterateAllUnits([&](std::shared_ptr<Unit> unit) -> bool {
-        if ((unit->Position - pos).mag2() < (SearchRadius * SearchRadius) && unit->Health > 0.f ) {
-            if ((unit->Position - pos).mag2() < 0.2f) return true; // continue
+    for (auto& objects : engine.worldManager->quadtreeList.search({ pos, {SearchRadius,SearchRadius} }))
+    {
+        std::shared_ptr<Unit> test;
+        std::shared_ptr<Building> build;
+        if (test = std::dynamic_pointer_cast<Unit>(objects->item))
+        {
+            if ((test->Position - pos).mag2() < 0.2f) continue;
+            if (test.get()->Health < 0.f)
+                continue;//dead unit
             if (owner == 0) {
-                if(unit->Owner != 0)
-                    testobjects.push_back(unit);
-                return true; // continue
+                if (test->Owner != 0)
+                    testobjects.push_back(test);
+                continue; // continue
             } else {
-                for (int i = 0; i < unit->FriendList.size(); i++) {
-                    if (unit->FriendList[i] == owner || unit->Owner == 0)
-                        if (abs(unit->FriendList[i]) + unit->FriendList[i] == 0)
-                            testobjects.push_back(unit);
+                for (int i = 0; i < test->FriendList.size(); i++) {
+                    if (test->FriendList[i] == owner || test->Owner == 0)
+                        if (abs(test->FriendList[i]) + test->FriendList[i] == 0)
+                            testobjects.push_back(test);
                 }
             }
-        }
-        return true; // continue
-    });
-
-    engine.buildingManager->IterateAllBuildings([&](std::shared_ptr<Building> build) -> bool {
-        if ((build->Position - pos).mag2() < (SearchRadius * SearchRadius + (float)build->Size.x) && build->Health > 0.f) {
-            if ((build->Position - pos).mag2() < 0.2f) return true; // continue
+        } else if (build = std::dynamic_pointer_cast<Building>(objects->item))
+        {
+            if ((build->Position - pos).mag2() < 0.2f) continue; // continue
             if (owner == 0) {
                 if (build->Owner != 0)
                     testobjects.push_back(build);
-                return true; // continue
+                continue; // continue
             } else {
                 //Bugged here fix later
                 for (int i = 0; i < build->FriendList.size(); i++) {
@@ -753,8 +757,8 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestEnemy(int owner,olc::vf2d 
                 }
             }
         }
-        return true;
-    });
+    }
+  
 
     if (testobjects.size()) {
         std::shared_ptr<Collidable> closest;

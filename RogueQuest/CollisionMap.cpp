@@ -91,8 +91,8 @@ void CollisionMap::PlaceMapObjects() {
             if (Trees.tileids[0] == CLayerdata[i])//Bing! we got a match on the top left tile on the texture
             {
                 if (FindMapObject(Trees.tileids,Trees.ObjectShape, i)) {
-                    olc::vf2d position = Trees.ObjectShape * Trees.tilesize / 2.f;
-                    float X = (i % map->layerSize.x) * map->tileSize.x;
+                    olc::vf2d position = olc::vf2d(Trees.ObjectShape) * (float)Trees.tilesize / 2.f;
+                    float X = (float)(i % map->layerSize.x) * (float)map->tileSize.x;
                     int test = (int)(i / map->layerSize.x);
                     float Y = (float)test * (float)map->tileSize.x;
                     olc::vf2d pos = olc::vf2d( X, Y);
@@ -117,7 +117,7 @@ bool CollisionMap::FindMapObject(std::vector<int> obj,olc::vf2d Shape, int Pos) 
             int pos =( x + y * map->layerSize.x) + Pos;//If y = 1...
             
             if (pos > map->layerSize.x * map->layerSize.y) return false;//Size of Map
-            int objectpos = x + y * Shape.x;
+            int objectpos = x + y * (int)Shape.x;
             if (obj[objectpos] != CLayerdata[pos]) {
                 return false;
             }

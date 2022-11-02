@@ -35,19 +35,20 @@ class WorldManager {
 	std::vector<std::shared_ptr<WorldObject>> objectList; // living objects
 	std::vector<std::shared_ptr<WorldObject>> newObjectList; // new objects live here
 	std::vector<std::reference_wrapper<std::shared_ptr<WorldObject>>> objectListView; // view transform on object list
-	std::vector<std::shared_ptr<WorldObject>> garbageList;
+
 	//QuadTree
 	 // The object goes into the tree
-	std::reference_wrapper<olc::utils::QuadTreeContainer<std::shared_ptr<WorldObject>>> quadtreelistviews;
+	
+	std::vector<std::shared_ptr<WorldObject>> sigSorter;//Sorts the QuadTreeList 
 	std::vector<std::pair<std::shared_ptr<WorldObject>, olc::utils::geom2d::rect<float>>> newobjects;//new objects to be added
 	olc::utils::QuadTreeContainer<std::shared_ptr<WorldObject>> quadtreeList; // The object goes into the tree
 
-
+	olc::utils::geom2d::rect<float> screen;
 	void refreshObjectView();
 	void addObjectToList(std::shared_ptr<WorldObject> obj, olc::utils::geom2d::rect<float> size);
 
-	void addStaticObjectToList(int obj, olc::utils::geom2d::rect<float> size);//Map
 
+	std::vector<std::shared_ptr<WorldObject>> garbageList;
 	Clock worldclock;
 public:
 	std::shared_ptr<Map> currentMap;

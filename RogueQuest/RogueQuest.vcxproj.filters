@@ -242,13 +242,13 @@
     <ClInclude Include="CollisionMapObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="olcUTIL_QuadTree.h">
+    <ClInclude Include="ObjectQuadTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="olcUTIL_Geometry2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ObjectQuadTree.h">
+    <ClInclude Include="olcUTIL_QuadTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -43,6 +43,11 @@ public:
 	virtual ~Unit();
 	const cAssets::UnitType& unitType; // internal unit type reference
 
+
+
+	
+
+
 	//Testing Some Build Logic Gates	
 	olc::vf2d buildlocation;//Where is the building going to be made
 	olc::vf2d buildingSize; //Size of Building | Given by construct

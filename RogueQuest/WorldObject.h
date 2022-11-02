@@ -15,6 +15,7 @@ public:
 	olc::vf2d Position {};
 	olc::vf2d Velocity {};
 	olc::utils::geom2d::rect<float> PosSize;
+	bool IhaveMoved = false; //unit has moved
 	float m_fTimer {};		
 	float drawDepth;
 	float updatePriority;
