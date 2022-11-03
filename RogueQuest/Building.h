@@ -6,6 +6,7 @@
 #include "Assets.h"
 #include "Unit.h"
 #include "UnitManager.h"
+#include "CollisionMapObject.h"
 #include "TaskManager.h"
 #include <queue>
 

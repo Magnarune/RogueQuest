@@ -19,8 +19,9 @@ void Building::UpgradeBuilding() {
 
 void Building::BuildingBehaviour() {
 	auto& engine = Game_Engine::Current();
+	std::weak_ptr<CollisionMapObject> testTree;
 	if (execTimeout.getMilliseconds() > 400) {
-		engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner, Position, 180.f), BuildTarget, UnitTarget);
+		engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner, Position, 180.f), BuildTarget, UnitTarget,testTree);
 		execTimeout.restart();
 	}
 	if (AttackTypes.size() > 1){

@@ -236,6 +236,65 @@ UnitManager::UnitManager() {
              return false;
          }
          , 0, olc::Key::R }); // metadata , hotkey
+        taskMgr.RegisterTask("Harvest",
+            { [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+                // required
+                auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+                auto& unit = arguments.first;
+                if (!FindHomeBase(unit))//If their is no home base you cant Mine
+                    return false;
+                // customizable parameters
+                const auto& params = std::any_cast<std::pair<std::weak_ptr<CollisionMapObject>, olc::vf2d>>(arguments.second);
+                const std::weak_ptr<CollisionMapObject>& Tree = params.first;
+                if (Tree.lock()->Lumber < 0.f)//If this building selected is not a mine you cant mine
+                    return false;
+                const olc::vf2d& target = params.second;
+
+                unit->ActionMode = false;
+                unit->TreeObject = Tree;
+                unit->ActionZone = (olc::vf2d(unit->TreeObject.lock()->mask.rect) / 2.f + olc::vf2d(12, 12.f));
+                unit->Target = Tree.lock()->Position;
+                if (unit->Lumber > 0)
+                    unit->currentTask->performTask();
+                return true;
+             },
+
+            [&](std::shared_ptr<TaskManager::Task> task) -> bool {
+                auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+                auto& unit = arguments.first;
+                if (unit->Lumber < 25) {//Gather wood
+                    unit->Gather();
+                }
+                if (unit->HomeBase.lock()) {
+                    if (unit->Lumber > 0 && unit->Target != unit->HomeBase.lock()->Position) {//Change Take to Delivery
+                        unit->Target = unit->HomeBase.lock()->Position;
+                        unit->ActionZone = olc::vf2d(unit->HomeBase.lock()->Size) / 2.f + olc::vf2d(12.f, 12.f);
+                        return true;//This is Dangerous but will work for now
+
+                    }
+                } else
+                    return true;
+
+                if (unit->Lumber > 0) {//If I have gold and have triggered preform task
+                    unit->Deliver();
+
+                    unit->ActionZone = olc::vf2d(unit->TreeObject.lock()->mask.rect) / 2.f + olc::vf2d(12.f, 12.f);//Restart Gather
+                    unit->Target = unit->TreeObject.lock()->Position + olc::vf2d(0.f, 5.f);
+                }
+
+
+                return true;
+             },
+             [&](std::shared_ptr<TaskManager::Task> task) -> bool { // check if task is finished
+                 // required
+                 auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
+                 auto& unit = arguments.first;
+                 if (unit->TreeObject.expired() || unit->TreeObject.lock()->Lumber < 0) {
+                     return true;
+                }
+                 return false;
+             }
+             , 0, olc::Key::H }); // metadata , hotkey
 
         taskMgr.RegisterTask("AttackTarget",
             { [&](std::shared_ptr<TaskManager::Task> task) -> bool {//Initiate Task
@@ -343,7 +402,8 @@ void UnitManager::CheckTaskAbility(std::shared_ptr<Collidable> object, bool A_Cl
     auto& engine = Game_Engine::Current();
     std::weak_ptr<Unit> testunit;
     std::weak_ptr<Building> testbuilding;
-    ParseObject(object,testbuilding,testunit);
+    std::weak_ptr<CollisionMapObject> testTree;
+    ParseObject(object,testbuilding,testunit, testTree);
     for (auto& _unit : selectedUnits) {
         if (_unit.expired()) continue;
         numberofselectedunits += 1;
@@ -392,16 +452,27 @@ void UnitManager::CheckTaskAbility(std::shared_ptr<Collidable> object, bool A_Cl
                     engine.unitManager->DelegateTask("AttackTarget",
                         std::make_pair(testbuilding, testunit));
                 }
-                
-            } else 
+
+            } else
             {
                 engine.unitManager->DelegateTask("AttackTarget",
                     std::make_pair(testbuilding, testunit));
             }
+        }
+        if (testTree.lock()) {
+            if (std::find(abilities.begin(), abilities.end(), "Harvest") != abilities.end())
+                engine.unitManager->DelegateTask("Harvest",
+                    std::make_pair(testTree, engine.tv.ScreenToWorld(engine.GetMousePos())));
 
-
+            if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
+                engine.unitManager->DelegateTask("Move",
+                    std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), A_Click));
 
         }
+        else
+            if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
+            engine.unitManager->DelegateTask("Move",
+                std::make_pair(engine.tv.ScreenToWorld(engine.GetMousePos()), A_Click));
     }
 }
 
@@ -658,13 +729,30 @@ std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
         }
         return true;
     });
-   
-    return testBuild;
+    if (testBuild)
+        return testBuild;
+    std::shared_ptr<CollisionMapObject> testTree;
+    engine.worldManager->IterateObjectsQT(olc::utils::geom2d::rect<float>(engine.tv.GetWorldTL(), engine.tv.GetWorldVisibleArea()), [&](std::shared_ptr<WorldObject> _Tree) -> bool {
+        auto tree = std::dynamic_pointer_cast<Collidable>(_Tree);
+        const auto& meta = tree->mask;
+        if (auto ISTREE = std::dynamic_pointer_cast<CollisionMapObject>(tree)) {
+            if (Mouse.x > tree->Position.x - (float)meta.origin.x && Mouse.y > tree->Position.y - (float)meta.origin.y &&
+                Mouse.x < tree->Position.x + (float)meta.origin.x &&
+                Mouse.y < tree->Position.y + (float)meta.origin.y) {
+                testTree = ISTREE;
+                return false;
+            }
+        }
+        return true;
+        });
+ 
+    return testTree;
 }
 
-void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit) {
+void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<Building>& _build, std::weak_ptr<Unit>& _unit , std::weak_ptr<CollisionMapObject>& _tree) {
     _build.reset();
     _unit.reset();
+    _tree.reset();
     if (!object)
         return;
     if (auto unit = std::dynamic_pointer_cast<Unit>(object)) {
@@ -673,6 +761,10 @@ void UnitManager::ParseObject(std::shared_ptr<Collidable> object, std::weak_ptr<
     }
     if (auto build = std::dynamic_pointer_cast<Building>(object)) {
         _build = build;
+        return;
+    }
+    if (auto tree = std::dynamic_pointer_cast<CollisionMapObject>(object)) {
+        _tree = tree;
         return;
     }
 }

@@ -61,7 +61,6 @@ void Map::UpdateTimeofDay(float felapsedtime) {//0 -> 100
 
 void Map::UpdateMap(float felapsedtime) {
     UpdateTimeofDay(felapsedtime);
-
 }
 
 bool Map::ImportMap(const std::string& path) {
@@ -114,7 +113,6 @@ bool Map::ImportMap(const std::string& path) {
             
             for (int j = 0; j < layerSize.x * layerSize.y; j++) {
                 if (j >= layerSize.x * layerSize.y) break;
-
                 layerData[i][j] = data[j + 1];             
             }
         }
@@ -138,7 +136,7 @@ void Map::DrawMap(olc::TileTransformedView* tv) {
     bottomRightTile.x = bottomRightTile.x >= layerSize.x ? layerSize.x : bottomRightTile.x;
     bottomRightTile.y = bottomRightTile.y >= layerSize.y ? layerSize.y : bottomRightTile.y;
 
-    for (int i = 0; i < mapLayers-1; i++) {//-1 for now
+    for (int i = 0; i < mapLayers; i++) {//-1 for now
         for (int y = topLeftTile.y; y <= bottomRightTile.y; y++) {
             for (int x = topLeftTile.x; x <= bottomRightTile.x; x++) {
                 int pos = x + y * layerSize.x;
@@ -150,15 +148,6 @@ void Map::DrawMap(olc::TileTransformedView* tv) {
             }
         }
     }
-    //auto& engine = Game_Engine::Current();
-    //olc::utils::geom2d::rect<float> screen = {engine.tv.GetWorldTL(),engine.tv.GetWorldBR()- engine.tv.GetWorldTL()};
-
-    //for (int i = 0; i < mapLayers - 1; i++) {
-    //    for (const auto& object : mapquadtreeList[i].search(screen)) {
-    //        tv->DrawPartialDecal(object->item.second, GetTileSet(object->item.first).decal, GetTile(object->item.first) * tileSize, tileSize, { 1.0,1.0 });
-    //   
-    //    }
-    //}
 }
 
 olc::vi2d Map::GetTile(int id) const {

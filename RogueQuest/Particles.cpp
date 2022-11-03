@@ -60,7 +60,8 @@ void Particles::GenerateEffect(std::string Effectname, std::shared_ptr<Collidabl
 	auto& engine = Game_Engine::Current();	
 	std::weak_ptr<Building> tbuild;
 	std::weak_ptr<Unit> tUnit;
-	engine.unitManager->ParseObject(Object, tbuild,tUnit);
+	std::weak_ptr<CollisionMapObject> tTree;
+	engine.unitManager->ParseObject(Object, tbuild,tUnit,tTree);
 	std::weak_ptr<Effect> newEffect;
 	newEffect.lock()->animationlength = animationlength[Effectname];
 	for (int i = 0; i < 5; i++) {

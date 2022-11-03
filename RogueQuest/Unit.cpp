@@ -56,15 +56,27 @@ void Unit::UnitBehaviour() {
 }
 
 void Unit::Gather() {
-	if(MineTarget.lock())
+	if (MineTarget.lock()) {
 		MineTarget.lock()->Gold -= 25;
-	Gold += 25;
+		Gold += 25;
+	}
+	else if (TreeObject.lock())
+	{
+		TreeObject.lock()->Lumber -= 25;
+		Lumber += 25;
+	}
 }
 
 void Unit::Deliver() {
 	auto& engine = Game_Engine::Current();
-	engine.leaders->LeaderList[Owner]->Gold += 25;
-	Gold -= 25;
+	if (Gold > 0) {
+		engine.leaders->LeaderList[Owner]->Gold += Gold;
+		Gold -= Gold;
+	}
+	if (Lumber > 0) {
+		engine.leaders->LeaderList[Owner]->Lumber += Lumber;
+		Lumber -= Lumber;
+	}
 }
 
 bool Unit::OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) {
@@ -174,7 +186,7 @@ void Unit::AfterUpdate(float delta) {
 
 void Unit::UnitSearch() {//Target = unit/build.front()
 	auto& engine = Game_Engine::Current();
-	engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner,Position,AgroRange), targetBuilding, targetUnit);
+	engine.unitManager->ParseObject(engine.unitManager->SearchClosestEnemy(Owner,Position,AgroRange), targetBuilding, targetUnit, TreeObject);
 	if (targetBuilding.lock() || targetUnit.lock()) {
 		if (targetBuilding.lock()) {
 			Target = targetBuilding.lock()->Position + olc::vf2d(targetBuilding.lock()->Size) / 2.f;

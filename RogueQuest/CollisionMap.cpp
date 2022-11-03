@@ -66,8 +66,6 @@ void CollisionMap::ImportCollisionData(){
                 meta.CollisionOrigin = to_vi2d(fileset["CollisionOrigin"]);//collision origin
                 meta.collisionbox = to_vi2d(fileset["CollisionBox"]);
 
-
-
                 CMapObjectCache.TreeTypes.insert_or_assign(name, meta);//add Gate here
             }           
         } catch (std::exception e) {
@@ -75,7 +73,7 @@ void CollisionMap::ImportCollisionData(){
         }
     }
 }
-//Made map place trees and rocks and rivers
+
 void CollisionMap::PlaceMapObjects() {
     auto& engine = Game_Engine::Current();
     auto& map = engine.worldManager->currentMap;
@@ -119,6 +117,12 @@ bool CollisionMap::FindMapObject(std::vector<int> obj,olc::vf2d Shape, int Pos) 
             }
         }
       
+    }
+    for (int y = 0; y < Shape.y; y++) {
+        for (int x = 0; x < Shape.x; x++) {//Check if next "X" ids match   
+            int pos = (x + y * map->layerSize.x) + Pos;//If y = 1...
+            map->layerData[map->mapLayers - 1][pos] = 0;            
+        }
     }
     return true;
 }

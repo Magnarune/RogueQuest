@@ -2,6 +2,7 @@
 #include "olcPGEX_TransformedView.h"
 #include "olcPixelGameEngine.h"
 #include "WorldObject.h"
+#include "CollisionMapObject.h"
 #include <iostream>
 #include <vector>
 #include <algorithm>

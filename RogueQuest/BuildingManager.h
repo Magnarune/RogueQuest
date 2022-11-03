@@ -8,6 +8,7 @@
 #include "TaskManager.h"
 #include "Unit.h"
 #include "UnitManager.h"
+#include "CollisionMapObject.h"
 class Unit;
 class BuildingManager {
     std::vector<std::weak_ptr<Building>> BuildingList;

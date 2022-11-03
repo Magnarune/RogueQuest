@@ -145,16 +145,6 @@ void WorldManager::Draw() {
     }
 }
 
-bool WorldManager::Checkonscreen(std::shared_ptr<WorldObject> obj) {
-    auto& engine = Game_Engine::Current();
-    if (obj->Position.x > 32.f * (float)currentMap->topLeftTile.x &&
-        obj->Position.y > 32.f * (float)currentMap->topLeftTile.y &&
-        obj->Position.x < 32.f * (float)currentMap->bottomRightTile.x &&
-        obj->Position.y < 32.f * (float)currentMap->bottomRightTile.y)
-        return true;
-    return false;
-}
-
 void WorldManager::DestroyObject(WorldObject* self) {
     garbageList.emplace_back(self->_ithome->item);
 }

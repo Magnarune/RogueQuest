@@ -58,7 +58,6 @@ public:
 	virtual ~WorldManager();
     
 	void Update(float delta);
-	bool Checkonscreen(std::shared_ptr<WorldObject> obj);
     void Draw();
 	void DestroyObject(WorldObject* self);
 	void DestroyObject(const std::shared_ptr<WorldObject>& self);

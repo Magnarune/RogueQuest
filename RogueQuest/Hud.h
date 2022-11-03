@@ -7,8 +7,6 @@
 #include <array>
 
 class Hud {
-
-
 	void loadImage(const std::string& name, const std::string& path);
 	void loadImage(const std::string& name, size_t tex_id);
 public:

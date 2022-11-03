@@ -13,7 +13,7 @@
 #include <iostream>
 #include "Projectiles.h"
 #include "Utilities.h"
-
+#include "CollisionMapObject.h"
 
 
 
@@ -65,8 +65,10 @@ public:
 
 	float Health; // units have health
 	int Gold;
+	int Lumber;
 	std::weak_ptr<Building> HomeBase;
 	std::weak_ptr<Building> MineTarget;
+	std::weak_ptr<CollisionMapObject> TreeObject;
 
 	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both
 

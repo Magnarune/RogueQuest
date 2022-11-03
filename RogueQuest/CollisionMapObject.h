@@ -18,7 +18,7 @@ public:
 	//std::unique_ptr<olc::Decal> objectdecal;//the image
 	//
 	std::string name;
-	int Lumber=0;//just a tree
+	int Lumber=100;//just a tree
 	CollisionMapObject();
 	virtual ~CollisionMapObject();
 };
