@@ -230,11 +230,6 @@ void Unit::UpdatePosition(float delta) {
 			Distance = Target.value() - Position;//distance from target location
 			olc::vf2d direction = (Target.value() - Position).norm(); //direction to target
 			Velocity = direction * fMoveSpeed;//Velocity toward that direction * move speed
-	
-			///If This happens PUSH THIS UNIT INTO A VECTOR to Update QTree
-			IhaveMoved = true;
-
-
 
 			if (ActionMode) {
 				if (Distance.mag2() < ActionZone.mag2()) {//If action zone is a circle do if inside circle

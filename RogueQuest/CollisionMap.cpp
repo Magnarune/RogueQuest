@@ -81,12 +81,8 @@ void CollisionMap::PlaceMapObjects() {
     auto& map = engine.worldManager->currentMap;
     //     tree-name  Treedata
     for (auto& [name, Trees] : CMapObjectCache.TreeTypes) {//For Every Tree
-
-
-           
+        
         for (int i = 0; i < map->layerSize.y*map->layerSize.x; i++) {//Check the entire Map         
-          
-                  
 
             if (Trees.tileids[0] == CLayerdata[i])//Bing! we got a match on the top left tile on the texture
             {
@@ -156,11 +152,11 @@ void CollisionMap::GenerateCollisionObject(const std::string& name, olc::vf2d po
     mapobject->cType = Collidable::isMapObject;
     mapobject->SetMask(Collidable::Mask(data.collisionbox));
     mapobject->mask.origin = data.CollisionOrigin;   
-    mapobject->drawDepth = mapobject->Position.y / 4000.f;
+    mapobject->drawDepth = mapobject->Position.y / 3800.f;
     mapobject->updatePriority = 0.95f;
     //engine.worldManager->addStaticObjectToList(mapobject);
-    mapobject->PosSize = { mapobject->Position,data.collisionbox };
-    engine.worldManager->addObjectToList(mapobject, mapobject->PosSize);
+   
+    engine.worldManager->addObjectToList(mapobject);
  
 
 }

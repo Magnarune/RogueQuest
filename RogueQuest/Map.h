@@ -15,7 +15,7 @@ class Map {
 	sol::state lua;
     bool valid;
     std::vector<std::unique_ptr<olc::Decal>> decals;
-    std::vector<olc::utils::QuadTreeContainer<std::pair<int,olc::vf2d>>> mapquadtreeList;
+    //std::vector<olc::utils::QuadTreeContainer<std::pair<int,olc::vf2d>>> mapquadtreeList;
 
 public:
 	Map();

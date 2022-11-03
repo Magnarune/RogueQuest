@@ -192,16 +192,18 @@ namespace olc::utils
 		}
 
 		// Inserts an item into the quadtree
-		void insert(const T& item, const geom2d::rect<CTYPE>& itemsize)
+		typename IQuadtreeContainer::iterator insert(const T& item, const geom2d::rect<CTYPE>& itemsize)
 		{
 			QuadTreeItem<T> newItem;
 			newItem.item = item;
 
 			// Item i stored in container
-			m_allItems.emplace_back(newItem);
+			m_allItems.emplace_back(std::move(newItem));
 
 			// Pointer/Area of item is stored in geom2d::rect<CTYPE> tree
 			m_allItems.back().pItem = root.insert(std::prev(m_allItems.end()), itemsize);
+
+			return std::prev(m_allItems.end());
 		}
 
 		// Returns a std::list of pointers to items within the search area

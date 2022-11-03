@@ -1,22 +1,29 @@
 #pragma once
+
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_TransformedView.h"
 #include "clock.h"
 #include <variant>
 #include <map>
+#include <list>
 #include "olcUTIL_Geometry2D.h"
+#include "olcUTIL_QuadTree.h"
 
-class WorldObject : std::enable_shared_from_this<WorldObject> {
+class WorldManager;
+
+class WorldObject : public std::enable_shared_from_this<WorldObject> {
+	typedef std::list<olc::utils::QuadTreeItem<std::shared_ptr<WorldObject>, float>>::iterator QuadTreeItem;
+
+	QuadTreeItem _ithome;
 public:
 
 	WorldObject();
 	virtual ~WorldObject();
 
 	olc::vf2d Position {};
+	olc::vf2d PrevPosition {};
 	olc::vf2d Velocity {};
-	olc::utils::geom2d::rect<float> PosSize;
-	bool IhaveMoved = false; //unit has moved
-	float m_fTimer {};		
+	float m_fTimer {};
 	float drawDepth;
 	float updatePriority;
 
@@ -27,6 +34,8 @@ public:
 
 	// to do, consider adding collision method here or maybe use a different class for that
 	// virtual void Interaction() {};//If two world objects interact??? IDK Hmm i'll think about this - perhaps
+
+	friend class WorldManager;
 };
 /// Collidable v Collidable
 class Collidable : public WorldObject {

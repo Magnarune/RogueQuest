@@ -33,21 +33,22 @@ class Building;
 class WorldManager {
 	std::vector<std::shared_ptr<Map>> mapList; // Maybe
 	std::vector<std::shared_ptr<WorldObject>> newObjectList; // new objects live here
-	std::vector<std::shared_ptr<WorldObject>> objectList; // living objects
+	// std::vector<std::shared_ptr<WorldObject>> objectList; // living objects - old
+	olc::utils::QuadTreeContainer<std::shared_ptr<WorldObject>> objectList; // living objects
 	std::vector<std::reference_wrapper<std::shared_ptr<WorldObject>>> objectListView; // view transform on object list
-	olc::utils::QuadTreeContainer<std::reference_wrapper<std::shared_ptr<WorldObject>>> QuadList;// idk...
+	//olc::utils::QuadTreeContainer<WorldObject*> objectQuadList;//QT transform on object list
+
 	
 	//QuadTree
 	 // The object goes into the tree
 	
 	//std::vector<std::shared_ptr<WorldObject>> sigSorter;//Sorts the QuadTreeList 
-	std::vector<std::pair<std::shared_ptr<WorldObject>, olc::utils::geom2d::rect<float>>> newobjects;//new objects to be added
-	olc::utils::QuadTreeContainer<std::shared_ptr<WorldObject>> quadtreeList; // The object goes into the tree
+	//std::vector<std::pair<std::shared_ptr<WorldObject>, olc::utils::geom2d::rect<float>>> newobjects;//new objects to be added
+	//olc::utils::QuadTreeContainer<std::shared_ptr<WorldObject>> quadtreeList; // The object goes into the tree
 
 	olc::utils::geom2d::rect<float> screen;
 	void refreshObjectView();
-	void addObjectToList(std::shared_ptr<WorldObject> obj, olc::utils::geom2d::rect<float> size);
-
+	void addObjectToList(std::shared_ptr<WorldObject> obj);
 
 	std::vector<std::shared_ptr<WorldObject>> garbageList;
 	Clock worldclock;
@@ -60,16 +61,16 @@ public:
 	bool Checkonscreen(std::shared_ptr<WorldObject> obj);
     void Draw();
 	void DestroyObject(WorldObject* self);
+	void DestroyObject(const std::shared_ptr<WorldObject>& self);
 	void CollectGarbage();
 	void PopulateNewObjects();
+	void RelocateObject(std::shared_ptr<WorldObject> self);
 
-	//Additional
-	std::shared_ptr<WorldObject> FindObject(size_t index = 0);
-    
-    bool IterateObjects(std::function<bool(std::shared_ptr<WorldObject>)> cb);
+	//Additional 
+    bool IterateObjects(std::function<bool(std::shared_ptr<WorldObject>&)> cb);
 
-	bool IterateObjectQT(std::function<bool(std::shared_ptr<WorldObject>)> cb, olc::utils::geom2d::rect<float> searchsize);
-
+	bool IterateObjectsQT(olc::utils::geom2d::rect<float> searchArea, std::function<bool(std::shared_ptr<WorldObject>&)> cb);
+	olc::utils::geom2d::rect<float> getObjectQuadTreeArea(const std::shared_ptr<WorldObject>& obj) const;
 
 
 

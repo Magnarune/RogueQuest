@@ -106,8 +106,6 @@ bool Map::ImportMap(const std::string& path) {
         tileSize = { mapData["tilewidth"] , mapData["tileheight"] };//32by 32
         layerSize = { mapData["width"], mapData["height"] };
         layerData.resize(mapLayers); //[0->1] Size of first collum
-        olc::utils::geom2d::rect<float> Size = {olc::vf2d(0.f,0.f), olc::vf2d(layerSize)};
-        mapquadtreeList.resize(mapLayers);
        
         for (int i = 0; i < mapLayers; i++) {
             layerData[i].resize(layerSize.x * layerSize.y); //make this [0-1] [0-959]
@@ -120,18 +118,6 @@ bool Map::ImportMap(const std::string& path) {
                 layerData[i][j] = data[j + 1];             
             }
         }
-   /*     for (int i = 0; i < mapLayers; i++) {
-            mapquadtreeList[i].resize(Size);
-            for (int x = 0; x < layerSize.x; x++) {
-                for (int y = 0; y < layerSize.y; y++) {
-                    int pos = x + y * layerSize.x;
-                    if (pos >= layerSize.x * layerSize.y) break;                    
-                    olc::vi2d position = { x,  y };
-                    olc::utils::geom2d::rect<float> WPos = { position* tileSize, olc::vf2d(tileSize) };
-                    mapquadtreeList[i].insert({ layerData[i][pos],position * tileSize }, WPos);
-                }
-            }
-        }*/
 
     } catch(std::exception e){
         std::cerr << e.what() << "\n";

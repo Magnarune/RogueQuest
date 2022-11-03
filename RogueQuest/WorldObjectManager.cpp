@@ -2,10 +2,9 @@
 #include "Engine.h"
 #include <ranges>
 
-WorldManager::WorldManager(): QuadList(objectList) {
+WorldManager::WorldManager() {
     auto& engine = Game_Engine::Current();
-    
-    objectList.reserve(1024 * 512);
+
     garbageList.reserve(100);
     mapList.reserve(10);
 }
@@ -17,25 +16,81 @@ WorldManager::~WorldManager() {
 	garbageList.clear();
 }
 
+void WorldManager::PopulateNewObjects() {
+    for (auto& obj : newObjectList) {
+        auto item = objectList.insert(obj, getObjectQuadTreeArea(obj));
+        obj->_ithome = item; // update local pointer to item home
+    }
+    newObjectList.clear();
+    refreshObjectView();
+}
+
+void WorldManager::RelocateObject(std::shared_ptr<WorldObject> self) {
+    
+    objectList.relocate(self->_ithome, getObjectQuadTreeArea(self));
+}
+
 void WorldManager::refreshObjectView() {
     auto& engine = Game_Engine::Current();
     objectListView.clear();
-    objectListView.assign(objectList.begin(), objectList.end());
-
-   /* sigSorter.clear();
-    screen = { engine.tv.GetWorldTL(),engine.tv.GetWorldBR() - engine.tv.GetWorldTL() };
-    for (auto& founditems : quadtreeList.search(screen)) {
-        sigSorter.push_back(founditems->item);
+    for (auto& item : objectList) {
+        objectListView.emplace_back(item.item);
     }
-    
-    std::ranges::sort(sigSorter, [](auto& a, auto& b) -> bool {
-     return a.get()->drawDepth < b.get()->drawDepth;
-    });  */
 }
 
-void WorldManager::addObjectToList(std::shared_ptr<WorldObject> obj, olc::utils::geom2d::rect<float> size) {
-    newObjectList.emplace_back(obj); // add to new object list
+void WorldManager::addObjectToList(std::shared_ptr<WorldObject> obj) {
+    newObjectList.emplace_back(obj);
 }
+
+olc::utils::geom2d::rect<float> WorldManager::getObjectQuadTreeArea(const std::shared_ptr<WorldObject>& obj) const {
+    if (auto col = std::dynamic_pointer_cast<Collidable>(obj)) {
+	    switch (col->mask.type) {
+            case Collidable::Mask::MASK_CIRCLE:
+                return olc::utils::geom2d::rect<float>(
+                    obj->Position - col->mask.origin - olc::vf2d(col->mask.radius, col->mask.radius),
+                    olc::vf2d(col->mask.radius, col->mask.radius) * 2.f
+                );
+            case Collidable::Mask::MASK_RECTANGLE:
+                return olc::utils::geom2d::rect<float>(
+                    obj->Position - col->mask.origin,
+                    col->mask.rect
+                );
+	    }
+    }
+    return olc::utils::geom2d::rect<float>( obj->Position, olc::vf2d(1.f, 1.f));
+}
+
+/*
+void WorldManager::refreshQuadtreeView() {
+    auto& engine = Game_Engine::Current();   
+   
+    auto mapsize = olc::vf2d(currentMap->layerSize) * olc::vf2d(currentMap->tileSize);
+	objectQuadList.clear();
+
+    for(auto obj : objectList) {
+        if(auto obj = std::dynamic_pointer_cast<Collidable>(obj)){
+            olc::utils::geom2d::rect<float> pos;
+
+            switch(col->mask.type){
+                case Collidable::Mask::MASK_CIRCLE:
+                    pos.pos = col->Position - col->mask.origin - olc::vf2d(col->mask.radius,col->mask.radius);
+                    pos.size = olc::vf2d(col->mask.radius,col->mask.radius) * 2.f;
+                break;
+                case Collidable::Mask::MASK_RECTANGLE:
+                    pos.pos = col->Position - col->mask.origin;
+                    pos.size = col->mask.rect;
+                break;
+                case Collidable::Mask::MASK_NONE:
+                    pos.pos = col->Position;
+                    pos.size = olc::vf2d(1.f, 1.f);
+                break;
+            }
+            objectQuadList.insert(obj.get(), pos);
+        }
+    }
+}
+*/
+
 
    // newobjects.push_back({ obj, size });//hold items until new frame   
 void WorldManager::Update(float delta) {//Update last frames
@@ -45,34 +100,18 @@ void WorldManager::Update(float delta) {//Update last frames
     // sort the object list based on draw depth
     std::ranges::sort(objectListView, [](auto& a, auto& b) -> bool {
         return a.get()->updatePriority < b.get()->updatePriority;
-        });
+    });
 
     for (auto& object : objectListView) {
         if (object.get() == nullptr) continue;
-
         object.get()->Update(delta);
     }
-    for (auto& object : objectListView) {
-        	if (object.get() == nullptr) continue;
-            object.get()->AfterUpdate(delta);
-           
-        }
-    //this is all Update
-  /*  for (auto quad = quadtreeList.begin(); quad != quadtreeList.end(); ++quad) {
-        if (quad->item.get() == nullptr) continue;
-        quad->item.get()->Update(delta);
-      
-    } 
 
-    for (auto quad = quadtreeList.begin(); quad != quadtreeList.end(); ++quad) {
-        if (quad->item.get() == nullptr) continue;
-        quad->item.get()->AfterUpdate(delta);
-        quad->item.get()->PosSize.pos = quad->item.get()->Position;        
-        if (quad->item.get()->IhaveMoved) {
-            quad->item.get()->IhaveMoved = false;
-            quadtreeList.relocate(quad, quad->item.get()->PosSize);            
-        }
-    } */
+    for (auto& object : objectListView) {
+        if (object.get() == nullptr) continue;
+        object.get()->AfterUpdate(delta);
+    }
+
 
     if (worldclock.getSeconds() > 1.0) {
         engine.leaders->FindHomeBase();
@@ -86,17 +125,24 @@ void WorldManager::Draw() {
         return a.get()->drawDepth < b.get()->drawDepth;
     });
     currentMap->DrawMap(&engine.tv);
-    for (auto& object : objectListView) {
-        if (object.get() == nullptr) continue;
-        if (!Checkonscreen(object)) continue;
-    }
-   
-    //refreshObjectView();
-    //for (auto& sigs : sigSorter) {
-    //    sigs->Draw(&engine.tv);
-    //}
-    //
 
+
+    std::vector<std::reference_wrapper<std::shared_ptr<WorldObject>>> drawList;
+    IterateObjectsQT(
+        olc::utils::geom2d::rect<float>(engine.tv.GetWorldTL(), engine.tv.GetWorldVisibleArea()),
+        [&](std::shared_ptr<WorldObject>& obj){
+            drawList.emplace_back(obj);
+            return true;
+        }
+    );
+
+    std::ranges::sort(drawList, [](auto& a, auto& b) -> bool {
+        return a.get()->drawDepth < b.get()->drawDepth;
+    });
+
+    for (auto& object : drawList) {
+        object.get()->Draw(&engine.tv);
+    }
 }
 
 bool WorldManager::Checkonscreen(std::shared_ptr<WorldObject> obj) {
@@ -110,34 +156,20 @@ bool WorldManager::Checkonscreen(std::shared_ptr<WorldObject> obj) {
 }
 
 void WorldManager::DestroyObject(WorldObject* self) {
-    auto me = std::find_if(objectList.begin(), objectList.end(), [&](const auto& obj) { return obj.get() == self; });
-    assert(me != objectList.end()); // destroying an object should always find it in the list!
-    garbageList.emplace_back(std::move(*me)); // move to garbage for final living space before death
+    garbageList.emplace_back(self->_ithome->item);
+}
+
+void WorldManager::DestroyObject(const std::shared_ptr<WorldObject>& self) {
+    DestroyObject(self.get());
 }
 
 void WorldManager::CollectGarbage() {
     auto& engine = Game_Engine::Current();
 
-    size_t len = garbageList.size();
-    if (len) { // if there is garbage, we need to clean the missing links
-        size_t pos = 1;
-
-        auto itr = objectList.begin();
-        if (std::find_if(objectList.begin(), objectList.end(), [](const auto& obj) { return obj.get() != nullptr; }) == objectList.end()) {
-            objectList.clear();
-        } else {
-            do {
-                if (!!itr->get()) continue; // keep valid objectList
-                do { // keep swapping until there's no more invalid object here
-                    if (objectList.begin() == objectList.end() - pos || itr == objectList.end() - pos) break;
-                    std::swap(*itr, *(objectList.end() - pos)); // move garbage to end of list
-                    ++pos; // increase found garbage
-                } while (!itr->get());
-
-            } while (itr + 1 != objectList.end() && pos <= len && ++itr != objectList.end() - len); // continue looking for missing link garbage
-
-            objectList.resize(objectList.size() - len); // slice off the head
-            // for(int i=0; i < len; ++i) objectList.pop_back(); // slice off the garbage - resize instead?
+    if (garbageList.size()) { // if there is garbage, we need to clean the missing links
+		
+        for(auto& obj : garbageList){
+            objectList.remove(obj->_ithome);
         }
         garbageList.clear();
 
@@ -148,37 +180,24 @@ void WorldManager::CollectGarbage() {
    }
 }
 
-void WorldManager::PopulateNewObjects() {
-    for (auto& obj : newObjectList) objectList.emplace_back(std::move(obj));
-    newObjectList.clear();
-    refreshObjectView();
-}
-    //for(auto& obj : newobjects)//add the vector of new items to quad tree
-    //    quadtreeList.insert(obj.first, obj.second);
-    //newobjects.clear();
-
-   // refreshObjectView();
-std::shared_ptr<WorldObject> WorldManager::FindObject(size_t index) {
-    return objectList.size() > index ? objectList.at(index) : nullptr;
-}
-
-bool WorldManager::IterateObjects(std::function<bool(std::shared_ptr<WorldObject>)> cb) {
-
-    for(auto& object : objectList) {
-        if(object == nullptr) continue;
-        if(!cb(object)) break;
+bool WorldManager::IterateObjects(std::function<bool(std::shared_ptr<WorldObject>&)> cb) {
+    for(auto& obj : objectList) {
+        if(obj.item == nullptr) continue;
+        if(!cb(obj.item)) break;
     }
     return true; // iterate completed successfully
 }
 
-//bool WorldManager::IterateObjectQT(std::function<bool(std::shared_ptr<WorldObject>)> cb, olc::utils::geom2d::rect<float> searchsize) {
-//    auto object = quadtreeList.search(searchsize);
-//    for (auto& obj :object) {    
-//        if (obj->item == nullptr) continue;
-//        if (!cb(obj->item)) break;
-//    }
-//    return true; // iterate completed successfully
-//}
+bool WorldManager::IterateObjectsQT(olc::utils::geom2d::rect<float> searchArea, std::function<bool(std::shared_ptr<WorldObject>&)> cb) {
+    auto found = objectList.search(searchArea); // position of object and size of search area
+    for (auto& _obj : found) { // returns a list if found objects
+        auto& obj = _obj->item;
+
+        if (obj == nullptr) continue;
+        if (!cb(obj)) break;//obj->item is the items obj->pitem is the pointer to the container
+    }
+    return true;
+}
 
 /* Factory Function */
 
@@ -249,8 +268,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     unit->updatePriority = 0.1f; // highest priority
 
     engine.unitManager->addNewUnit(unit);
-    unit->PosSize = { unit->Position,olc::vf2d(unit->Unit_Collision_Radius,unit->Unit_Collision_Radius)};
-    addObjectToList(unit,unit->PosSize);
+    addObjectToList(unit);
     return unit;
 }
 
@@ -330,8 +348,7 @@ std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name
     build->updatePriority = 0.9f; // lower priority
 
     engine.buildingManager->addNewBuilding(build);
-    build->PosSize = { build->Position,build->Size };
-    addObjectToList(build, build->PosSize);
+    addObjectToList(build);
     return build;
 }
 
@@ -368,7 +385,7 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
 
     //if (name == "ThrowingAxe")
     //    proj->projType = "Axe";
-  //  proj->projType = name;
+    //proj->projType = name;
     
     // create decals for each texture state
     for (auto& [name, meta] : data.texture_metadata) {
@@ -384,8 +401,7 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
     //proj->SetMask(Collidable::Mask(olc::vf2d(proj->Size))); // TO DO: Figure out what the mask will be / and how to implement it
     proj->cType = Collidable::isProjectile;
     proj->updatePriority = 0.5f; // mid priority
-    proj->PosSize = { proj->Position,olc::vf2d(32.f,32.f) };
-    addObjectToList(proj,proj->PosSize);
+    addObjectToList(proj);
     return proj;
 }
 
@@ -411,9 +427,8 @@ bool WorldManager::ChangeMap(const std::string& name) {
         return false;
     }
     currentMap = *it;
-    olc::utils::geom2d::rect<float> cash = { olc::vf2d( 0.f,0.f ),olc::vf2d((float)currentMap->layerSize.x, (float)currentMap->layerSize.y)};
-   /*
-    quadtreeList.resize(cash);*/
+    olc::utils::geom2d::rect<float> worldMapArea = { {0.f,0.f}, olc::vf2d(currentMap->layerSize) * olc::vf2d(currentMap->tileSize)};
+
     engine.hud->PreRenderMiniMap(*currentMap);
 
     engine.cmapmanager->CLayerdata.clear();
@@ -423,7 +438,10 @@ bool WorldManager::ChangeMap(const std::string& name) {
         engine.cmapmanager->CLayerdata[i] = currentMap->layerData[1][i];
     }
 
+	objectList.resize(worldMapArea); // clear quadtree and reset to map size
     engine.cmapmanager->PlaceMapObjects();//Gulp
+
+
     return true;
 }
 

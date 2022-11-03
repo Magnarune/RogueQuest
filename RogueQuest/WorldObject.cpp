@@ -26,6 +26,11 @@ void WorldObject::Update(float delta) {
 }
 
 void WorldObject::AfterUpdate(float delta) {
+	auto& engine = Game_Engine::Current();
+	if(Position != PrevPosition){
+		engine.worldManager->RelocateObject(shared_from_this());
+		PrevPosition = Position;
+	}
 }
 
 void WorldObject::Draw(olc::TileTransformedView* gfx) {
@@ -76,8 +81,6 @@ void Collidable::Update(float delta) {
 void Collidable::AfterUpdate(float delta) {
 	Position = predPosition; // finalize position after calcuations are made
 	WorldObject::AfterUpdate(delta); // inherit
-
-
 }
 
 bool Collidable::CheckCollision(float delta) {
@@ -168,32 +171,36 @@ bool Collidable::CheckCollision(float delta) {
 		return true;
 	};
 	
+	olc::vf2d searchArea(256.f, 256.f);
 
-	return engine.worldManager->IterateObjects([&](std::shared_ptr<WorldObject> _obj) {
-		auto obj = std::dynamic_pointer_cast<Collidable>(_obj);
-		if(!obj || obj.get() == this) return true;
-		if(obj->mask.type == Mask::MASK_NONE) return true; // skip non-masked
+	return engine.worldManager->IterateObjectsQT(
+		olc::utils::geom2d::rect<float>(Position - mask.origin - searchArea / 2.f, searchArea),
+		[&](std::shared_ptr<WorldObject>& _obj) {
+			auto obj = std::dynamic_pointer_cast<Collidable>(_obj);
+			if(!obj || obj.get() == this) return true;
+			if(obj->mask.type == Mask::MASK_NONE) return true; // skip non-masked
 
-		// rectangle mask
-		if(obj->mask.type == Mask::MASK_RECTANGLE){
-			olc::vf2d& rect = obj->mask.rect;
-			if(mask.type == Mask::MASK_RECTANGLE){
-				return checkRvR(obj, mask.rect, rect, mask.origin);
+			// rectangle mask
+			if(obj->mask.type == Mask::MASK_RECTANGLE){
+				olc::vf2d& rect = obj->mask.rect;
+				if(mask.type == Mask::MASK_RECTANGLE){
+					return checkRvR(obj, mask.rect, rect, mask.origin);
+				}
+				if(mask.type == Mask::MASK_CIRCLE){
+					return checkRvC(obj, mask.radius, rect, mask.origin, true); // reverse for circle v rect
+				}
 			}
-			if(mask.type == Mask::MASK_CIRCLE){
-				return checkRvC(obj, mask.radius, rect, mask.origin, true); // reverse for circle v rect
+			if(obj->mask.type == Mask::MASK_CIRCLE){
+				float& radius = obj->mask.radius;
+				if(mask.type == Mask::MASK_CIRCLE){
+					return checkCvC(obj, mask.radius, radius, mask.origin);
+				}
+				if(mask.type == Mask::MASK_RECTANGLE){
+					return checkRvC(obj, radius, mask.rect, mask.origin); // just rect v circle
+				}
 			}
+
+			throw std::runtime_error("Invalid collision detection reached");
 		}
-		if(obj->mask.type == Mask::MASK_CIRCLE){
-			float& radius = obj->mask.radius;
-			if(mask.type == Mask::MASK_CIRCLE){
-				return checkCvC(obj, mask.radius, radius, mask.origin);
-			}
-			if(mask.type == Mask::MASK_RECTANGLE){
-				return checkRvC(obj, radius, mask.rect, mask.origin); // just rect v circle
-			}
-		}
-
-		throw std::runtime_error("Invalid collision detection reached");
-		});
+	);
 }
