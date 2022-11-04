@@ -95,9 +95,6 @@ void Hud::ImportHudAssets() {
     loadImage("Jack", "Assets/Gui/LeaderIcons/Jackson.png");
     loadImage("Lando", "Assets/Gui/LeaderIcons/Lando.png");
     loadImage("Luke", "Assets/Gui/LeaderIcons/Luke.png");
-
-
-
     
     loadImage("Units",    "Assets/Research/Icons/Make_Units_Icon.png");//Icons for buildings
     loadImage("Research", "Assets/Research/Icons/Research_Icon.png"); //Icon for Research
@@ -231,59 +228,31 @@ void Hud::DrawHud(){
         DrawBuild();
 }
 
-struct LeaderHeads {
-    olc::Decal* decIcon;
-    olc::vf2d iconSize, borderSize;
-    int value;
-    olc::Pixel color;
-};
-
 void Hud::DrawLeaderInfoHud() {
     auto& engine = Game_Engine::Current();
     olc::vf2d Start(0.f,10.f);
     engine.DrawDecal(Start, decals["LeaderInfo"].get(),{0.4f,0.4f}, 0xEAFFFFFF);
+    olc::vf2d Pos =olc::vf2d((float)engine.ScreenWidth() / 10.f, (float)engine.ScreenHeight() / 13.f);
+        int a = 0;
+    for (int i = 0; i < engine.leaders->LeaderList.size(); i++) {
+        a = i;
+        int sp = 13;
+        olc::vf2d size = { 12.f,12.f };
 
-    float kerning = .5f;
-    olc::vf2d listPosition(Start.x + 4.f, Start.y+30.f);
-    olc::vf2d frameSize(1.f, 0.f);
-
-    float ysize = (Start.y - listPosition.y)*1.f;
-    std::array<LeaderHeads, 3> Leaderheads{ {
-        {decals["Gav"].get(), {ysize, ysize}, {Start.y * 1.42f, ysize}, engine.leaders->LeaderList[1]->Food, olc::RED },
-        {decals["Lando"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, engine.leaders->LeaderList[1]->Lumber, olc::GREEN },
-        {decals["Jack"].get(), {ysize, ysize}, {ysize * 1.42f, ysize}, engine.leaders->LeaderList[1]->Gold, olc::YELLOW },
-       
-    } };
-
-    olc::Decal* decBorder = decals["mBox"].get();
-    olc::Decal* decBackground = decals["HealthBoxBackground"].get();
-
-    int i = 1;
-    for (const LeaderHeads& item : Leaderheads) {
-        const std::string& valueStr = std::to_string(item.value);
-        olc::vf2d pos = listPosition;
-        float itemWidth = (item.iconSize.x + item.borderSize.x + frameSize.x * 2.f);
-
-        pos.y -= i * itemWidth * kerning;
-
-        olc::vf2d valuePos(pos);
-        olc::vf2d iconPos(valuePos);
-        iconPos.y += frameSize.x + item.borderSize.x + 2.f;
-
-        olc::vf2d borderPos(valuePos - frameSize);
-        olc::vf2d textSize = olc::vf2d(engine.GetTextSize(valueStr));
-
-        olc::vf2d tscale((item.borderSize + frameSize - olc::vf2d(2.f, 2.f)) / textSize);
-        float textScale = std::max(std::min(std::min(tscale.x, tscale.y), 0.75f), 0.25f);
-
-        engine.DrawPartialDecal(borderPos, item.borderSize + frameSize * 2.f, decBackground, { 0.f,4.f }, { 128.f,24.f });
-        engine.DrawPartialDecal(borderPos, item.borderSize + frameSize * 2.f, decBorder, { 0.f,0.f }, { 104.f,104.f });
-        engine.DrawPartialDecal(iconPos, item.iconSize, item.decIcon, { 0.f,0.f }, olc::vf2d(float(item.decIcon->sprite->width), float(item.decIcon->sprite->height)));
-        engine.DrawCenteredStringDecal(valuePos + item.borderSize / 2.f, valueStr, item.color, olc::vf2d(textScale, textScale));
-
-        ++i;
+        engine.DrawPartialDecal(Pos + olc::vf2d(0, sp * a), size, engine.leaders->LeaderList[i]->LeaderHead, { 0,0 }, { 256,256 });
+        engine.DrawPartialDecal(Pos + olc::vf2d(sp , sp * a), size, decals["HealthBoxBackground"].get(), { 0.f,4.f }, { 128.f,24.f });
+        engine.DrawPartialDecal(Pos + olc::vf2d(sp, sp * a), size, decals["mBox"].get(), { 0.f,0.f }, { 104.f,104.f });
+        engine.DrawCenteredStringDecal(Pos + olc::vf2d(18, sp * a + 6), std::to_string(engine.leaders->LeaderList[i]->Gold), olc::YELLOW, olc::vf2d(0.25,0.25));
+        engine.DrawPartialDecal(Pos + olc::vf2d(2*sp, sp * a), size, decals["HealthBoxBackground"].get(), { 0.f,4.f }, { 128.f,24.f });
+        engine.DrawPartialDecal(Pos + olc::vf2d(2*sp, sp * a), size, decals["mBox"].get(), { 0.f,0.f }, { 104.f,104.f });
+        engine.DrawCenteredStringDecal(Pos + olc::vf2d(31, sp * a + 6), std::to_string(engine.leaders->LeaderList[i]->Lumber), olc::GREEN, olc::vf2d(0.25, 0.25));
+        engine.DrawPartialDecal(Pos + olc::vf2d(3*sp, sp * a), size, decals["HealthBoxBackground"].get(), { 0.f,4.f }, { 128.f,24.f });
+        engine.DrawPartialDecal(Pos + olc::vf2d(3*sp, sp * a), size, decals["mBox"].get(), { 0.f,0.f }, { 104.f,104.f });
+        engine.DrawCenteredStringDecal(Pos + olc::vf2d(44, sp * a + 6), std::to_string(engine.leaders->LeaderList[i]->Food), olc::RED, olc::vf2d(0.25, 0.25));
+        
+        engine.DrawStringDecal(Pos + olc::vf2d(4 * sp, 6 + sp * a), engine.leaders->LeaderList[i]->LeaderName, olc::BLACK, {0.51f,0.51f});
+        engine.DrawStringDecal(Pos + olc::vf2d(4 * sp, 6 + sp * a), engine.leaders->LeaderList[i]->LeaderName, engine.highlightmanagment->Color[i], {0.5f,0.5f});
     }
-
 }
 
 

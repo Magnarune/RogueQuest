@@ -246,14 +246,18 @@ UnitManager::UnitManager() {
                 // customizable parameters
                 const auto& params = std::any_cast<std::pair<std::weak_ptr<CollisionMapObject>, olc::vf2d>>(arguments.second);
                 const std::weak_ptr<CollisionMapObject>& Tree = params.first;
+                if (Tree.expired())
+                    return false;
                 if (Tree.lock()->Lumber < 0.f)//If this building selected is not a mine you cant mine
                     return false;
+                if(unit->MineTarget.lock())
+                    unit->MineTarget.reset();
                 const olc::vf2d& target = params.second;
 
                 unit->ActionMode = false;
                 unit->TreeObject = Tree;
-                unit->ActionZone = (olc::vf2d(unit->TreeObject.lock()->mask.rect) / 2.f + olc::vf2d(12, 12.f));
-                unit->Target = Tree.lock()->Position;
+                unit->ActionZone = (olc::vf2d(unit->TreeObject.lock()->mask.rect) / 2.f + olc::vf2d(12, 16.f));
+                unit->Target = Tree.lock()->Position+olc::vf2d(0,16);
                 if (unit->Lumber > 0)
                     unit->currentTask->performTask();
                 return true;
@@ -279,7 +283,7 @@ UnitManager::UnitManager() {
                     unit->Deliver();
 
                     unit->ActionZone = olc::vf2d(unit->TreeObject.lock()->mask.rect) / 2.f + olc::vf2d(12.f, 12.f);//Restart Gather
-                    unit->Target = unit->TreeObject.lock()->Position + olc::vf2d(0.f, 5.f);
+                    unit->Target = unit->TreeObject.lock()->Position + olc::vf2d(0, 16) + olc::vf2d(0.f, 5.f);
                 }
 
 
@@ -369,7 +373,6 @@ void UnitManager::Update(float delta) {
   
 }
 
-// GC do not touch Magnarune ill explain later... ||
 void UnitManager::CollectGarbage() {//edited    
 
     std::erase_if(unitList, [](const auto& unit) { return unit.expired(); });
@@ -621,8 +624,8 @@ bool UnitManager::CheckBuildObstruction(std::shared_ptr<Building> potBuilding) {
             GoodtoPlaceBuilding = false;
             return false;
         }*/
-        if ((potBuilding->Position.x < build->Position.x + (float)build->Size.x && potBuilding->Position.x + (float)potBuilding->Size.x>  build->Position.x &&
-            potBuilding->Position.y < build->Position.y + (float)build->Size.y && potBuilding->Position.y + (float)potBuilding->Size.y>  build->Position.y)) {
+        if ((potBuilding->Position.x - potBuilding->Size.x < build->Position.x - potBuilding->Size.x + (float)build->Size.x && potBuilding->Position.x - potBuilding->Size.x + (float)potBuilding->Size.x>  build->Position.x - potBuilding->Size.x &&
+            potBuilding->Position.y - potBuilding->Size.y< build->Position.y - potBuilding->Size.y + (float)build->Size.y && potBuilding->Position.y - potBuilding->Size.y + (float)potBuilding->Size.y>  build->Position.y - potBuilding->Size.y)) {
             GoodtoPlaceBuilding = false;
             return false;
         }
@@ -736,9 +739,9 @@ std::shared_ptr<Collidable> UnitManager::FindObject(olc::vf2d Mouse) {//User
         auto tree = std::dynamic_pointer_cast<Collidable>(_Tree);
         const auto& meta = tree->mask;
         if (auto ISTREE = std::dynamic_pointer_cast<CollisionMapObject>(tree)) {
-            if (Mouse.x > tree->Position.x - (float)meta.origin.x && Mouse.y > tree->Position.y - (float)meta.origin.y &&
-                Mouse.x < tree->Position.x + (float)meta.origin.x &&
-                Mouse.y < tree->Position.y + (float)meta.origin.y) {
+            if (Mouse.x > tree->Position.x -(float)meta.origin.x && Mouse.y > tree->Position.y - (float)meta.origin.y &&
+                Mouse.x < tree->Position.x + (float)meta.rect.x &&
+                Mouse.y < tree->Position.y + (float)meta.rect.y) {
                 testTree = ISTREE;
                 return false;
             }

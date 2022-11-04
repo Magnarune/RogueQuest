@@ -78,8 +78,7 @@ bool Options::MenuSelect() {
         SetGuiMenu("MainMenu");
     }
     engine.DrawDecal({ 0,0 }, engine.hud->decals["Background"].get());//Background
-    engine.DrawStringDecal(engine.GetMousePos() - olc::vi2d(-5, -20), std::to_string((float)engine.GetMousePos().x / (float)engine.ScreenWidth()) + "/" + std::to_string((float)engine.GetMousePos().y / (float)engine.ScreenHeight()));
-
+    
     if (engine.GetMousePos().x <X+70.f && engine.GetMousePos().y < 13.f && engine.GetMousePos().x > X) {
         engine.DrawPartialDecal({ X,0.f }, { 79.5,13 }, engine.hud->decals["Gui"].get(), { 15,206 }, { 300,52 });
         engine.DrawStringDecal({ X+17,4.f }, "Back", olc::WHITE, { 0.5,0.5 });

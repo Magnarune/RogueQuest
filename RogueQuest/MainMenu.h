@@ -17,6 +17,7 @@ class MainMenu {
 			Checkbox,
 			Textbox,
 			Button,
+			BigBoxButton,
 			Label,
 			Slider
 		} type;

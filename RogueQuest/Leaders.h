@@ -10,7 +10,8 @@ public:
 
 	void UpdateBonus();
 	int CheckCost(std::string name);
-
+	std::string LeaderName = "";
+	olc::Decal* LeaderHead;
 	std::string AGE; //What Age is it
 	std::weak_ptr<Building> HomeBase; //Home Base Castle /Town Hall
 	std::vector<std::string> Buildings; //List of Leader's buildings 

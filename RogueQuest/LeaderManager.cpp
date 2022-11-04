@@ -10,13 +10,14 @@ LeaderManager::~LeaderManager() {
 }
 
 void LeaderManager::AddLeader(int Size) {//Only done at start of game. Must be 10 or less
-	
+	auto& engine = Game_Engine::Current();
 	for (int i = 0; i < Size + 1; i++) {
 		std::shared_ptr<Leader> playerleader;
 		playerleader.reset(new Leader);
 		playerleader->Allies.insert({ static_cast<leaderList>(i), {i}});
 		playerleader->AGE="Stone Age";//Starting "Age"
-		
+		playerleader->LeaderHead = engine.hud->decals["Gav"].get();
+		playerleader->LeaderName = "Ai Gavin";
 		LeaderList.push_back(playerleader);
 	}		
 }

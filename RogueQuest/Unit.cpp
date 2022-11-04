@@ -20,6 +20,8 @@ void Unit::Stop() {
 	}
 	targetBuilding.reset();
 	targetUnit.reset();
+	TreeObject.reset();
+	MineTarget.reset();
 	ULogic = Passive;
 	Target = std::nullopt;
 	attackTarget = false;
@@ -29,6 +31,7 @@ void Unit::Stop() {
 	}
 	repairedbuilding.reset();
 	Taskpaused = false;
+	
 
 }
 
@@ -388,8 +391,8 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 					DrawCircleDecal(Target.value(), ActionZone.mag(), olc::WHITE, gfx);
 				else {
 					auto homebase = HomeBase.lock();
-					auto minetarget = MineTarget.lock();
-					if (MineTarget.lock() && Target != homebase->Position) {
+					auto minetarget = TreeObject.lock();
+					if (TreeObject.lock() && Target != homebase->Position) {
 						gfx->DrawLineDecal(minetarget->Position - ActionZone, olc::vf2d({ minetarget->Position.x + ActionZone.x, minetarget->Position.y - ActionZone.y }));
 						gfx->DrawLineDecal(minetarget->Position - ActionZone, olc::vf2d({ minetarget->Position.x - ActionZone.x  ,minetarget->Position.y + ActionZone.y }));
 						gfx->DrawLineDecal(minetarget->Position + ActionZone, olc::vf2d({ minetarget->Position.x + ActionZone.x  ,minetarget->Position.y - ActionZone.y }));

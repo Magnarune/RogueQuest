@@ -23,9 +23,31 @@ MainMenu::MainMenu() {
     float SX = (float)engine.ScreenWidth() * .172917f;//magic numbers
     float SY = (float)engine.ScreenHeight() * 0.17777f;
     /*Setup Game*/
-    setupMenu["blInitiategame"] = Option(Option::Checkbox, "Initiate Game", [&](Option& opt) { InitiateGame = !InitiateGame; }, olc::vf2d(SX, SY),InitiateGame);
-    setupMenu["btnStart"] = Option(Option::Button, "Play Game", [&](Option& opt) {GameStarted=true; CreateGame(); engine.m_nGameMode = engine.MODE_LOCAL_MAP; }, olc::vf2d(X, Y + 4 * Dy));
-    
+    setupMenu["blInitiategame"] = Option(Option::Checkbox, "Initiate Game", [&](Option& opt) { InitiateGame = !InitiateGame; }, olc::vf2d(SX, SY), InitiateGame);
+    setupMenu["btnStart"] = Option(Option::Button, "Play Game", [&](Option& opt) {GameStarted = true; CreateGame(); engine.m_nGameMode = engine.MODE_LOCAL_MAP; }, olc::vf2d(X, Y + 4 * Dy));
+   
+   
+        setupMenu["btnGav"] = Option(Option::BigBoxButton, "Gavin", [&](Option& opt) {
+            engine.leaders->LeaderList[1]->LeaderName = "Gavin";
+            engine.leaders->LeaderList[1]->LeaderHead = engine.hud->decals["Gav"].get();
+            }, olc::vf2d(X/2.f +0*25, Y/2.f ));
+        setupMenu["btnHunt" ] = Option(Option::BigBoxButton, "Hunter", [&](Option& opt) {
+            engine.leaders->LeaderList[1]->LeaderName = "Hunter";
+            engine.leaders->LeaderList[1]->LeaderHead = engine.hud->decals["Hunt"].get();
+            }, olc::vf2d(X / 2.f + 1 * 25, Y / 2.f));
+        setupMenu["btnJack"] = Option(Option::BigBoxButton, "Jackson", [&](Option& opt) {
+            engine.leaders->LeaderList[1]->LeaderName = "Jackson";
+            engine.leaders->LeaderList[1]->LeaderHead = engine.hud->decals["Jack"].get();
+            }, olc::vf2d(X / 2.f + 2 * 25, Y / 2.f));
+        setupMenu["btnLando"] = Option(Option::BigBoxButton, "Landon", [&](Option& opt) {
+            engine.leaders->LeaderList[1]->LeaderName = "Landon";
+            engine.leaders->LeaderList[1]->LeaderHead = engine.hud->decals["Lando"].get();
+            }, olc::vf2d(X / 2.f + 3 * 25, Y / 2.f));
+        setupMenu["btnLuke"] = Option(Option::BigBoxButton, "Luke", [&](Option& opt) {
+            engine.leaders->LeaderList[1]->LeaderName = "Luke";
+            engine.leaders->LeaderList[1]->LeaderHead = engine.hud->decals["Luke"].get();
+            }, olc::vf2d(X / 2.f + 4 * 25, Y / 2.f));
+   
 }
 MainMenu::~MainMenu() {
 
@@ -90,9 +112,6 @@ bool MainMenu::MainMenuSelection(float delta) {
     engine.DrawPartialDecal({ 0.f,0.f }, { (float)engine.ScreenWidth(),(float)engine.ScreenHeight() }, menudecals["MainMenuBackround"].get(),
         { 0.f,0.f }, { 1200.f,1500.f }, olc::PixelF(val, val, val, 1.f));
     engine.DrawPartialDecal({ 0.f,0.f }, { (float)engine.ScreenWidth(),(float)engine.ScreenHeight() }, menudecals["Titleforground"].get(), { 0.f,0.f }, { 1200.f,1500.f });
-    //olc::vf2d pos = { (float)engine.GetMousePos().x / (float)engine.ScreenWidth() ,(float)engine.GetMousePos().y / (float)engine.ScreenHeight()};
-    //engine.DrawStringDecal(engine.GetMousePos() - olc::vi2d(-5, -20), std::to_string(pos.x) + "/" + std::to_string(pos.y));
-   // engine.DrawStringDecal(engine.GetMousePos() - olc::vi2d( 0, 20 ), std::to_string((float)engine.ScreenWidth()) + "/" + std::to_string((float)engine.ScreenHeight()));
     timer += delta;
     if (timer > 1.f) {
         timer = 0.f;
@@ -116,7 +135,8 @@ void MainMenu::DrawGui(OptionsList& options) {
 
         static const std::map<Option::GuiType, olc::vf2d> sizeChart{ // gui element sizes go here for now :)
             {Option::Checkbox,{8.f, 8.f}},
-            {Option::Button,{55.5f,10.f}}
+            {Option::Button,{55.5f,10.f}},
+            {Option::BigBoxButton,{24.f,24.f}},
         };
         olc::vf2d size{ 0,0 };
         if (sizeChart.count(option.type)) size = sizeChart.at(option.type);
@@ -142,14 +162,37 @@ void MainMenu::DrawGui(OptionsList& options) {
             engine.DrawStringDecal(option.position, option.label, olc::WHITE); // eh.. can make it configurable later
             hover = 0;
             break; }
+        case Option::BigBoxButton: {
+            olc::vf2d src = hover ?  olc::vf2d(96, 227): olc::vf2d(96, 128);
+            size = { 24.f,24.f };
+            engine.DrawPartialDecal(option.position, size, engine.hud->decals["Hud"].get(), src, { 96.f,96.f });
+            engine.DrawStringDecal(option.position - olc::vf2d(1.f, 4.f), option.label, olc::WHITE, { 0.4f,0.4f });
+            break; }
         }
+                          
+        
         // hmm .. temporarily .. but should be moved
         if (engine.GetMouse(0).bPressed && hover) {
             localchange(); // change any value if necessary
             option.callback(option);
         }
     }
-
+    //Special Menu Draws
+    float X = (float)engine.ScreenWidth() * .372917f;//magic numbers
+    float Y = (float)engine.ScreenHeight() * 0.37777f;
+    if (currentMenu == menus["SetupMenu"]) {
+        for (int i = 0; i < 5; i++) {
+            engine.DrawPartialDecal({ X / 2.f + 0 +2.f, Y / 2.f +2.f}, { 20.f,20.f }, engine.hud->decals["Gav"].get(), { 0.f,0.f }, {256,256});
+            engine.DrawPartialDecal({ X / 2.f +  25 + 2.f, Y / 2.f + 2.f }, { 20.f,20.f }, engine.hud->decals["Hunt"].get(), { 0.f,0.f }, { 256,256 });
+            engine.DrawPartialDecal({ X / 2.f + 2 * 25 + 2.f, Y / 2.f + 2.f }, { 20.f,20.f }, engine.hud->decals["Jack"].get(), { 0.f,0.f }, { 256,256 });
+            engine.DrawPartialDecal({ X / 2.f +3 * 25 + 2.f, Y / 2.f + 2.f }, { 20.f,20.f }, engine.hud->decals["Lando"].get(), { 0.f,0.f }, { 256,256 });
+            engine.DrawPartialDecal({ X / 2.f + 4 * 25 + 2.f, Y / 2.f + 2.f }, { 20.f,20.f }, engine.hud->decals["Luke"].get(), { 0.f,0.f }, { 256,256 });
+        }
+        if (engine.leaders->LeaderList[1]->LeaderName != "") {
+            engine.DrawStringDecal({ X / 12,Y * 1.45f }, engine.leaders->LeaderList[1]->LeaderName, olc::WHITE, { 0.5f,0.5f });
+            engine.DrawPartialDecal({ X / 13,Y * 1.5f }, { 96,96 }, engine.leaders->LeaderList[1]->LeaderHead, { 0,0 }, { 256,256 });
+        }
+    }
 }
 
 void  MainMenu::CreateGame() {
