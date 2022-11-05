@@ -116,6 +116,94 @@ void cAssets::LoadUnitAssets(){
     
 }
 
+void cAssets::LoadHeroAssets() {
+    sol::table UnitData, FileSets, UnitStats;
+
+    auto to_vi2d = [](sol::table obj) -> olc::vi2d {
+        int32_t x = obj[1],
+            y = obj[2];
+        return { x, y };
+    };
+    const std::vector<std::string> filePaths = {
+        "Assets/Units/Archer/Archer.lua"
+    };
+
+    for (const auto& path : filePaths) {
+        try {
+            sol::load_result script = lua_state.load_file(path);
+
+            sol::protected_function_result rcode = script();
+
+            if (!rcode.valid()) {
+                sol::error e = rcode;
+                std::cout << "error: " << e.what() << "\n";
+            } else {
+                UnitData = rcode;
+            }
+
+            std::string name = UnitData["Name"];
+
+            UnitType::TextureMetaData meta;
+            UnitType unitType;
+            for (int i = 1; i < 5; i++)
+                meta.Sprite_Order.push_back(UnitData["SpriteOrder"][i]);//Im in danger
+
+            if (UnitData["Description"] != sol::nil) {
+                unitType.Description = UnitData["Description"];
+            } else
+                unitType.Description = "Not Added For this Unit";
+
+
+
+            FileSets = UnitData["Files"];
+            for (int i = 0; i < FileSets.size(); ++i) {
+                sol::table fileset = FileSets[i + 1];
+                // load the Name : TextureID for the unitType
+                std::string name = fileset["Name"], path = fileset["FileName"];
+
+                meta.tex_id = TextureCache::GetCache().CreateTexture(path);
+                meta.ani_len = sol::object(fileset["AnimationLength"]).as<int>();
+                meta.sprite_size = to_vi2d(fileset["SpriteSize"]);
+                meta.tile_size = to_vi2d(fileset["TileSize"]);
+                meta.draw_origin = olc::vf2d(to_vi2d(fileset["Origin"]));
+
+                meta.target_size = to_vi2d(fileset["TargetSize"]);
+
+                meta.scale = olc::vf2d(meta.target_size) / olc::vf2d(meta.tile_size);
+
+                // load head location data into the texture meta data
+                if (fileset["HeadImage"] != sol::nil) {
+                    unitType.head.tl = to_vi2d(fileset["HeadImage"]["tl"]);
+                    unitType.head.sz = to_vi2d(fileset["HeadImage"]["size"]);
+                    unitType.head.tex_id = meta.tex_id;
+                }
+
+                unitType.texture_metadata.insert_or_assign(name, std::move(meta));
+            }          
+         
+            if (UnitData["Parameters"] != sol::nil &&
+                UnitData["Parameters"]["Abilities"] != sol::nil &&
+                UnitData["Parameters"]["Abilities"]["Tasks"] != sol::nil) {
+                sol::table tasks = UnitData["Parameters"]["Abilities"]["Tasks"];
+                for (int i = 0; i < tasks.size(); ++i) {
+                    unitType.task_abilities.emplace_back(tasks[i + 1].get<std::string>());
+                }
+            }
+            if (UnitData["Parameters"]["Ranged"] == true)
+                unitType.projectileName = UnitData["Parameters"]["Projectile"];
+
+            unitType.lua_data = std::move(UnitData); // UnitData is empty now
+
+            unitCache.insert_or_assign(name, std::move(unitType));//if you say unit you get Full table!
+        } catch (std::exception e) {
+            std::cerr << e.what() << "\n";
+        }
+    }
+}
+
+
+
+
 void cAssets::LoadBuildingAssets() {
     sol::table BuildingData, FileSets, BuildingStats, Offsets;
 

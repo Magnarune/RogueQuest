@@ -136,7 +136,14 @@ void CollisionMap::GenerateCollisionObject(const std::string& name, olc::vf2d po
     std::shared_ptr<CollisionMapObject> mapobject;
     mapobject.reset(new CollisionMapObject);
     mapobject->name = name;
-    mapobject->Position = pos;
+    olc::vf2d randpos(0.f,0.f);
+    
+    if (name == "BasicTree") {
+        randpos += {0.1f * (float)((rand() % 320-160)), 0.1f * (float)((rand() % 320-160))};
+    }
+
+
+    mapobject->Position = pos + randpos;
     //mapobject->Origin = data.Origin;//Get object data
     mapobject->Lumber = 100;    
     int y = int(data.textureids[0] / data.tilemapwidth);

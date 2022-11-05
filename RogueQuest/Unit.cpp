@@ -3,7 +3,7 @@
 #include <optional>
 
 
-Unit::Unit(const cAssets::UnitType& type) : Collidable(), unitType(type),
+Unit::Unit() : Collidable(),
 	 fUnitAngle(0.f), Graphic_State(Unit::Walking), Last_State(Unit::Walking), curFrame(0) {
 }
 
@@ -217,7 +217,8 @@ void Unit::PerformAttack() {
 
 	if (targetUnit.lock()) {
 		if (bIsRanged) {
-			engine.worldManager->GenerateProjectile(unitType.projectileName, engine.unitManager->This_shared_pointer(Position), targetUnit);
+			
+			engine.worldManager->GenerateProjectile(engine.assetManager->GetUnitData(sUnitName).projectileName, engine.unitManager->This_shared_pointer(Position), targetUnit);
 		}
 		else {
 			targetUnit.lock()->Health -= fAttackDamage;
@@ -227,7 +228,7 @@ void Unit::PerformAttack() {
 	}
 	else if (targetBuilding.lock()) {
 		if (bIsRanged) {
-			engine.worldManager->GenerateProjectile(unitType.projectileName, engine.unitManager->This_shared_pointer(Position), targetBuilding);
+			engine.worldManager->GenerateProjectile(engine.assetManager->GetUnitData(sUnitName).projectileName, engine.unitManager->This_shared_pointer(Position), targetBuilding);
 		}
 		else {
 			targetBuilding.lock()->Health -= fAttackDamage;

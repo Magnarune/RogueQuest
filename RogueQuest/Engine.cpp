@@ -404,7 +404,7 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
         worldManager->GenerateUnit("Archer", 1, {3*i+19.f * 32.f,10 * 32.f });
     worldManager->GenerateUnit("Builder", 1, { 19 * 32.f,14 * 32.f });
 
-    worldManager->GenerateBuilding("GoldMine", 0, { 16 * 32.f,30 * 32.f });
+    worldManager->GenerateBuilding("GoldMine", 0, { 18 * 32.f,30 * 32.f });
 
     const auto& Castles = worldManager->GenerateBuilding("Castle", 0, { 25 * 32.f  ,  30 * 32.f });
     Castles->Health = Castles->maxHealth;
@@ -420,78 +420,7 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
         worldManager->GenerateUnit("Archer", 0, { 3* i + 19.f * 32.f,38 * 32.f });
 }
 
-
-
-
-
 void Game_Engine::DrawCenteredStringDecal(olc::vf2d pos, const std::string& str, olc::Pixel col, olc::vf2d scale) {
     olc::vf2d textOffset = olc::vf2d(GetTextSize(str)) * scale / 2.f;
     DrawStringDecal(pos - textOffset, str, col, scale);
 }
-
-/*
-    struct VirtualObjectType {
-        std::vector<std::vector<int>> matrix;
-        bool destroyable;
-    };
-
-    std::vector<VirtualObjectType> VirtualCollisionObjectDatabase;
-    // loaded from lua
-
-    VirtualObjectTypes = [
-        {
-            matrix = [
-                [11,11,122,11],
-                [11,19,11,11],
-                [11,121,10,11],
-                [11,11,11,19]
-            ],
-            objectName = "TreeThing",
-            destroyable = true,
-        },
-        {
-            matrix = [
-                [14,1,85,11],
-                [10,15,18,20],
-                [11,121,11,11],
-                [10,10,11,19]
-            ],
-            objectName = "Something",
-            destroyable = false
-        },
-    ]
-
-
-    // LOADING MAP:
-    Iterate World {
-        tile -> 
-            Iterate -> VirtualCollisionObjectDatabase {
-                VCO -> Check if matches first tile and creates matched tile box
-
-            }
-    }
-
-
-    struct VirtualObject {
-        position {x,y}
-        size {width, height}
-        destructable true|false
-
-        layer
-        tilePosition {tx, ty}
-        eraseOnDestroy true|false
-
-        onErase() { < clear the tilePosition + size > }
-    }
-
-    Map::VirtualObjects [VirtualObject, VirtualObject, VirtualObject ...]
-
-
-    CollisionCheck -> {
-        Iterate spatial grid -> (automatic) {
-            collide with VirtualObject...
-            logic can allow for removing VirtualObject
-        }
-    }
-
-*/

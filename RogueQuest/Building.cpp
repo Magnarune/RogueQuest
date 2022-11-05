@@ -160,13 +160,13 @@ void Building::Draw(olc::TileTransformedView* gfx){
 	gfx->DrawPartialDecal(Position -SpriteOrigin - olc::vf2d(offset), meta.target_size, decals[Graphic_State].get(), stage.offset, stage.tile_size,
 						 (bSelected ? olc::WHITE : engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
 
-	//if (engine.hud->BuildMode) {
-	//auto maskpos = Position - SpriteOrigin;
-	//	gfx->DrawLineDecal(maskpos, { maskpos.x + mask.rect.x,maskpos.y });//collision box
-	//	gfx->DrawLineDecal(maskpos, { maskpos.x ,maskpos.y + mask.rect.y });
-	//	gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x,maskpos.y + mask.rect.y });
-	//	gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x + mask.rect.x,maskpos.y  });
-	//}
+	if (engine.hud->BuildMode) {
+	auto maskpos = Position - SpriteOrigin;
+		gfx->DrawLineDecal(maskpos, { maskpos.x + mask.rect.x,maskpos.y });//collision box
+		gfx->DrawLineDecal(maskpos, { maskpos.x ,maskpos.y + mask.rect.y });
+		gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x,maskpos.y + mask.rect.y });
+		gfx->DrawLineDecal(maskpos + mask.rect, { maskpos.x + mask.rect.x,maskpos.y  });
+	}
 }
 
 void Building::CheckResearch(std::string name) {

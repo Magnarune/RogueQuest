@@ -93,7 +93,7 @@ void HudManager::UnitsSelected(size_t ucount) {
 void HudManager::UnitAbilities(std::shared_ptr<Unit> unit) {
     auto& engine = Game_Engine::Current();
     bool hover = false;
-    const sol::table& data = unit->unitType.lua_data; // this is totally fine
+    const sol::table& data = engine.assetManager->GetUnitData(unit->sUnitName).lua_data; // this is totally fine
     if(data["Parameters"]["Abilities"] == sol::nil ||
        data["Parameters"]["Abilities"]["Buildables"] == sol::nil ) return;
 

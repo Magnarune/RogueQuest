@@ -18,6 +18,7 @@
 #include "UserInput.h"
 #include "UserInputManager.h"
 #include "Unit.h"
+#include "Hero.h"
 #include "UnitManager.h"
 #include "Assets.h"
 #include "Hud.h"

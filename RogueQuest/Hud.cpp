@@ -331,7 +331,7 @@ void Hud::DrawBuild() {
         engine.hud->loadImage(_refname, data.icon.tex_id);
     }
     olc::Decal* decal = engine.hud->decals[_refname].get();
-    olc::vf2d Center = olc::vf2d(engine.tv.ScreenToWorld(engine.GetMousePos())) - olc::vf2d((float)data.icon.sz.x/2.f, (float)data.icon.sz.y/2.f );
+    olc::vf2d Center = olc::vf2d(engine.tv.ScreenToWorld(engine.GetMousePos())) - olc::vf2d((float)data.icon.sz.x, (float)data.icon.sz.y );
     engine.tv.DrawPartialDecal( ((Center)), olc::vf2d(engine.hud->potBuilding->Size), decal, {0,0}, data.icon.fsz, engine.unitManager->CheckBuildObstruction(potBuilding) ? olc::PixelF(0.f, 255.f, 0.f, 0.7f) : olc::PixelF(1.f, 0.f, 0.f, 0.7f));
 }
 

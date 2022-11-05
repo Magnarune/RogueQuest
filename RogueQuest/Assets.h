@@ -41,6 +41,30 @@ public:
         } head = {};
     };
 
+
+    struct HeroType {
+        struct TextureMetaData {
+            size_t tex_id, ani_len;
+            olc::vi2d sprite_size, tile_size, target_size;
+            olc::vf2d draw_origin;
+            std::vector<int> Sprite_Order;
+            olc::vf2d scale;
+        };
+        std::string Description;        
+        std::string projectileName;
+        std::map<std::string, TextureMetaData> texture_metadata;
+        std::vector<std::string> task_abilities;
+        sol::table lua_data;
+
+        struct {
+            olc::vi2d tl, sz;
+            size_t tex_id;
+        } head = {};
+    };
+
+
+
+
     struct BuildingType {
         struct LevelOffset {
             olc::vi2d offset;
@@ -95,6 +119,7 @@ public:
 	};
 private:
             //Unit name, Object data
+    std::map<std::string, HeroType> heroCache;
     std::map<std::string, UnitType> unitCache;
     std::map<std::string, BuildingType> buildCache;
     std::map<std::string, ProjectileType> projCache;
@@ -108,8 +133,10 @@ public:
 	olc::vi2d vTileSize;
     int Animation {};
     inline bool BuildingExists(const std::string& name) { return !!buildCache.count(name); }
-    inline const BuildingType& GetBuildingData(const std::string& name) {
-        return buildCache.at(name); }
+    inline const BuildingType& GetBuildingData(const std::string& name) { return buildCache.at(name); }
+
+    inline bool HeroExists(const std::string& name) { return !!heroCache.count(name); }
+    inline const HeroType& GetHeroData(const std::string& name) { return heroCache.at(name); }
 
     inline bool UnitExists(const std::string& name) { return !!unitCache.count(name); }
     inline const UnitType& GetUnitData(const std::string& name) { return unitCache.at(name); }
@@ -121,6 +148,7 @@ public:
     inline const ResearchType& GetResearchData(const std::string& name) { return resCache.at(name); }
 
     void LoadUnitAssets();
+    void LoadHeroAssets();
     void LoadBuildingAssets();
     void LoadProjectileAssets();
     void LoadResearchAssets();

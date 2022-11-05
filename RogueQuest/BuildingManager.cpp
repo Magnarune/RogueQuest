@@ -115,7 +115,7 @@ void BuildingManager::AssignTask(olc::vf2d Location, std::shared_ptr<Unit>& unit
     std::weak_ptr<Building> testbuilding;
     std::weak_ptr<CollisionMapObject> testtree;
     engine.unitManager->ParseObject(engine.unitManager->FindObject(Location), testbuilding, testunit, testtree);
-        const auto& abilities = unit->unitType.task_abilities;
+        const auto& abilities = engine.assetManager->GetUnitData(unit->sUnitName).task_abilities;
         if (testbuilding.expired() && testunit.expired()) {
             if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
             unit->taskQueue.push(engine.unitManager->taskMgr.PrepareTask("Move", std::pair<std::shared_ptr<Unit>, std::any>{unit, std::pair<olc::vf2d, bool> {Location, true} }));               

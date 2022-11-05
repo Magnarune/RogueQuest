@@ -62,7 +62,7 @@ public:
 	void DeselectUnits();
 
 	bool FindHomeBase(std::shared_ptr<Unit>& unit);
-
+	std::shared_ptr<CollisionMapObject> FindAnotherTree(olc::vf2d TreeSearchPos);
 	size_t GetSelectedUnitCount();
     size_t GetUnitCount(const std::string& name="");
     std::shared_ptr<Unit> GetUnit(const std::string& name, size_t index=0);

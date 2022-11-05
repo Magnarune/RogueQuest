@@ -198,7 +198,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
     const auto& data = engine.assetManager->GetUnitData(name);
     // Make Unit
     std::shared_ptr<Unit> unit;
-    unit.reset(new Unit(data)); // pass in primary unit type
+    unit.reset(new Unit()); // pass in primary unit type
     if (pos == olc::vf2d(0.f, 0.f))
         pos = { engine.worldManager->curMap().layerSize.x * 32 / 2.f, engine.worldManager->curMap().layerSize.y * 32 / 2.f };
 

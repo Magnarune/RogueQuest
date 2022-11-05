@@ -258,6 +258,7 @@ UnitManager::UnitManager() {
                 unit->TreeObject = Tree;
                 unit->ActionZone = (olc::vf2d(unit->TreeObject.lock()->mask.rect) / 2.f + olc::vf2d(12, 16.f));
                 unit->Target = Tree.lock()->Position+olc::vf2d(0,16);
+                unit->treeSearchPos = Tree.lock()->Position;
                 if (unit->Lumber > 0)
                     unit->currentTask->performTask();
                 return true;
@@ -293,9 +294,20 @@ UnitManager::UnitManager() {
                  // required
                  auto arguments = std::any_cast<std::pair<std::shared_ptr<Unit>,std::any>>(task->data);
                  auto& unit = arguments.first;
-                 if (unit->TreeObject.expired() || unit->TreeObject.lock()->Lumber < 0) {
-                     return true;
-                }
+
+                 if (unit->TreeObject.expired()) 
+                 {
+                     unit->TreeObject = FindAnotherTree(unit->treeSearchPos);
+                     
+                     if (unit->TreeObject.expired())
+                         return true;               
+                    unit->treeSearchPos= unit->TreeObject.lock()->Position;
+                   /* unit->ActionZone = (olc::vf2d(unit->TreeObject.lock()->mask.rect) / 2.f + olc::vf2d(12, 16.f));
+                    unit->Target = unit->TreeObject.lock()->Position + olc::vf2d(0, 16);*/
+                 }
+
+
+                
                  return false;
              }
              , 0, olc::Key::H }); // metadata , hotkey
@@ -381,10 +393,11 @@ void UnitManager::CollectGarbage() {//edited
 
 // Task delegation
 void UnitManager::DelegateTask(const std::string& name, const std::any& data) {
+    auto& engine = Game_Engine::Current();
 	for (auto& _unit : selectedUnits) {
 		if (_unit.expired()) continue;
 		auto unit = _unit.lock();
-        const auto& abilities = unit->unitType.task_abilities;
+        const auto& abilities = engine.assetManager->GetUnitData(unit->sUnitName).task_abilities;
         if (name == "AttackTarget") {
             if (std::find(abilities.begin(), abilities.end(), "Attack") == abilities.end()) continue;
         }else
@@ -411,7 +424,7 @@ void UnitManager::CheckTaskAbility(std::shared_ptr<Collidable> object, bool A_Cl
         if (_unit.expired()) continue;
         numberofselectedunits += 1;
         auto unit = _unit.lock();
-        const auto& abilities = unit->unitType.task_abilities;
+        const auto& abilities = engine.assetManager->GetUnitData(unit->sUnitName).task_abilities;
         if (!object) {
             if (std::find(abilities.begin(), abilities.end(), "Move") != abilities.end())
                 engine.unitManager->ConditionedDelegateTask(unit, "Move",
@@ -616,16 +629,14 @@ void UnitManager::SelectUnits(olc::vf2d Initial, olc::vf2d Final) {
 bool UnitManager::CheckBuildObstruction(std::shared_ptr<Building> potBuilding) {
     auto& engine = Game_Engine::Current();
     bool GoodtoPlaceBuilding = true;
-    engine.buildingManager->IterateAllBuildings([&](std::shared_ptr<Building> build) -> bool {
-   /*     if (build->Position.x > potBuilding->Position.x + (float)potBuilding->Size.x &&
-            build->Position.y > potBuilding->Position.y + (float)potBuilding->Size.y &&
-            build->Position.x + (float)build->Size.x > potBuilding->Position.x &&
-            build->Position.y + (float)build->Size.y > potBuilding->Position.y) {
-            GoodtoPlaceBuilding = false;
-            return false;
-        }*/
-        if ((potBuilding->Position.x - potBuilding->Size.x < build->Position.x - potBuilding->Size.x + (float)build->Size.x && potBuilding->Position.x - potBuilding->Size.x + (float)potBuilding->Size.x>  build->Position.x - potBuilding->Size.x &&
-            potBuilding->Position.y - potBuilding->Size.y< build->Position.y - potBuilding->Size.y + (float)build->Size.y && potBuilding->Position.y - potBuilding->Size.y + (float)potBuilding->Size.y>  build->Position.y - potBuilding->Size.y)) {
+    auto meta = engine.assetManager->GetBuildingData(potBuilding->name);
+    olc::vf2d ps = { potBuilding->Position + 2 * meta.texture_metadata["Normal"].draw_origin};
+    olc::vf2d pbs = { potBuilding->Position  };
+
+    engine.buildingManager->IterateAllBuildings([&](std::shared_ptr<Building> build) -> bool {        
+        olc::vf2d tps  = { build->Position + build->textureMetadata[build->Graphic_State].draw_origin };
+        olc::vf2d tbps = { build->Position - build->textureMetadata[build->Graphic_State].draw_origin };
+        if (ps.x > tbps.x && ps.y > tbps.y && pbs.x< tps.x && pbs.y < tps.y) {
             GoodtoPlaceBuilding = false;
             return false;
         }
@@ -858,8 +869,7 @@ std::shared_ptr<Collidable> UnitManager::SearchClosestEnemy(int owner,olc::vf2d 
     if (testobjects.size()) {
         std::shared_ptr<Collidable> closest;
         closest = testobjects[0];
-        for (auto& o : testobjects) {
-            
+        for (auto& o : testobjects) {            
             float test = (o->Position - pos).mag2();
             if (test < Smallest) {
                 closest = o;
@@ -888,7 +898,6 @@ std::shared_ptr<Unit> UnitManager::This_shared_pointer(olc::vf2d pos) {
 
 bool UnitManager::FindHomeBase(std::shared_ptr<Unit>& unit) {
     auto& engine = Game_Engine::Current();
-
     engine.buildingManager->IterateAllBuildings([&](std::shared_ptr<Building> build) -> bool {
         if  (build->Owner == unit->Owner) {
             if (build->name == "Castle") {            
@@ -899,4 +908,29 @@ bool UnitManager::FindHomeBase(std::shared_ptr<Unit>& unit) {
         return true;
     });
     return !unit->HomeBase.expired();
+}
+
+std::shared_ptr<CollisionMapObject> UnitManager::FindAnotherTree(olc::vf2d treeSearchPosition) {
+    auto& engine = Game_Engine::Current();
+    std::vector<std::shared_ptr<CollisionMapObject>> newTrees;
+    std::shared_ptr<CollisionMapObject> testTree;
+    engine.worldManager->IterateObjectsQT({ treeSearchPosition - olc::vf2d(200.f,200.f), {400.f,400.f}}, [&](std::shared_ptr<WorldObject> obj) -> bool {
+        if (testTree = std::dynamic_pointer_cast<CollisionMapObject>(obj)) {
+            newTrees.push_back(testTree);
+        }
+        return true;
+        });
+    if (newTrees.size()) {//Find Closest tree
+        testTree = newTrees[0];
+    float Smallest = (newTrees[0]->Position - treeSearchPosition).mag2();
+        for (auto& o : newTrees) {
+            float test = (o->Position - treeSearchPosition).mag2();
+            if (test < Smallest) {
+                testTree = o;
+                Smallest = test;
+            }
+        }
+        return testTree;
+    } else
+        return testTree;
 }

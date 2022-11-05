@@ -18,36 +18,31 @@
 
 
 class Unit : public Collidable   {
+protected:
+	void DrawCircleDecal(olc::vf2d pos, float radius, olc::Pixel col,olc::TileTransformedView * gfx);
 	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
-
-	void RepairBuilding();
-
-	void TrytoBuild(const std::string& name, const olc::vf2d& Target);
-	void UnitBehaviour();
-	void UnitSearch();
-	void UnitHunting();
-	void PerformAttack();//good
-	void UnitGraphicUpdate(float delta);
-	void UpdatePosition(float felapstedtime);
-	void Stop();//fine
-	
-	void Gather();
-	void Deliver();
-
 	void Update(float fElapsedTime) override; //remake
 	void AfterUpdate(float delta) override;
 	void Draw(olc::TileTransformedView* gfx) override;//good
-	void DrawCircleDecal(olc::vf2d pos, float radius, olc::Pixel col,olc::TileTransformedView * gfx);
-public:
-	Unit(const cAssets::UnitType& unitType);
-	virtual ~Unit();
-	const cAssets::UnitType& unitType; // internal unit type reference
 
+	virtual	void RepairBuilding();
 
-
+	virtual void TrytoBuild(const std::string& name, const olc::vf2d& Target);
+	virtual void UnitBehaviour();
+	virtual void UnitSearch();
+	virtual void UnitHunting();
+	virtual void PerformAttack();//good
+	virtual void UnitGraphicUpdate(float delta);
+	virtual void UpdatePosition(float felapstedtime);
+	virtual void Stop();//fine
 	
+	virtual	void Gather();
+	virtual void Deliver();
 
-
+public:
+	Unit();
+	virtual ~Unit();
+//	const cAssets::UnitType& unitType; // internal unit type reference
 	//Testing Some Build Logic Gates	
 	olc::vf2d buildlocation;//Where is the building going to be made
 	olc::vf2d buildingSize; //Size of Building | Given by construct
@@ -69,7 +64,7 @@ public:
 	std::weak_ptr<Building> HomeBase;
 	std::weak_ptr<Building> MineTarget;
 	std::weak_ptr<CollisionMapObject> TreeObject;
-
+	olc::vf2d treeSearchPos;
 	olc::vf2d ActionZone; //Zone where to stop moving || Perform action or Both
 
 	// Data
@@ -144,7 +139,7 @@ public:
 public:
 	void KnockBack(float damage, olc::vf2d velocity);
 
-protected:
+public:
 
 	enum GFXState {
 		Walking,
@@ -165,7 +160,7 @@ protected:
 	float fAttackCD =0.1f; //simple timer before unit can attack
 	bool bAnimating = false; // is animating
 
-private:
+public:
 	int curFrame;//current frame of the animation
 	std::map<GFXState, std::unique_ptr<olc::Decal>> decals; // multiple textures for different states
 	std::map<GFXState, cAssets::UnitType::TextureMetaData> textureMetadata;
@@ -181,4 +176,5 @@ private:
 	friend class TaskManager;
 	friend class Building;
 	friend class BuildingManager;
+	//friend class Hero;
 };
