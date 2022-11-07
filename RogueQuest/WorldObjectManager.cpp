@@ -395,6 +395,45 @@ std::shared_ptr<Projectile> WorldManager::GenerateProjectile(const std::string& 
     return proj;
 }
 
+std::shared_ptr<Projectile> WorldManager::GenerateProjectile(std::shared_ptr<Unit> Hero, float angle) {
+    auto& engine = Game_Engine::Current();
+    auto to_vi2d = [](sol::table obj) -> olc::vi2d {
+        int32_t x = obj[1],
+            y = obj[2];
+        return { x, y };
+    };
+    const auto& Herodata = engine.assetManager->GetHeroData(Hero->sUnitName);
+    if (!engine.assetManager->ProjectileExists(Herodata.projectileName)) return nullptr;
+    const auto& data = engine.assetManager->GetProjectileData(Herodata.projectileName);
+   
+
+    std::shared_ptr<Projectile> proj;
+    proj.reset(new Projectile());
+    proj->predPosition = proj->Position = Hero->Position;
+
+    proj->noTarget = true;
+    proj->Damage = data.lua_data["Stats"]["Damage"];
+    proj->PSpeed = data.lua_data["Stats"]["Speed"];
+    proj->Spinning = data.lua_data["Stats"]["Spin"];
+    proj->Damage += Hero->fAttackDamage;
+
+    for (auto& [name, meta] : data.texture_metadata) {
+        // const Building::GFXState& state = States[name]; // local state ref
+        // load a decal texture and add to decal map
+        proj->projType = name;
+        std::unique_ptr<olc::Decal> decal;
+        decal.reset(new olc::Decal(TextureCache::GetCache().GetTexture(meta.tex_id)));
+        proj->decals.insert_or_assign(name, std::move(decal)); // TO DO: Use a graphic state
+        // copy texture metadata
+        proj->textureMetadata.insert_or_assign(name, meta);
+    }
+    proj->SetMask(Collidable::Mask(olc::vf2d({5.f,5.f}))); // TO DO: Figure out what the mask will be / and how to implement it
+    proj->cType = Collidable::isProjectile;
+    proj->updatePriority = 0.5f; // mid priority
+    addObjectToList(proj);
+    return proj;
+}
+
 void WorldManager::ImportMapData() {
     // to do: iterate map folder and find maps
     const std::vector<std::string> paths = {

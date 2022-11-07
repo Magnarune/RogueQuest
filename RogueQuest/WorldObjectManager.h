@@ -36,15 +36,6 @@ class WorldManager {
 	// std::vector<std::shared_ptr<WorldObject>> objectList; // living objects - old
 	olc::utils::QuadTreeContainer<std::shared_ptr<WorldObject>> objectList; // living objects
 	std::vector<std::reference_wrapper<std::shared_ptr<WorldObject>>> objectListView; // view transform on object list
-	//olc::utils::QuadTreeContainer<WorldObject*> objectQuadList;//QT transform on object list
-
-	
-	//QuadTree
-	 // The object goes into the tree
-	
-	//std::vector<std::shared_ptr<WorldObject>> sigSorter;//Sorts the QuadTreeList 
-	//std::vector<std::pair<std::shared_ptr<WorldObject>, olc::utils::geom2d::rect<float>>> newobjects;//new objects to be added
-	//olc::utils::QuadTreeContainer<std::shared_ptr<WorldObject>> quadtreeList; // The object goes into the tree
 
 	olc::utils::geom2d::rect<float> screen;
 	void refreshObjectView();
@@ -87,6 +78,8 @@ public:
 	std::shared_ptr<Building> GenerateBuilding(const std::string& name, int owner, olc::vf2d pos = { 0.f,0.f });
 
 	std::shared_ptr<Projectile> GenerateProjectile(const std::string& name,std::shared_ptr<WorldObject> pos, std::weak_ptr<WorldObject> trgt);
+
+	std::shared_ptr<Projectile> GenerateProjectile(std::shared_ptr<Unit> HeroName,float angle);
 
 	friend class WorldObject;
 	friend class Unit;

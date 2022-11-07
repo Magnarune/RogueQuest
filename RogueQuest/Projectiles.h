@@ -11,10 +11,10 @@ class Projectile : public Collidable {
 public:
 	virtual ~Projectile();
 
-	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override { return false; };
+	bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) override;
 	void Update(float fElapsedtime) override;
+	void AfterUpdate(float delta) override;
 	void Draw(olc::TileTransformedView* gfx) override;
-
 	olc::vf2d direction;
 	std::weak_ptr<WorldObject> TargetObj;
 	float Damage {}; //Damage of projectile
@@ -23,7 +23,11 @@ public:
 	bool Spinning {};
 	bool Traveling {};
 	float PSpeed {}; //Speed of projectile
-
+	
+	bool noTarget = false; // No Target just go
+	float Angle; //Initial Angle if no Target
+	float MaxDistance; //Give up distance
+	float start; //Start Distance
 	std::map<std::string, std::string> projectType {
 		{ "Arrow","Normal" }, {"Axe","ThrowAxe"}
 	};

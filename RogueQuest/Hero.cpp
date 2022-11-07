@@ -23,7 +23,8 @@ void Hero::Update(float delta) {
 
 void Hero::UpdatePosition(float delta) {
 	/*Done By Player*/
-	PerformAttack();
+	if(unitAttacking)
+		PerformAttack();
 }
 
 void Hero::AfterUpdate(float delta) {
@@ -36,10 +37,10 @@ void Hero::PerformAttack() {
 	Graphic_State = Attacking;
 	if (curFrame == textureMetadata[Graphic_State].ani_len - 1) {
 		if (bIsRanged){
-			//engine.worldManager->GenerateProjectile()
+			engine.worldManager->GenerateProjectile(engine.assetManager->GetUnitData(sUnitName).projectileName, engine.unitManager->This_shared_pointer(Position), targetUnit);
 		}
 
-
+		unitAttacking = false;		
 	}	
 }
 
@@ -61,8 +62,11 @@ void Hero::UnitGraphicUpdate(float delta) {
 		curFrame = 0;
 		Last_State = Graphic_State;
 	}
-	if (Graphic_State == Attacking && curFrame == textureMetadata[Graphic_State].ani_len - 1)
-		Graphic_State = Walking;
+	if (unitAttacking)
+		Graphic_State = Attacking;
+	else
+		Walking;
+
 
 	if (bAnimating)
 		m_fTimer += delta;

@@ -25,6 +25,7 @@ class Hero : public Unit {
 	void CheckHit();
 	
 public:
+	bool unitAttacking;
 	Hero();
 	virtual ~Hero();
 	friend class Unit;
