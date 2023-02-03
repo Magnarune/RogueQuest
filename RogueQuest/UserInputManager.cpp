@@ -74,6 +74,32 @@ void UserInputManager::DecideUnitAction() {
     engine.unitManager->CheckTaskAbility(engine.unitManager->FindObject(engine.tv.ScreenToWorld(engine.GetMousePos())),engine.GetKey(olc::A).bHeld);  
 }
 
+void UserInputManager::HeroUserInput() {
+    auto& engine = Game_Engine::Current();
+ 
+}
+
+void UserInputManager::PrimarySelected() 
+{
+    auto& engine = Game_Engine::Current();
+
+  /*  if (engine.leaders->LeaderList[1]->HeroDynamic)
+    {
+        auto& HERO = engine.leaders->LeaderList[1]->HomeHero;
+        if (engine.GetKey(olc::Key::W).bHeld) HERO.lock()->Velocity += { 0.0f, -1.0f };
+        if (engine.GetKey(olc::Key::S).bHeld) HERO.lock()->Velocity += { 0.0f, +1.0f };
+        if (engine.GetKey(olc::Key::A).bHeld) HERO.lock()->Velocity += { -1.0f, 0.0f };
+        if (engine.GetKey(olc::Key::D).bHeld) HERO.lock()->Velocity += { +1.0f, 0.0f };
+
+        if (HERO.lock()->Velocity.mag2() > 0)
+            HERO.lock()->Velocity = HERO.lock()->Velocity.norm() * (engine.GetKey(olc::Key::SHIFT).bHeld ? 2.0f : 1.0f);
+
+    }*/
+}
+
+
+
+
 bool UserInputManager::Button(olc::vf2d pos, olc::vi2d Mouse, olc::vf2d Size) {
     auto& engine = Game_Engine::Current();
     if (engine.GetMouse(0).bPressed &&

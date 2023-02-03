@@ -129,7 +129,6 @@ bool Collidable::CheckCollision(float delta) {
 					fPos.y = brd.y;
 				}
 			}
-
 			if (std::fabs(fPos.x) < std::fabs(fPos.y)) {
 				nPos.x += fPos.x;
 			} else {

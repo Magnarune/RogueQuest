@@ -197,6 +197,7 @@ void MainMenu::DrawGui(OptionsList& options) {
 
 void  MainMenu::CreateGame() {
     auto& engine = Game_Engine::Current();
+    engine.ThisLeader = 1;
     if(InitiateGame)
         engine.InitiateGame();
 }

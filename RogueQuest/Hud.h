@@ -13,17 +13,16 @@ public:
 	std::map<std::string, std::unique_ptr<olc::Decal>> decals;
 	Hud();
 	virtual ~Hud();
-
 	void ImportHudAssets();
-	void Update(float delta);
 
-	void RefreshMiniMap();
-	void PreRenderMiniMap(const Map& current_map);
-	
+	void Update(float delta);
+	void RefreshMiniMap();//Always here
+	void PreRenderMiniMap(const Map& current_map);	
 	void DrawMiniMap();
-	void DrawHud();
 	void DrawLeaderInfoHud();
 	void DrawLeaderHud();
+	void DrawHud();
+
 	void DrawBuild();
 
 	bool LeaderInfo = false;

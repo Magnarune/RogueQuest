@@ -1,7 +1,8 @@
 #pragma once
 #include "Unit.h"
+
 #include "Building.h"
-//#include "Engine.h"
+
 class Unit;
 
 class HudManager{
@@ -19,6 +20,8 @@ public:
 	void ResearchAbilites(std::shared_ptr<Building> buildinginfo);
 	void ProductionAbilites(std::shared_ptr<Building> buildinginfo);
 	void PrimaryBuildingSelection();//if you select buildings of differing types what abilities do you want shown
+
+	void HerosHud();
 
 	void ObjectDetails();
 

@@ -18,9 +18,9 @@
 #include "UserInput.h"
 #include "UserInputManager.h"
 #include "Unit.h"
-#include "Hero.h"
 #include "UnitManager.h"
 #include "Assets.h"
+#include "Hero.h"
 #include "Hud.h"
 #include "Map.h"
 #include "CollisionMapObject.h"
@@ -111,7 +111,7 @@ public:
 	};
 	Cam Camera;
 	std::weak_ptr<Unit> followUnit;
-
+	int ThisLeader;
 	inline void ChangeCursor(const std::string& name) { auto c = assetManager->GetCursor(name); curCursor = c == nullptr ? curCursor : c; }
 	
 	inline bool GetLocked() { return bIsLocked; }

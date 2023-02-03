@@ -76,49 +76,20 @@ void UserInput::MiniMapBox() {
 }
 
 void UserInput::GetUserInput() {
-    auto& engine = Game_Engine::Current();
-    CenterofScreen = engine.tv.ScaleToWorld(olc::vf2d(float(engine.ScreenWidth()) / 2.0f, float(engine.ScreenHeight()) / 2.0f));//Center of screen
+    auto& engine = Game_Engine::Current();   
     if (!engine.IsConsoleShowing()) {
         if (engine.IsFocused()) {
             CameraInput();
-            MiniMapBox();
+            MiniMapBox();     
+            DeadZone();
+            Home();  
 
-            
-
-            if (engine.GetKey(olc::ESCAPE).bPressed) {
-                if (engine.hud->LeaderInfo)
-                    engine.hud->LeaderInfo = false;
-                else
-                    engine.m_nGameMode = engine.MODE_OPTIONS_MENU;
-            }
-            if (engine.GetKey(olc::F1).bPressed) {
-                
-                if (!engine.leaders->LeaderList[1]->HomeBase.expired() && engine.leaders->LeaderList[1]->HomeBase.lock()->bSelected==true) {
-                    engine.unitManager->DeselectUnits();
-                    engine.buildingManager->DeselectBuildings();
-                    engine.buildingManager->SelectBuilding(engine.leaders->LeaderList[1]->HomeBase.lock()->Position);
-                    engine.Camera.vPOS = engine.leaders->LeaderList[1]->HomeBase.lock()->Position;
-                    engine.tv.SetWorldOffset(engine.Camera.vPOS - CenterofScreen);
-                
-                }
-                else if (!engine.leaders->LeaderList[1]->HomeBase.expired()) {
-                    engine.unitManager->DeselectUnits();
-                    engine.buildingManager->DeselectBuildings();
-                    engine.buildingManager->SelectBuilding(engine.leaders->LeaderList[1]->HomeBase.lock()->Position);
-
-                }
-            }
-
-
-
-            if ((engine.GetMouse(1).bPressed || engine.GetMouse(0).bPressed || engine.GetMouse(0).bReleased) && engine.GetMousePos().y > (float)engine.ScreenHeight() * 0.75f)
-                engine.ActivityDone = true;
-
-
-            if (engine.hud->BuildMode)
+            if (engine.hud->BuildMode)//Builder Selected
                 engine.inputmanager->GetBuildModeUserInput();
-            engine.inputmanager->StandardUserInput();
-          
+            if (engine.leaders->LeaderList[1]->Kingdom == true)
+                engine.inputmanager->StandardUserInput();
+            else
+                engine.inputmanager->HeroUserInput();
         }
     }
 
@@ -135,4 +106,43 @@ void UserInput::DrawUserInput() {
             engine.tv.DrawLineDecal(engine.inputmanager->Final,   { engine.inputmanager->Final.x,engine.inputmanager->Initial.y }, color);
         }
     }
+}
+
+void UserInput::Home() {
+    auto& engine = Game_Engine::Current();
+    if (engine.GetKey(olc::ESCAPE).bPressed) {
+        if (engine.hud->LeaderInfo)
+            engine.hud->LeaderInfo = false;
+        else
+            engine.m_nGameMode = engine.MODE_OPTIONS_MENU;
+    }
+    if (engine.leaders->LeaderList[1]->Kingdom) 
+    {
+        if (engine.GetKey(olc::F1).bPressed) {
+
+            if (!engine.leaders->LeaderList[1]->HomeBase.expired() && engine.leaders->LeaderList[1]->HomeBase.lock()->bSelected == true) {
+                engine.unitManager->DeselectUnits();
+                engine.buildingManager->DeselectBuildings();
+                engine.buildingManager->SelectBuilding(engine.leaders->LeaderList[1]->HomeBase.lock()->Position);
+                engine.Camera.vPOS = engine.leaders->LeaderList[1]->HomeBase.lock()->Position;
+                engine.tv.SetWorldOffset(engine.Camera.vPOS - CenterofScreen);
+
+            } else if (!engine.leaders->LeaderList[1]->HomeBase.expired()) {
+                engine.unitManager->DeselectUnits();
+                engine.buildingManager->DeselectBuildings();
+                engine.buildingManager->SelectBuilding(engine.leaders->LeaderList[1]->HomeBase.lock()->Position);
+
+            }
+        }
+    }
+    else
+    {
+
+    }
+}
+
+void UserInput::DeadZone() {//Add a better zone
+    auto& engine = Game_Engine::Current();
+    if ((engine.GetMouse(1).bPressed || engine.GetMouse(0).bPressed || engine.GetMouse(0).bReleased) && engine.GetMousePos().y > (float)engine.ScreenHeight() * 0.75f)
+        engine.ActivityDone = true;
 }

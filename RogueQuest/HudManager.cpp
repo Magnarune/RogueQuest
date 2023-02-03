@@ -414,3 +414,7 @@ bool HudManager::CheckRequirements(int Owner, cAssets::ResearchType object , std
 void HudManager::ObjectDetails() {
 
 }
+
+void HudManager::HerosHud() {
+
+}

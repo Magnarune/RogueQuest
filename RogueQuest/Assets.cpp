@@ -125,7 +125,7 @@ void cAssets::LoadHeroAssets() {
         return { x, y };
     };
     const std::vector<std::string> filePaths = {
-        "Assets/Units/Archer/Archer.lua"
+        "Assets/Units/Hero_Units/Magnus.lua"
     };
 
     for (const auto& path : filePaths) {

@@ -3,6 +3,7 @@
 #include "WorldObject.h"
 #include "UnitManager.h"
 #include "Unit.h"
+#include "Hero.h"
 #include "Building.h"
 #include "BuildingManager.h"
 class UserInputManager {
@@ -13,10 +14,19 @@ public:
 	void StandardUserInput();
 	void DecideUnitAction();
 	void GetBuildModeUserInput();
+
+
+	//HeroLeader
+	void HeroUserInput();
+	void PrimarySelected();
+	void SecondarySelected();
+
+
 	
 	bool Button(olc::vf2d Position, olc::vi2d Mouse, olc::vf2d Width_Height);
 	bool InsideBox(olc::vf2d Position, olc::vi2d Mouse, olc::vf2d Width_Height);
 	bool Hover(olc::vf2d Position, olc::vi2d Mouse, olc::vf2d Width_Height, float triggertime , float felapstedtime);
+
 
 	float triggertime = 0.f;
 	olc::vf2d Initial, Final;

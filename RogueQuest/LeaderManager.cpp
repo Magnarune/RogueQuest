@@ -146,3 +146,25 @@ void LeaderManager::FindHomeBase() {
 			}));
 	}
 }
+//
+//void LeaderManager::FindHomeHero() {
+//	auto& engine = Game_Engine::Current();
+//	for (int Owner = 1; Owner < engine.leaders->LeaderList.size(); Owner++) 
+//	{
+//		if (!engine.leaders->LeaderList[Owner]->Kingdom) 
+//		{
+//			engine.unitManager->IterateAllUnits(([&](auto Units) -> bool {
+//				if (Units->Owner != Owner)
+//					return true;
+//				std::shared_ptr<Hero> hero;
+//				if (hero = std::dynamic_pointer_cast<Hero> Units)
+//				{
+//					engine.leaders->LeaderList[Owner]->HomeHero = hero;
+//					return false;
+//					
+//				}
+//			
+//				}));
+//		}
+//	}
+//}

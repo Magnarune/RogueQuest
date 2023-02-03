@@ -7,6 +7,7 @@
 #include "Hud.h"
 #include "HudManager.h"
 #include "Unit.h"
+#include "Hero.h"
 #include "Building.h"
 #include "TaskManager.h"
 #include "Assets.h"

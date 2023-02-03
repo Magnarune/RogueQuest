@@ -50,7 +50,7 @@ void Projectile::Update(float fElapsedtime) {
             if (MaxDistance > start)
             {
 
-                Destroy;
+                Destroy();
             }
         }        
         else

@@ -331,6 +331,9 @@
     <None Include="Assets\MapObjects\Trees\BasicTree.lua">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="Assets\Units\Hero_Units\Magnus.lua">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Assets\Projectiles\Arrows\arrow.lua">

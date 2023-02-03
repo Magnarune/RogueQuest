@@ -190,42 +190,81 @@ void Hud::DrawMiniMap() {
     engine.DrawPartialDecal(minimapPosition - frameSize - olc::vf2d(2.f,2.8f), minimapSize + olc::vf2d(4.8f, 6.2f) + frameSize * 2.f, decals["Gui"].get(), {872.f,218.f}, {115.f,97.f}, 0xFFFFFFFF);
 }
 
-void Hud::DrawHud(){
+void Hud::DrawHud() {//Hero Hud
     auto& engine = Game_Engine::Current();
+    if (engine.leaders->LeaderList[engine.ThisLeader]->Kingdom)
+    {
+        const auto& ucount = engine.unitManager->GetSelectedUnitCount();
+        const auto& bcount = engine.buildingManager->GetSelectedBuildingCount();
+        float X = (float)engine.ScreenWidth() * 0.758f;
+        float Y = (float)engine.ScreenHeight() * 0.75f;
+        float Xb = (float)engine.ScreenHeight() * 0.58f;
+        engine.DrawPartialDecal({ Xb,Y - 2.f }, { 115.f,(float)engine.ScreenHeight() * 0.748f }, decals["Hud"].get(), { 0,96 }, { 96,96 });
+        float Xa = (float)engine.ScreenWidth() * 0.35f;
+        engine.DrawDecal({ X,Y + 1.f }, decals["HudBox"].get(), { 0.66f,0.63f });
+        engine.DrawPartialDecal({ Xa,(float)engine.ScreenHeight() * 0.75f }, { 96,60.f }, decals["Hud"].get(), { 224,223 }, { 96,97 });
 
-    const auto& ucount = engine.unitManager->GetSelectedUnitCount();
-    const auto& bcount = engine.buildingManager->GetSelectedBuildingCount();
-    float X = (float)engine.ScreenWidth() * 0.758f;
-    float Y = (float)engine.ScreenHeight() * 0.75f;
-    float Xb = (float)engine.ScreenHeight() * 0.58f;
-    engine.DrawPartialDecal({ Xb,Y-2.f }, { 115.f,(float)engine.ScreenHeight() * 0.748f }, decals["Hud"].get(), { 0,96 }, { 96,96 });
-    float Xa = (float)engine.ScreenWidth() * 0.35f;
-    engine.DrawDecal({X,Y+1.f }, decals["HudBox"].get(),{0.66f,0.63f});
-    engine.DrawPartialDecal({ Xa,(float)engine.ScreenHeight() * 0.75f }, { 96,60.f }, decals["Hud"].get(), { 224,223 }, { 96,97 });
+        //Options Icon top left
+        if (engine.GetMousePos().x < 55.5 && engine.GetMousePos().y < 10) {
+            engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
+            if (engine.GetMouse(0).bPressed)
+                LeaderInfo = !LeaderInfo;
+        } else {
+            engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
+        }
+        engine.DrawCenteredStringDecal({ 26.f,5.f }, "Leaders Info", olc::WHITE, { 0.4f,0.4f });
 
-    //Options Icon top left
-    if (engine.GetMousePos().x < 55.5 && engine.GetMousePos().y < 10) {
-        engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
-        if (engine.GetMouse(0).bPressed)
-            LeaderInfo = !LeaderInfo;
-    } else {
-        engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
+        if (ucount == 1) //If you select one unit
+            engine.hudManager->UnitSelected();
+        if (ucount > 1)
+            engine.hudManager->UnitsSelected(ucount);
+        if (bcount == 1)
+            engine.hudManager->BuildingSelected();
+        if (bcount > 1)
+            engine.hudManager->BuildingsSelected(bcount);
+        if (LeaderInfo)
+            DrawLeaderInfoHud();
+
+        if (BuildMode)
+            DrawBuild();
     }
-    engine.DrawCenteredStringDecal({ 26.f,5.f }, "Leaders Info", olc::WHITE, { 0.4f,0.4f });
-    
-    if (ucount == 1) //If you select one unit
-        engine.hudManager->UnitSelected();
-    if (ucount > 1) 
-        engine.hudManager->UnitsSelected(ucount);
-   if (bcount == 1)
-       engine.hudManager->BuildingSelected();
-   if (bcount > 1)
-       engine.hudManager->BuildingsSelected(bcount);
-   if (LeaderInfo)
-       DrawLeaderInfoHud();
-   
-    if (BuildMode)
-        DrawBuild();
+    else //Hero Hud
+    {
+        const auto& ucount = engine.unitManager->GetSelectedUnitCount();
+        const auto& bcount = engine.buildingManager->GetSelectedBuildingCount();
+        float X = (float)engine.ScreenWidth() * 0.758f;
+        float Y = (float)engine.ScreenHeight() * 0.75f;
+        float Xb = (float)engine.ScreenHeight() * 0.58f;
+        engine.DrawPartialDecal({ Xb,Y - 2.f }, { 115.f,(float)engine.ScreenHeight() * 0.748f }, decals["Hud"].get(), { 0,96 }, { 96,96 });
+        float Xa = (float)engine.ScreenWidth() * 0.35f;
+        engine.DrawDecal({ X,Y + 1.f }, decals["HudBox"].get(), { 0.66f,0.63f });
+        engine.DrawPartialDecal({ Xa,(float)engine.ScreenHeight() * 0.75f }, { 96,60.f }, decals["Hud"].get(), { 224,223 }, { 96,97 });
+
+        //Options Icon top left
+        if (engine.GetMousePos().x < 55.5 && engine.GetMousePos().y < 10) {
+            engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,206 }, { 300,52 });
+            if (engine.GetMouse(0).bPressed)
+                LeaderInfo = !LeaderInfo;
+        } else {
+            engine.DrawPartialDecal({ 1.f,0.f }, { 55.5,10 }, decals["Gui"].get(), { 15,128 }, { 300,52 });
+        }
+        engine.DrawCenteredStringDecal({ 26.f,5.f }, "Leaders Info", olc::WHITE, { 0.4f,0.4f });
+
+        if (ucount == 1) //If you select one unit
+            engine.hudManager->UnitSelected();
+        if (ucount > 1)
+            engine.hudManager->UnitsSelected(ucount);
+        if (bcount == 1)
+            engine.hudManager->BuildingSelected();
+        if (bcount > 1)
+            engine.hudManager->BuildingsSelected(bcount);
+        
+        if (LeaderInfo)
+            DrawLeaderInfoHud();
+
+        if (BuildMode)
+            DrawBuild();
+    }
 }
 
 void Hud::DrawLeaderInfoHud() {
@@ -233,10 +272,10 @@ void Hud::DrawLeaderInfoHud() {
     olc::vf2d Start(0.f,10.f);
     engine.DrawDecal(Start, decals["LeaderInfo"].get(),{0.4f,0.4f}, 0xEAFFFFFF);
     olc::vf2d Pos =olc::vf2d((float)engine.ScreenWidth() / 10.f, (float)engine.ScreenHeight() / 13.f);
-        int a = 0;
+        float a = 0;
     for (int i = 0; i < engine.leaders->LeaderList.size(); i++) {
-        a = i;
-        int sp = 13;
+        a = (float)i;
+        float sp = 13;
         olc::vf2d size = { 12.f,12.f };
 
         engine.DrawPartialDecal(Pos + olc::vf2d(0, sp * a), size, engine.leaders->LeaderList[i]->LeaderHead, { 0,0 }, { 256,256 });
@@ -255,8 +294,6 @@ void Hud::DrawLeaderInfoHud() {
     }
 }
 
-
-
 struct Item {
     olc::Decal* decIcon;
     olc::vf2d iconSize, borderSize;
@@ -266,7 +303,6 @@ struct Item {
 
 void Hud::DrawLeaderHud() {
     auto& engine = Game_Engine::Current();
-
 
     { // border
         olc::vf2d topBarSize(float(engine.ScreenWidth()), 8.f);
