@@ -103,6 +103,8 @@ bool Game_Engine::OnUserCreate() {
     ShowSystemCursor(false); 
 
     leaders->AddLeader(5);//add Main Menu
+    for (auto& L : leaders->LeaderList)
+        L->Gold = 0;
     leaders->LeaderList[1]->Gold += 1000;
     Camera.vPOS = { 30.f,30.f };
     tv.SetWorldOffset(Camera.vPOS);

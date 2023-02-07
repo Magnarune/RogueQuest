@@ -86,10 +86,10 @@ void UserInput::GetUserInput() {
 
             if (engine.hud->BuildMode)//Builder Selected
                 engine.inputmanager->GetBuildModeUserInput();
-            if (engine.leaders->LeaderList[1]->Kingdom == true)
+           // if (engine.leaders->LeaderList[1]->Kingdom == true)
                 engine.inputmanager->StandardUserInput();
-            else
-                engine.inputmanager->HeroUserInput();
+           /* else
+                engine.inputmanager->HeroUserInput();*/
         }
     }
 
