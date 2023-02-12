@@ -4,7 +4,9 @@
 #include <string>
 #include <algorithm>
 #include <map>
+
 #include "olcPixelGameEngine.h"
+#include "olcSoundWaveEngine.h"
 #include "olcPGEX_TransformedView.h"
 #include "olcUTIL_Geometry2D.h"
 #include "olcUTIL_QuadTree.h"
@@ -44,7 +46,6 @@ extern std::string StringifyObject(sol::object val);
 
 class Game_Engine : public olc::PixelGameEngine {
 	static Game_Engine* self;
-
 	bool bIsLocked;
 	bool bWasLocked = false;
 public:
@@ -63,6 +64,8 @@ public:
 	void DrawCenteredStringDecal(olc::vf2d pos, const std::string& str, olc::Pixel col = olc::WHITE, olc::vf2d scale = { 1,1 });
 
 	olc::TileTransformedView tv;
+
+	olc::sound::WaveEngine soundEngine;//soundmanager???
 
 	std::unique_ptr<Config> config;
 

@@ -58,6 +58,7 @@ Game_Engine::~Game_Engine() {
 }
 bool Game_Engine::OnUserCreate() {
     // Setup Controllers   
+    
     MapTextureCache::InitCache();
     TextureCache::InitCache(); // initialize texture cache
     config.reset(new Config("Config.lua", true)); // config manager

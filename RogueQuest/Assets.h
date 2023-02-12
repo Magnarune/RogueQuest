@@ -10,6 +10,7 @@
 #include <string>
 #include <assert.h>
 #include "olcPixelGameEngine.h"
+#include "olcSoundWaveEngine.h"
 #include "sol/sol.hpp"
 #include "Map.h"
 
@@ -25,7 +26,24 @@ public:
             olc::vf2d draw_origin;
             std::vector<int> Sprite_Order;
             olc::vf2d scale;
+            //unit sound manager [death, attack, move] 
         };
+        struct SoundMetaData {
+            size_t sound_id, sound_type;
+        };
+
+
+        //struct SoundMetaData {
+        //    std::map<std::string, std::vector<olc::sound::Wave>> unit_sounds;// sound type  | random sound from waves
+
+        //    std::vector<olc::sound::Wave> selected_sounds;
+        //    std::vector<olc::sound::Wave> death_sounds;//i died
+        //    std::vector<olc::sound::Wave> hurt_sounds;
+        //    std::vector<olc::sound::Wave> attack_sounds;//Attack impact sounds
+        //    std::vector<olc::sound::Wave> swing_sounds;//Swinging sword | pulling bow | shooting magic juice 
+        //    std::vector<olc::sound::Wave> move_sounds; // Move talk
+        //    std::vector<olc::sound::Wave> meme_sounds;//if you have a selected unit but afk for idk 5 min
+        //};
         std::string Description;
         int Cost;
         int Food;
@@ -178,4 +196,34 @@ public:
     friend class Building;
     friend class WorldManager;
     friend class CollisionMap;
+};
+
+class SoundManager {
+    SoundManager();
+       //     The object,    name of sound requested, Random sound from list of sounds
+    std::pair<WorldObject,std::map<std::string, std::vector<olc::sound::Wave>>> object_sounds;//Objects in game's sounds
+
+    std::map<std::string, olc::sound::Wave> game_sounds;//Game sounds name of sound = sound
+
+    std::map<std::string, olc::sound::Wave> music_sounds; //Music sounds
+
+    //std::vector<olc::sound::Wave> sound_instances;//What about music too Main menu, options menu,
+    
+    //so you have object id, object sound playing name;
+    
+    std::vector<olc::sound::PlayingWave> playing_sounds;
+    
+public:
+    ~SoundManager();
+    //System controls
+    void Stop_all_sounds();
+    void Stop_Game_Sound(int sound_id);
+    void Master_Volume(float volume); //maybe have an into to decide what channel audio goes down
+    uint64_t Play_sound_pack(const std::string& sound, void* link = nullptr); // For single event sounds E.g. "Death"  "Hurt"   "Selected" etc  
+    
+private://Only internally use
+    void Play_Sound_Effect(olc::sound::Wave);
+    void Play_Music(olc::sound::Wave);
+    void Stop_Sound(olc::sound::Wave);
+
 };

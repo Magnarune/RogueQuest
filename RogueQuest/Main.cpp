@@ -1,5 +1,6 @@
 #define OLC_PGE_APPLICATION
 #define OLC_PGEX_TRANSFORMEDVIEW
+#define OLC_SOUNDWAVE
 #include "Engine.h"
 
 int main()

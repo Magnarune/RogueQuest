@@ -323,7 +323,7 @@ void Unit::UnitGraphicUpdate(float delta) {
 
 	if (m_fTimer >= 0.1f) {//if time > 0.1f ms
 		m_fTimer -= 0.1f;
-		++curFrame %= textureMetadata[Graphic_State].ani_len;//This is animation length it's complex cause my game 
+		++curFrame %= textureMetadata.at(Graphic_State).ani_len;//This is animation length it's complex cause my game 
 		// ++toframe 
 	}
 }

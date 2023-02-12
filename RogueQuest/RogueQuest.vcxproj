@@ -245,6 +245,8 @@
     <ClInclude Include="ObjectQuadTree.h" />
     <ClInclude Include="olcPGEX_TransformedView.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
+    <ClInclude Include="olcShader.h" />
+    <ClInclude Include="olcSoundWaveEngine.h" />
     <ClInclude Include="olcUTIL_Geometry2D.h" />
     <ClInclude Include="olcUTIL_QuadTree.h" />
     <ClInclude Include="Options.h" />

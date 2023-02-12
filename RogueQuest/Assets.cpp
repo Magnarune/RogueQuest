@@ -51,8 +51,11 @@ void cAssets::LoadUnitAssets(){
             }
 
             std::string name = UnitData["Name"];
-            
+            UnitType::SoundMetaData sMeta;
             UnitType::TextureMetaData meta;
+            
+
+
             UnitType unitType;
             for (int i = 1; i < 5; i++)
                 meta.Sprite_Order.push_back(UnitData["SpriteOrder"][i]);//Im in danger
@@ -89,6 +92,23 @@ void cAssets::LoadUnitAssets(){
 
                 unitType.texture_metadata.insert_or_assign(name, std::move(meta));
             }
+            //Sound uplink          
+            //sol::table soundlist = UnitData["Sounds"];//what if unit has no sound
+
+            //for (const auto& kv : soundlist) {
+            //    sol::table list = kv.second;
+            //    std::string category_name = kv.first.as<std::string>();
+
+            //    for (const auto& snd : list) {
+            //        SoundManager::LoadAudioFile(category_name, snd.second.as<std::string>());
+            //    }
+            //}
+            //    
+                
+                
+  
+
+            
             unitType.Cost = UnitData["Parameters"]["Cost"];
             unitType.Food = UnitData["Parameters"]["Food"];
             sol::table Requirements = UnitData["Parameters"]["Requirements"];
@@ -486,4 +506,59 @@ size_t TextureCache::CreateTexture(const std::string& path) {
 olc::Sprite* TextureCache::GetTexture(size_t texid) {
     if(texid >= textures.size()) return nullptr;
     return (textures.at(texid));
+}
+
+
+SoundManager::SoundManager() {
+    auto& engine = Game_Engine::Current();
+    engine.soundEngine.InitialiseAudio();//Need to initialiseaudio engine;
+}
+SoundManager::~SoundManager() {
+
+}
+
+void SoundManager::Stop_all_sounds() {
+    auto& engine = Game_Engine::Current();
+    engine.soundEngine.StopAll(); //Stop EVERYTHING
+  
+}
+
+
+
+
+
+
+
+void SoundManager::Master_Volume(float volume) {
+    auto& engine = Game_Engine::Current();
+    engine.soundEngine.SetOutputVolume(volume); //volume = volume input
+
+}
+
+void SoundManager::Play_Sound_Effect(olc::sound::Wave soundeffect) {
+    auto& engine = Game_Engine::Current();
+    
+  olc::sound::PlayingWave garry =  engine.soundEngine.PlayWaveform( &soundeffect , false, 1.0); //play actual sound, dont loop it when finished, normal speed
+}
+
+void SoundManager::Play_Music(olc::sound::Wave music) {
+    auto& engine = Game_Engine::Current();
+    engine.soundEngine.PlayWaveform( &music , false, 1.0); //play actual sound, loop it when finished, normal speed
+}
+void SoundManager::Stop_Sound(olc::sound::Wave sound) {
+    auto& engine = Game_Engine::Current();
+
+    //engine.soundEngine.StopWaveform(sound);
+ 
+}
+
+uint64_t SoundManager::Play_sound_pack(const std::string& sound, void* link = nullptr) {
+    auto& engine = Game_Engine::Current();
+    
+        int number_of_sounds = game_sounds[sound].size();
+        int random = rand() % number_of_sounds;
+
+
+
+        playing_sounds.push_back(engine.soundEngine.PlayWaveform(&game_sounds[sound][random]));//Picks a random sound of that type    
 }
