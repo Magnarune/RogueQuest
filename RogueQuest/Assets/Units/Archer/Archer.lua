@@ -66,7 +66,7 @@ return
 	},
 	Sounds = 
 	{
-		Death = {"./Sounds/Dead.wav", "./Sounds/Dead1.wav","./Sounds/Dead2.wav"},
+		Death = {"Assets/Units/Archer/Sounds/Dead.wav", "Assets/Units/Archer/Sounds/Dead1.wav","Assets/Units/Archer/Sounds/Dead2.wav"},
 		Hurt = {""},
 		Selected = {""},
 		Attack = {""},

@@ -31,7 +31,7 @@ class Building;
 // -----------------
 
 class WorldManager {
-	std::vector<std::shared_ptr<Map>> mapList; 
+	std::vector<std::shared_ptr<Map>> mapList; //List of maps to play on
 	std::vector<std::shared_ptr<WorldObject>> newObjectList; // new objects live here
 	// std::vector<std::shared_ptr<WorldObject>> objectList; // living objects - old
 	olc::utils::QuadTreeContainer<std::shared_ptr<WorldObject>> objectList; // living objects

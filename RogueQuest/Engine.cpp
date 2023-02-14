@@ -62,6 +62,7 @@ bool Game_Engine::OnUserCreate() {
     MapTextureCache::InitCache();
     TextureCache::InitCache(); // initialize texture cache
     config.reset(new Config("Config.lua", true)); // config manager
+    soundmanager.reset(new SoundManager);//Sound manager
     worldManager.reset(new WorldManager); // create the world manager
     unitManager.reset(new UnitManager); // create the unit manager
     buildingManager.reset(new BuildingManager); //create the build manager
@@ -141,6 +142,16 @@ bool Game_Engine::OnUserUpdate(float fElapsedTime) {
             rval = UpdateMainMenu(fElapsedTime);
             break;
     }
+
+    {
+        static Clock T;
+        if (T.getSeconds() > 1) {
+            T.restart();
+            soundmanager->Play_Random_PackSound("Death");
+        }
+        
+    }
+
 
     DrawCursor();
     return rval;
@@ -228,6 +239,7 @@ bool Game_Engine::OnUserDestroy(){
     researchmanager.reset();
     mainmenu.reset();
     cmapmanager.reset();
+    soundmanager.reset();
     return true;
 }
 

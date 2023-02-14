@@ -393,6 +393,7 @@ namespace olc::sound
 		void SetCallBack_NewSample(std::function<void(double)> func);
 		void SetCallBack_SynthFunction(std::function<float(uint32_t, double)> func);
 		void SetCallBack_FilterFunction(std::function<float(uint32_t, double, float)> func);
+		void SetCallBack_OnWaveDestroy(std::function<void(PlayingWave)> func);
 
 	public:
 		void SetOutputVolume(const float fVolume);
@@ -411,6 +412,7 @@ namespace olc::sound
 		std::function<void(double)> m_funcNewSample;
 		std::function<float(uint32_t, double)> m_funcUserSynth;
 		std::function<float(uint32_t, double, float)> m_funcUserFilter;
+		std::function<void(PlayingWave)> m_funcOnWaveFinished;
 
 
 	private:
@@ -872,6 +874,10 @@ namespace olc::sound
 	{
 		m_funcUserFilter = func;
 	}
+	
+	void WaveEngine::SetCallBack_OnWaveDestroy(std::function<void(PlayingWave)> func) {
+		m_funcOnWaveFinished = func;
+	}
 
 	PlayingWave WaveEngine::PlayWaveform(Wave* pWave, bool bLoop, double dSpeed)
 	{
@@ -884,6 +890,7 @@ namespace olc::sound
 		m_listWaves.push_back(wi);
 		return std::prev(m_listWaves.end());
 	}
+	
 
 	void WaveEngine::StopWaveform(const PlayingWave& w)
 	{
@@ -947,6 +954,14 @@ namespace olc::sound
 							fSample += float(wave.pWave->vChannelView[nChannel % wave.pWave->file.channels()].GetSample(dTimeOffset * m_dSamplePerTime * wave.dSpeedModifier));
 						}
 					}
+
+					
+					if (wave.bFinished && m_funcOnWaveFinished)
+					{
+						m_funcOnWaveFinished(
+							std::find_if(m_listWaves.begin(), m_listWaves.end(), [&wave](const auto& w) { return &w == &wave; })
+						);
+					}
 				}
 
 				// Remove waveform instances that have finished
@@ -958,7 +973,7 @@ namespace olc::sound
 					fSample += m_funcUserSynth(nChannel, dSampleTime);
 
 				// 3) Apply global filters
-
+				
 
 				// 4) If user is filtering, allow manipulation of output
 				if (m_funcUserFilter)

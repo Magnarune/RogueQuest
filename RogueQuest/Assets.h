@@ -200,18 +200,14 @@ public:
 
 class SoundManager {
     SoundManager();
-       //     The object,    name of sound requested, Random sound from list of sounds
-    std::pair<WorldObject,std::map<std::string, std::vector<olc::sound::Wave>>> object_sounds;//Objects in game's sounds
 
-    std::map<std::string, olc::sound::Wave> game_sounds;//Game sounds name of sound = sound
-
-    std::map<std::string, olc::sound::Wave> music_sounds; //Music sounds
-
-    //std::vector<olc::sound::Wave> sound_instances;//What about music too Main menu, options menu,
+    olc::sound::WaveEngine soundEngine; //Wave Engine
     
-    //so you have object id, object sound playing name;
+    // sound pack name ie death attack etc.. | name of actual sound | sound
+    std::map<std::string, std::map<std::string, olc::sound::Wave>> soundpacks; 
     
-    std::vector<olc::sound::PlayingWave> playing_sounds;
+    //Actual sound playing atm
+    std::list<olc::sound::PlayingWave> playing_sounds;
     
 public:
     ~SoundManager();
@@ -219,11 +215,15 @@ public:
     void Stop_all_sounds();
     void Stop_Game_Sound(int sound_id);
     void Master_Volume(float volume); //maybe have an into to decide what channel audio goes down
-    uint64_t Play_sound_pack(const std::string& sound, void* link = nullptr); // For single event sounds E.g. "Death"  "Hurt"   "Selected" etc  
-    
-private://Only internally use
-    void Play_Sound_Effect(olc::sound::Wave);
-    void Play_Music(olc::sound::Wave);
-    void Stop_Sound(olc::sound::Wave);
+    bool LoadAudioFile(const std::string& snd_pack_name, const std::string& Sound_path);
+    olc::sound::PlayingWave Play_Random_PackSound(const std::string& sound, void* link = nullptr); // For single event sounds E.g. "Death"  "Hurt"   "Selected" etc  
 
+  //  uint64_t Play_Object_sound(WorldObject object_number,std::string obj_name, std::string sound_name);
+
+private:
+    olc::sound::PlayingWave Play_Sound_Effect(olc::sound::Wave&);
+    void Play_Music(olc::sound::Wave);
+    void Stop_Sound(olc::sound::PlayingWave);
+    void OnWaveFinished(olc::sound::PlayingWave wave);//bad practice
+    friend class Game_Engine;
 };

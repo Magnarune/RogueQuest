@@ -65,8 +65,6 @@ public:
 
 	olc::TileTransformedView tv;
 
-	olc::sound::WaveEngine soundEngine;//soundmanager???
-
 	std::unique_ptr<Config> config;
 
 	//Cursor BS
@@ -106,6 +104,7 @@ public:
 	std::unique_ptr<Highlighting> highlightmanagment;
 	std::unique_ptr<Research> researchmanager;
 	std::unique_ptr<CollisionMap> cmapmanager;
+	std::unique_ptr<SoundManager> soundmanager;
 	//This needs to be initialized to map size
 	bool ActivityDone;
 	struct Cam{
