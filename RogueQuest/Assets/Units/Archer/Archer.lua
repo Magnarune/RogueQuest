@@ -59,7 +59,7 @@ return
 		MaxAmmo = 0,
 		MoveSpeed = 80,       
 		AttackRange = 80, 
-		AttackDamage = 2,
+		AttackDamage = 6,
 		AttackSpeed = .7,
 		SpellCooldown = 5,
 		KnockBackResist = 1

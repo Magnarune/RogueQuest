@@ -273,6 +273,7 @@ void Unit::UpdatePosition(float delta) {
 }
 
 void Unit::UnitGraphicUpdate(float delta) {
+	auto& engine = Game_Engine::Current();
 	bAnimating = true;
 	if (Velocity.mag2() < 0.1f * 0.1f && Graphic_State != Dead)
 		bAnimating = false;	
@@ -291,6 +292,7 @@ void Unit::UnitGraphicUpdate(float delta) {
 
 	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1) {
 		Stop();
+		engine.soundmanager->Play_Random_PackSound("Death");
 		Destroy();
 	}
 	//if (currentTask) {//Exceptions to the rule

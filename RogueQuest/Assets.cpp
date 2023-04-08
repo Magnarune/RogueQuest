@@ -52,7 +52,7 @@ void cAssets::LoadUnitAssets(){
             }
 
             std::string name = UnitData["Name"];
-            UnitType::SoundMetaData sMeta;
+            UnitType::SoundMetaData  sMeta;
             UnitType::TextureMetaData meta;
 
 
@@ -217,9 +217,6 @@ void cAssets::LoadHeroAssets() {
     }
 }
 
-
-
-
 void cAssets::LoadBuildingAssets() {
     sol::table BuildingData, FileSets, BuildingStats, Offsets;
 
@@ -305,9 +302,7 @@ void cAssets::LoadBuildingAssets() {
     }
 
 }
-
 /* Working On Loading Projectile Assets */
-
 void cAssets::LoadProjectileAssets() {
     sol::table ProjectileData, FileSets;
 

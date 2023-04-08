@@ -143,14 +143,7 @@ bool Game_Engine::OnUserUpdate(float fElapsedTime) {
             break;
     }
 
-    {
-        static Clock T;
-        if (T.getSeconds() > 1) {
-            T.restart();
-            soundmanager->Play_Random_PackSound("Death");
-        }
-        
-    }
+
 
 
     DrawCursor();
