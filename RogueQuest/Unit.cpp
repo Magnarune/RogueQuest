@@ -217,7 +217,7 @@ void Unit::PerformAttack() {
 
 	if (targetUnit.lock()) {
 		if (bIsRanged) {
-			
+			engine.soundmanager->Play_Random_PackSound("Attack");
 			engine.worldManager->GenerateProjectile(engine.assetManager->GetUnitData(sUnitName).projectileName, engine.unitManager->This_shared_pointer(Position), targetUnit);
 		}
 		else {

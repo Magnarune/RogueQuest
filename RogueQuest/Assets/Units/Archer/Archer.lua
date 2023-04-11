@@ -69,9 +69,9 @@ return
 		Death = {"Assets/Units/Archer/Sounds/Dead.wav", "Assets/Units/Archer/Sounds/Dead1.wav","Assets/Units/Archer/Sounds/Dead2.wav"},
 		Hurt = {""},
 		Selected = {""},
-		Attack = {""},
+		Attack = {"Assets/Units/Archer/Sounds/Attack.wav"},
 		Swing = {""},
-		Move = {""},
+		Move = {"Assets/Units/Archer/Sounds/Selected.wav"},
 		Meme = {""}
 
 	},

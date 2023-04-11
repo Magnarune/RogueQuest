@@ -554,7 +554,12 @@ olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& s
     }
     auto& sound_pack = soundpacks.at(sound_pack_name);
    int idx = rand() % sound_pack.size();
-   for (auto& [name,snd] : sound_pack) {
+   if (idx == 0)
+   {
+       for (auto& [name, snd] : sound_pack)
+       return Play_Sound_Effect(snd);
+   }
+       for (auto& [name,snd] : sound_pack) {
        if (!--idx) {
            return Play_Sound_Effect(snd);
        }

@@ -28,6 +28,8 @@ UnitManager::UnitManager() {
             //unit->Distance = target - unit->Position;
             unit->Graphic_State = Unit::Walking;
             unit->Target = target;
+            //unit->Sound
+            engine.soundmanager->Play_Random_PackSound("Move");
             return true;
         },
         [&](std::shared_ptr<TaskManager::Task> task) -> bool {
