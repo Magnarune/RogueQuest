@@ -558,7 +558,7 @@ olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& s
     }
     static std::map<std::string, Clock> timeout_map;
     if (!timeout_map.count(sound_pack_name)) {
-        timeout_map.insert_or_assign(sound_pack_name, Clock{});
+        timeout_map.insert_or_assign(sound_pack_name, Clock{}).first->second.setMilliseconds(100);
     }
     if (timeout_map.at(sound_pack_name).getMilliseconds() < 5) {
         return {};
