@@ -502,6 +502,9 @@ olc::Sprite* TextureCache::GetTexture(size_t texid) {
 SoundManager::SoundManager() {
     soundEngine.InitialiseAudio();//Need to start engine
     soundEngine.SetCallBack_OnWaveDestroy(std::bind(&SoundManager::OnWaveFinished,this,std::placeholders::_1));
+    DialogEngine.InitialiseAudio();//Start Dialog engine
+    SfxEngine.InitialiseAudio();
+    MusicEngine.InitialiseAudio();
 }
 SoundManager::~SoundManager() {
 
@@ -519,16 +522,17 @@ void SoundManager::Master_Volume(float volume) {
 
 }
 
-olc::sound::PlayingWave SoundManager::Play_Sound_Effect(olc::sound::Wave& soundeffect) {
+olc::sound::PlayingWave SoundManager::Play_Sound_Effect(olc::sound::Wave& soundeffect, double vol) {
 
-    
-    olc::sound::PlayingWave w =  soundEngine.PlayWaveform( &soundeffect , false, 1.0); //play actual sound, dont loop it when finished, normal speed
+
+    olc::sound::PlayingWave w =  soundEngine.PlayWaveform( &soundeffect , false, 1.0, vol); //play actual sound, dont loop it when finished, normal speed
     playing_sounds.emplace_back(w);
     return w;
 }
 
 void SoundManager::Play_Music(olc::sound::Wave music) {
-    soundEngine.PlayWaveform( &music , false, 1.0); //play actual sound, loop it when finished, normal speed
+    auto w = soundEngine.PlayWaveform( &music , false, 1.0); //play actual sound, loop it when finished, normal speed
+    
 }
 void SoundManager::Stop_Sound(olc::sound::PlayingWave sound) {
     soundEngine.StopWaveform(sound); 
@@ -552,18 +556,28 @@ olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& s
     if (!soundpacks.count(sound_pack_name)) {
         return {};
     }
+    static std::map<std::string, Clock> timeout_map;
+    if (!timeout_map.count(sound_pack_name)) {
+        timeout_map.insert_or_assign(sound_pack_name, Clock{});
+    }
+    if (timeout_map.at(sound_pack_name).getMilliseconds() < 5) {
+        return {};
+    }
+    timeout_map.at(sound_pack_name).restart();
+
+
     auto& sound_pack = soundpacks.at(sound_pack_name);
-   int idx = rand() % sound_pack.size();
-   if (idx == 0)
-   {
-       for (auto& [name, snd] : sound_pack)
-       return Play_Sound_Effect(snd);
-   }
-       for (auto& [name,snd] : sound_pack) {
-       if (!--idx) {
-           return Play_Sound_Effect(snd);
-       }
-   }
-   return {};
+    int idx = rand() % sound_pack.size();
+    if (idx == 0) {
+        for (auto& [name, snd] : sound_pack) {
+            return Play_Sound_Effect(snd);
+        }
+    }
+    for (auto& [name, snd] : sound_pack) {
+        if (!--idx) {
+            return Play_Sound_Effect(snd);
+        }
+    }
+    return {};
 }
 

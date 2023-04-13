@@ -207,7 +207,14 @@ class SoundManager {
     SoundManager();
 
     olc::sound::WaveEngine soundEngine; //Wave Engine
-    
+    //-------------------------New stuff Magnarune -------------------------
+    olc::sound::WaveEngine DialogEngine;//All diolog in the game come into this 
+    olc::sound::WaveEngine SfxEngine; //All in game special effects
+    olc::sound::WaveEngine MusicEngine;//All in game music
+    //-----------------------------------------------------------
+
+
+
     // sound pack name ie death attack etc.. | name of actual sound | sound
     std::map<std::string, std::map<std::string, olc::sound::Wave>> soundpacks; 
     
@@ -219,14 +226,20 @@ public:
     //System controls
     void Stop_all_sounds();
     void Stop_Game_Sound(int sound_id);
+
     void Master_Volume(float volume); //maybe have an into to decide what channel audio goes down
-    bool LoadAudioFile(const std::string& snd_pack_name, const std::string& Sound_path);
+    void SFX_Volume(float volume);//"Whack" "Bam" etc.
+    void Dialog_Volume(float volume);// "Attack!!!" "We are under attack" etc.
+    void Music_Volume(float volume);// do i need to explain this??? god damn
+    void Other_Volume(float volume);// idk what else to put here
+
+    bool LoadAudioFile(const std::string& snd_pack_name, const std::string& Sound_path);//How do i know if im loading a "song" or "sound"
     olc::sound::PlayingWave Play_Random_PackSound(const std::string& sound, void* link = nullptr); // For single event sounds E.g. "Death"  "Hurt"   "Selected" etc  
 
   //  uint64_t Play_Object_sound(WorldObject object_number,std::string obj_name, std::string sound_name);
 
 private:
-    olc::sound::PlayingWave Play_Sound_Effect(olc::sound::Wave&);
+    olc::sound::PlayingWave Play_Sound_Effect(olc::sound::Wave&, double vol = 1.0);
     void Play_Music(olc::sound::Wave);
     void Stop_Sound(olc::sound::PlayingWave);
     void OnWaveFinished(olc::sound::PlayingWave wave);//bad practice

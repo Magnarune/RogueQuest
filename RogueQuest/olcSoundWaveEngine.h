@@ -221,7 +221,7 @@ namespace olc::sound
 
 		template<typename T>
 		class View
-		{
+		{ 
 		public:
 			View() = default;
 
@@ -349,6 +349,7 @@ namespace olc::sound
 		double dInstanceTime = 0.0;
 		double dDuration = 0.0;
 		double dSpeedModifier = 1.0;
+		double dVolume = 1.0;
 		bool bFinished = false;
 		bool bLoop = false;
 		bool bFlagForStop = false;
@@ -400,7 +401,7 @@ namespace olc::sound
 
 
 
-		PlayingWave PlayWaveform(Wave* pWave, bool bLoop = false, double dSpeed = 1.0);
+		PlayingWave PlayWaveform(Wave* pWave, bool bLoop = false, double dSpeed = 1.0, double dVolume = 1.);
 		void StopWaveform(const PlayingWave& w);
 		void StopAll();
 
@@ -879,13 +880,14 @@ namespace olc::sound
 		m_funcOnWaveFinished = func;
 	}
 
-	PlayingWave WaveEngine::PlayWaveform(Wave* pWave, bool bLoop, double dSpeed)
+	PlayingWave WaveEngine::PlayWaveform(Wave* pWave, bool bLoop, double dSpeed, double dVolume)
 	{
 		WaveInstance wi;
 		wi.bLoop = bLoop;
 		wi.pWave = pWave;
 		wi.dSpeedModifier = dSpeed * double(pWave->file.samplerate()) / m_dSamplePerTime;
 		wi.dDuration = pWave->file.duration() / dSpeed;
+		wi.dVolume = dVolume;
 		wi.dInstanceTime = m_dGlobalTime;
 		m_listWaves.push_back(wi);
 		return std::prev(m_listWaves.end());
@@ -951,7 +953,7 @@ namespace olc::sound
 						} else
 						{
 							// OR, sample the waveform from the correct channel
-							fSample += float(wave.pWave->vChannelView[nChannel % wave.pWave->file.channels()].GetSample(dTimeOffset * m_dSamplePerTime * wave.dSpeedModifier));
+							fSample += float(wave.pWave->vChannelView[nChannel % wave.pWave->file.channels()].GetSample(dTimeOffset * m_dSamplePerTime * wave.dSpeedModifier)) * wave.dVolume;
 						}
 					}
 
