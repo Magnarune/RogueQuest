@@ -57,7 +57,7 @@ public:
 	std::weak_ptr<TaskManager::Task> trashtask;
 	std::shared_ptr<TaskManager::Task> HoldTask;
 	bool Taskpaused;
-
+	int sound_id;
 	float Health; // units have health
 	int Gold;
 	int Lumber;

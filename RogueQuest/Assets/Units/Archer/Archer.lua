@@ -71,7 +71,7 @@ return
 		Selected = {""},
 		Attack = {"Assets/Units/Archer/Sounds/Attack.wav"},
 		Swing = {""},
-		Move = {"Assets/Units/Archer/Sounds/Selected.wav"},
+		Move = {""},
 		Meme = {""}
 
 	},

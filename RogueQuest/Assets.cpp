@@ -415,6 +415,12 @@ void cAssets::LoadResearchAssets() {
     }
 }
 
+void cAssets::ImportGameMusic() {
+    auto& engine = Game_Engine::Current();
+    //Make this automatic later;
+    engine.soundmanager->LoadAudioFile("Main Menu", "Assets/Sounds/Game_Music/Game_Start_Song.wav", true);
+}
+
 bool cAssets::ImportCursor(const std::string& name, const std::string& path, const olc::vf2d& size) {
     Cursor cursor;
     olc::Sprite* spr = TextureCache::GetCache().GetTexture(
@@ -498,7 +504,7 @@ olc::Sprite* TextureCache::GetTexture(size_t texid) {
     if(texid >= textures.size()) return nullptr;
     return (textures.at(texid));
 }
-
+//-----------------------------------------SOUND MANAGER ---------------------------------------
 SoundManager::SoundManager() {
     soundEngine.InitialiseAudio();//Need to start engine
     soundEngine.SetCallBack_OnWaveDestroy(std::bind(&SoundManager::OnWaveFinished,this,std::placeholders::_1));
@@ -506,6 +512,9 @@ SoundManager::SoundManager() {
     SfxEngine.InitialiseAudio();
     MusicEngine.InitialiseAudio();
 }
+
+
+
 SoundManager::~SoundManager() {
 
 }
@@ -516,12 +525,10 @@ void SoundManager::Stop_all_sounds() {
 void SoundManager::OnWaveFinished(olc::sound::PlayingWave wave) {
     playing_sounds.remove_if([&wave](const auto& w) { return wave == w; });
 }
-
 void SoundManager::Master_Volume(float volume) {
     soundEngine.SetOutputVolume(volume); //volume = volume input
 
 }
-
 olc::sound::PlayingWave SoundManager::Play_Sound_Effect(olc::sound::Wave& soundeffect, double vol) {
 
 
@@ -529,7 +536,6 @@ olc::sound::PlayingWave SoundManager::Play_Sound_Effect(olc::sound::Wave& sounde
     playing_sounds.emplace_back(w);
     return w;
 }
-
 void SoundManager::Play_Music(olc::sound::Wave music) {
     auto w = soundEngine.PlayWaveform( &music , false, 1.0); //play actual sound, loop it when finished, normal speed
     
@@ -540,18 +546,22 @@ void SoundManager::Stop_Sound(olc::sound::PlayingWave sound) {
 
 bool SoundManager::LoadAudioFile(const std::string& snd_pack_name, const std::string& Sound_path) {
     olc::sound::Wave wave;
-
     if (!wave.LoadAudioWaveform(Sound_path))
         return false;
-
     if (!soundpacks.count(snd_pack_name)) {
         soundpacks.insert_or_assign(snd_pack_name, std::map<std::string, olc::sound::Wave> {});
-    }
-    
+    }    
     soundpacks.at(snd_pack_name).insert_or_assign(std::filesystem::path(Sound_path).filename().string(),std::move(wave));
     return true;
 }
+bool SoundManager::LoadAudioFile(const std::string& snd_pack_name, const std::string& Sound_path, bool isSystemSound) {
+    olc::sound::Wave wave;
+    if (!wave.LoadAudioWaveform(Sound_path))
+        return false;
+    SystemSounds.insert_or_assign(snd_pack_name, Sound_path);
+    return true;
 
+}
 olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& sound_pack_name, void* link) {// <- how would i use this
     if (!soundpacks.count(sound_pack_name)) {
         return {};
@@ -581,3 +591,11 @@ olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& s
     return {};
 }
 
+olc::sound::PlayingWave SoundManager::Play_System_Sound(const std::string& soundname) {
+    if (!SystemSounds.count(soundname)) {
+        return {};
+    }
+    for (auto& [name, snd] : SystemSounds) {
+        return Play_Sound_Effect(snd);
+    }
+}

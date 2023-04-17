@@ -36,6 +36,7 @@ class WorldManager {
 	// std::vector<std::shared_ptr<WorldObject>> objectList; // living objects - old
 	olc::utils::QuadTreeContainer<std::shared_ptr<WorldObject>> objectList; // living objects
 	std::vector<std::reference_wrapper<std::shared_ptr<WorldObject>>> objectListView; // view transform on object list
+	int World_Object_id;
 
 	olc::utils::geom2d::rect<float> screen;
 	void refreshObjectView();

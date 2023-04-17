@@ -92,6 +92,7 @@ bool Game_Engine::OnUserCreate() {
     worldManager->ImportMapData();      // Load all the Lua Map files
     hud->ImportHudAssets();      // Load all the Hud files
     particles->ImportEffectsAssets();
+    assetManager->ImportGameMusic();
     // Setup Viewport
     tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 1,1 });   
     
@@ -117,6 +118,9 @@ bool Game_Engine::OnUserCreate() {
 
     SetLocked(bIsLocked);
     cmapmanager->GenerateCollisionObject("Bussy Tree", { 3 * 190.4f,3 * 200.5f });
+
+    soundmanager->Play_System_Sound("Main Menu");
+
     return true;
 }
 

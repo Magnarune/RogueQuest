@@ -131,7 +131,7 @@ bool CollisionMap::FindMapObject(std::vector<int> obj,olc::vf2d Shape, int Pos) 
 void CollisionMap::GenerateCollisionObject(const std::string& name, olc::vf2d pos) {
     Game_Engine& engine = Game_Engine::Current();  
     auto& data = CMapObjectCache.TreeTypes[name];
-    
+    World_Object_id++;
     // Make map object
     std::shared_ptr<CollisionMapObject> mapobject;
     mapobject.reset(new CollisionMapObject);
