@@ -531,14 +531,15 @@ void SoundManager::Master_Volume(float volume) {
 }
 olc::sound::PlayingWave SoundManager::Play_Sound_Effect(olc::sound::Wave& soundeffect, double vol) {
 
-
-    olc::sound::PlayingWave w =  soundEngine.PlayWaveform( &soundeffect , false, 1.0, vol); //play actual sound, dont loop it when finished, normal speed
+    olc::sound::PlayingWave w =  soundEngine.PlayWaveform( &soundeffect , false, 1.0, 0.2); //play actual sound, dont loop it when finished, normal speed
     playing_sounds.emplace_back(w);
     return w;
 }
 void SoundManager::Play_Music(olc::sound::Wave music) {
-    auto w = soundEngine.PlayWaveform( &music , false, 1.0); //play actual sound, loop it when finished, normal speed
+    auto w = soundEngine.PlayWaveform( &music , true, 1.0); //play actual sound, loop it when finished, normal speed
+    playing_sounds.emplace_back(w);
     
+
 }
 void SoundManager::Stop_Sound(olc::sound::PlayingWave sound) {
     soundEngine.StopWaveform(sound); 
@@ -577,7 +578,7 @@ olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& s
 
 
     auto& sound_pack = soundpacks.at(sound_pack_name);
-    int idx = rand() % sound_pack.size();
+    int idx = rand() % sound_pack.size()+1;
     if (idx == 0) {
         for (auto& [name, snd] : sound_pack) {
             return Play_Sound_Effect(snd);
@@ -591,6 +592,11 @@ olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& s
     return {};
 }
 
+
+
+
+
+
 olc::sound::PlayingWave SoundManager::Play_System_Sound(const std::string& soundname) {
     if (!SystemSounds.count(soundname)) {
         return {};
@@ -598,4 +604,5 @@ olc::sound::PlayingWave SoundManager::Play_System_Sound(const std::string& sound
     for (auto& [name, snd] : SystemSounds) {
         return Play_Sound_Effect(snd);
     }
+    return {};
 }

@@ -1,27 +1,28 @@
 #include "MoveNodes.h"
+#include "Engine.h"
 MoveLogic::MoveLogic() {
-	obstacles.reserve(std::size_t(1000) * 1000);
+	
 }
 MoveLogic::~MoveLogic() {
-	obstacles.clear();
-}
-
-void MoveLogic::addStaticObjects(){
 
 }
 
-void MoveLogic::addDynamicObject(std::weak_ptr<Collidable> object){
-	obstacles.emplace_back(object);
-}
+void MoveLogic::RayCaster(olc::vf2d Width,olc::vf2d position,olc::vf2d Target) {
+	auto& engine = Game_Engine::Current();
+    std::vector<std::shared_ptr<CollisionMapObject>> test_objects;
+    std::shared_ptr<CollisionMapObject> testTree;
 
-void MoveLogic::UpdateDynamicObject(){
+    olc::vf2d Pos_Diff = { std::fabs(position.x - Target.x), std::fabs(position.y - Target.y) };
+    float theta = atanf(Pos_Diff.y /Pos_Diff.x);
+    olc::vf2d widthint = { position.x * cosf(theta),position.y * sinf(theta) };
 
-}
 
-void MoveLogic::removeDynamicObject(){
+    engine.worldManager->IterateObjectsQT({ position - olc::vf2d(200.f,200.f), {400.f,400.f} }, [&](std::shared_ptr<WorldObject> obj) -> bool {
+        if (testTree = std::dynamic_pointer_cast<CollisionMapObject>(obj)) {
+            test_objects.push_back(testTree);
+        }
+        return true;
+        });
 
-}
-
-void MoveLogic::UnitCheckPath(){
 
 }

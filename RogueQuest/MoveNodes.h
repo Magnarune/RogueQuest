@@ -2,15 +2,12 @@
 #include "olcPixelGameEngine.h"
 #include "WorldObject.h"
 class MoveLogic {
+public:
 	MoveLogic();
 	virtual ~MoveLogic();
-	std::vector<std::vector<int>> mapData;
-	std::vector<std::weak_ptr<Collidable>> obstacles;
-public:
-	void addStaticObjects();
-	void addDynamicObject(std::weak_ptr<Collidable> object);
-	void UpdateDynamicObject();
-	void removeDynamicObject();
-	
-	void UnitCheckPath();
+	std::vector<olc::vf2d> Move_Node;
+
+	void RayCaster(olc::vf2d width,olc::vf2d position,olc::vf2d target); //I cast a ray from point a to point b*
+	void Adjust();
+
 };

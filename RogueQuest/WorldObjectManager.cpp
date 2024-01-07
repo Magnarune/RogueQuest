@@ -203,7 +203,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
         pos = { engine.worldManager->curMap().layerSize.x * 32 / 2.f, engine.worldManager->curMap().layerSize.y * 32 / 2.f };
 
     unit->predPosition = unit->Position = pos;
-    unit->sound_id = World_Object_id++;
+    
     // Update Internal Values Of New Unit
     unit->sUnitName = data.lua_data["Name"]; //This is in top of .lua
     //Load Sprite Order
@@ -264,7 +264,7 @@ std::shared_ptr<Unit> WorldManager::GenerateUnit(const std::string& name, int ow
 
 std::shared_ptr<Building> WorldManager::GenerateBuilding(const std::string& name, int owner, olc::vf2d pos) {
     Game_Engine& engine = Game_Engine::Current();
-    World_Object_id++;
+   
     auto to_vi2d = [](sol::table obj) -> olc::vi2d {
         int32_t x = obj[1],
             y = obj[2];

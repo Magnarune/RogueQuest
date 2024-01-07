@@ -30,3 +30,4 @@ void CollisionMapObject::Draw(olc::TileTransformedView* gfx) {
 	gfx->DrawPartialDecal(Position - meta.Origin, meta.ObjectShape * meta.tilesize, engine.cmapmanager->CMapObjectCache.TreeDecal.get(), source, meta.ObjectShape * meta.tilesize);
 	
 }
+ 

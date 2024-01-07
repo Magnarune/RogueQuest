@@ -26,15 +26,15 @@ void UserInputManager::StandardUserInput() {
             engine.unitManager->DeselectUnits();
 
         (Initial - Final).mag2() > 16 && !engine.ActivityDone ?
-            engine.unitManager->SelectUnits(Initial, Final) : engine.unitManager->SelectUnit(Final);
+            engine.unitManager->SelectUnits(Initial, Final) : engine.unitManager->SelectUnit(Final); 
 
         if (!engine.ActivityDone)
             engine.buildingManager->DeselectBuildings();
         if (!engine.ActivityDone)
             engine.hudManager->selection = engine.hudManager->None;
 
-        if (!engine.ActivityDone)
-            engine.buildingManager->SelectBuilding(Final);
+        if (!engine.ActivityDone && (Initial - Final).mag2() < 16)
+            engine.buildingManager->SelectBuilding(Initial);
         else
             engine.ActivityDone = false;
     }

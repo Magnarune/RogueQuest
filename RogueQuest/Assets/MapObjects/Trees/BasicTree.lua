@@ -7,7 +7,7 @@ return
 	Tilesize = 32,
 	FileName = "Assets/MapObjects/Trees/trees-green.png",
 	Types = --Renamed to types 
-	{
+	{  
 		{
 			Name = "BasicTree",	 -- used for Engine::GenerateTree()	
 			Tileids =  {0,1,32,33}, --Tile ids starting at 0 

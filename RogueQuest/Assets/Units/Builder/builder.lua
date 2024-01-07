@@ -72,5 +72,16 @@ return
 		AttackSpeed = 5,
 		SpellCooldown = 5,
 		KnockBackResist = 1
+	},	
+	Sounds = 
+	{
+		Death = {""},
+		Hurt = {""},
+		Selected = {"Assets/Units/Builder/Sounds/What.wav","Assets/Units/Builder/Sounds/What1.wav","Assets/Units/Builder/Sounds/What2.wav"},
+		Attack = {""},
+		Swing = {""},
+		Move = {""},
+		Meme = {""}
+
 	},
 }

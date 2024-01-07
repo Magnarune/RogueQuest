@@ -222,6 +222,14 @@ class SoundManager {
     //Actual sound playing atm
     std::list<olc::sound::PlayingWave> playing_sounds;
 
+    struct Unit_Sound_id {
+        std::string Unit_name;
+        olc::sound::PlayingWave Sound;
+        int Leader;
+        int unit_number;
+    };
+    
+    std::vector<Unit_Sound_id*> Unit_sounds;
     
 public:
     ~SoundManager();
@@ -243,6 +251,7 @@ public:
 private:
     olc::sound::PlayingWave Play_Sound_Effect(olc::sound::Wave&, double vol = 1.0);
     void Play_Music(olc::sound::Wave);
+    void Stop_Sound(std::string soundname);
     void Stop_Sound(olc::sound::PlayingWave);
     void OnWaveFinished(olc::sound::PlayingWave wave);//bad practice
     friend class Game_Engine;

@@ -78,6 +78,7 @@ bool Game_Engine::OnUserCreate() {
     researchmanager.reset(new Research);
     mainmenu.reset(new MainMenu);
     cmapmanager.reset(new CollisionMap);
+    nodemanager.reset(new MoveLogic);
 
     
     // Configure Controllers
@@ -119,7 +120,7 @@ bool Game_Engine::OnUserCreate() {
     SetLocked(bIsLocked);
     cmapmanager->GenerateCollisionObject("Bussy Tree", { 3 * 190.4f,3 * 200.5f });
 
-    soundmanager->Play_System_Sound("Main Menu");
+   // soundmanager->Play_System_Sound("Main Menu");
 
     return true;
 }
@@ -237,6 +238,7 @@ bool Game_Engine::OnUserDestroy(){
     mainmenu.reset();
     cmapmanager.reset();
     soundmanager.reset();
+    nodemanager.reset();
     return true;
 }
 

@@ -29,7 +29,7 @@ UnitManager::UnitManager() {
             unit->Graphic_State = Unit::Walking;
             unit->Target = target;
             //unit->Sound
-            engine.soundmanager->Play_Random_PackSound("Move");
+           // engine.soundmanager->Play_Random_PackSound("Move");
             return true;
         },
         [&](std::shared_ptr<TaskManager::Task> task) -> bool {
@@ -605,6 +605,8 @@ void UnitManager::SelectUnit(olc::vf2d mousePos) {
         if( (unit->Position - mousePos).mag2() < (r*r + r2*r2)){
             unit->bSelected = true;
             selectedUnits.push_back(_unit);
+            auto& engine = Game_Engine::Current();
+            engine.soundmanager->Play_Random_PackSound("Selected");
             break;
         }
     }

@@ -42,6 +42,7 @@
 #include "MainMenu.h"
 
 
+
 extern std::string StringifyObject(sol::object val);
 
 class Game_Engine : public olc::PixelGameEngine {
@@ -105,6 +106,7 @@ public:
 	std::unique_ptr<Research> researchmanager;
 	std::unique_ptr<CollisionMap> cmapmanager;
 	std::unique_ptr<SoundManager> soundmanager;
+	std::unique_ptr<MoveLogic> nodemanager;
 	//This needs to be initialized to map size
 	bool ActivityDone;
 	struct Cam{
