@@ -20,6 +20,7 @@ UnitManager::UnitManager() {
             const auto& params = std::any_cast<std::pair<olc::vf2d,bool>>(arguments.second);
             const olc::vf2d& target = params.first;
             const bool& attackstate = params.second;
+           
             // action code            
             unit->ActionMode = true;
             unit->ULogic = attackstate ? Unit::Aggressive : Unit::Passive;
@@ -411,6 +412,14 @@ void UnitManager::DelegateTask(const std::string& name, const std::any& data) {
 }
 //Step One 
 void UnitManager::ConditionedDelegateTask(std::shared_ptr<Unit> unit, const std::string& name, const std::any& data) {
+    auto& eng = Game_Engine::Current();
+
+    if (name == "Move") {
+        std::pair<olc::vf2d, bool> devtest = std::any_cast<std::pair<olc::vf2d, bool>>(data);
+        eng.nodemanager.get()->RayCaster(unit->mask.rect, unit.get()->Position, devtest.first);
+        devtest.first = eng.nodemanager->Test_Node;
+        unit->taskQueue.push(taskMgr.PrepareTask(name, std::pair<std::shared_ptr<Unit>, std::any>{unit, devtest}));
+    }
     unit->taskQueue.push(taskMgr.PrepareTask(name, std::pair<std::shared_ptr<Unit>, std::any>{unit, data}));       
 }
 
@@ -606,7 +615,7 @@ void UnitManager::SelectUnit(olc::vf2d mousePos) {
             unit->bSelected = true;
             selectedUnits.push_back(_unit);
             auto& engine = Game_Engine::Current();
-            engine.soundmanager->Play_Random_PackSound("Selected");
+            engine.soundmanager->Play_Random_PackSound("Selected",_unit.lock()->sUnitName);
             break;
         }
     }

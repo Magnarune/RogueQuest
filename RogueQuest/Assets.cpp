@@ -52,7 +52,7 @@ void cAssets::LoadUnitAssets(){
             }
 
             std::string name = UnitData["Name"];
-            UnitType::SoundMetaData  sMeta;
+            UnitType::SoundMetaData  sMeta = {};
             UnitType::TextureMetaData meta;
 
 
@@ -101,7 +101,7 @@ void cAssets::LoadUnitAssets(){
                     std::string category_name = kv.first.as<std::string>();
 
                     for (const auto& snd : list) {
-                        engine.soundmanager->LoadAudioFile(category_name, snd.second.as<std::string>());
+                        engine.soundmanager->LoadAudioFile(name,category_name, snd.second.as<std::string>());
                     }
                 }
             }
@@ -545,14 +545,23 @@ void SoundManager::Stop_Sound(olc::sound::PlayingWave sound) {
     soundEngine.StopWaveform(sound); 
 }
 
-bool SoundManager::LoadAudioFile(const std::string& snd_pack_name, const std::string& Sound_path) {
+bool SoundManager::LoadAudioFile(const std::string& object_name,const std::string& snd_pack_name, const std::string& Sound_path) {
     olc::sound::Wave wave;
     if (!wave.LoadAudioWaveform(Sound_path))
         return false;
-    if (!soundpacks.count(snd_pack_name)) {
-        soundpacks.insert_or_assign(snd_pack_name, std::map<std::string, olc::sound::Wave> {});
-    }    
-    soundpacks.at(snd_pack_name).insert_or_assign(std::filesystem::path(Sound_path).filename().string(),std::move(wave));
+    std::map<std::string, std::map<std::string, olc::sound::Wave>> soundpack = {};
+    if (!soundpacks.count(object_name)) {
+        //soundpacks.insert_or_assign(object_name,soundpack);    
+        soundpacks.insert_or_assign(object_name, std::map < std::string, std::map < std::string, olc::sound::Wave >> {});
+    }
+    if (!soundpacks.at(object_name).count(snd_pack_name)) {
+        /*soundpack.insert_or_assign(snd_pack_name, std::map < std::string, olc::sound::Wave > {});  */
+        //soundpacks.insert_or_assign(object_name, std::map < std::string, std::map < std::string, olc::sound::Wave >> {});
+        //soundpacks.at(object_name).insert_or_assign(snd_pack_name, std::map < std::string, olc::sound::Wave> {});
+    }
+    
+    soundpacks[object_name][snd_pack_name][std::filesystem::path(Sound_path).filename().string()] = std::move(wave);
+    //soundpacks.at(object_name).at(snd_pack_name).insert_or_assign(std::filesystem::path(Sound_path).filename().string(), std::move(wave));
     return true;
 }
 bool SoundManager::LoadAudioFile(const std::string& snd_pack_name, const std::string& Sound_path, bool isSystemSound) {
@@ -563,21 +572,23 @@ bool SoundManager::LoadAudioFile(const std::string& snd_pack_name, const std::st
     return true;
 
 }
-olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& sound_pack_name, void* link) {// <- how would i use this
-    if (!soundpacks.count(sound_pack_name)) {
+
+olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& sound_pack_name, std::string link) {
+    if (!soundpacks.count(link))
+        return {};
+    if (!soundpacks.at(link).count(sound_pack_name)) {
         return {};
     }
-    static std::map<std::string, Clock> timeout_map;
-    if (!timeout_map.count(sound_pack_name)) {
-        timeout_map.insert_or_assign(sound_pack_name, Clock{}).first->second.setMilliseconds(100);
-    }
-    if (timeout_map.at(sound_pack_name).getMilliseconds() < 5) {
-        return {};
-    }
-    timeout_map.at(sound_pack_name).restart();
+    //static std::map<std::string, Clock> timeout_map;
+    //if (!timeout_map.count(sound_pack_name)) {
+    //    timeout_map.insert_or_assign(sound_pack_name, Clock{}).first->second.setMilliseconds(100);
+    //}
+    //if (timeout_map.at(sound_pack_name).getMilliseconds() < 5) {
+    //    return {};
+    //}
+    //timeout_map.at(sound_pack_name).restart();
 
-
-    auto& sound_pack = soundpacks.at(sound_pack_name);
+    auto& sound_pack = soundpacks.at(link).at(sound_pack_name);
     int idx = rand() % sound_pack.size()+1;
     if (idx == 0) {
         for (auto& [name, snd] : sound_pack) {
@@ -591,11 +602,6 @@ olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& s
     }
     return {};
 }
-
-
-
-
-
 
 olc::sound::PlayingWave SoundManager::Play_System_Sound(const std::string& soundname) {
     if (!SystemSounds.count(soundname)) {

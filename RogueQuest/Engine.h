@@ -89,6 +89,7 @@ protected:
 	virtual bool UpdateOptions(float fElapsedTime);
 	virtual bool UpdateMainMenu(float fElapsedTime);
 	virtual void DrawCursor();
+	
 public:
 	std::unique_ptr<MainMenu> mainmenu;
 	std::unique_ptr<WorldManager> worldManager;
@@ -107,6 +108,7 @@ public:
 	std::unique_ptr<CollisionMap> cmapmanager;
 	std::unique_ptr<SoundManager> soundmanager;
 	std::unique_ptr<MoveLogic> nodemanager;
+	std::unique_ptr<Collidable> collisionmanager;
 	//This needs to be initialized to map size
 	bool ActivityDone;
 	struct Cam{

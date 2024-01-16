@@ -217,8 +217,9 @@ class SoundManager {
     //name of sound and sound
     std::map<std::string, olc::sound::Wave> SystemSounds;
     // sound pack name ie death attack etc.. | name of actual sound | sound
-    std::map<std::string, std::map<std::string, olc::sound::Wave>> soundpacks; 
-    
+   // std::map<std::string, std::map<std::string, olc::sound::Wave>> soundpacks; 
+    //Test Addition to allow for individual units to have their own sound
+    std::map<std::string,std::map<std::string, std::map<std::string, olc::sound::Wave>>> soundpacks;
     //Actual sound playing atm
     std::list<olc::sound::PlayingWave> playing_sounds;
 
@@ -242,9 +243,11 @@ public:
     void Dialog_Volume(float volume);// "Attack!!!" "We are under attack" etc.
     void Music_Volume(float volume);// do i need to explain this??? god damn
     void Other_Volume(float volume);// idk what else to put here
-    bool LoadAudioFile(const std::string& snd_pack_name, const std::string& Sound_path);//How do i know if im loading a "song" or "sound"
+
+    //bool LoadAudioFile(const std::string& snd_pack_name, const std::string& Sound_path);//How do i know if im loading a "song" or "sound"
+    bool LoadAudioFile(const std::string& Object_name, const std::string& snd_pack_name, const std::string& Sound_Path);
     bool LoadAudioFile(const std::string& Song_Name, const std::string& Sound_Path, bool is_System_Sound);
-    olc::sound::PlayingWave Play_Random_PackSound(const std::string& sound, void* link = nullptr); // For single event sounds E.g. "Death"  "Hurt"   "Selected" etc  
+    olc::sound::PlayingWave Play_Random_PackSound(const std::string& soundpack, std::string link = nullptr); // For single event sounds E.g. "Death"  "Hurt"   "Selected" etc  
     olc::sound::PlayingWave Play_System_Sound(const std::string& soundname);
   //  uint64_t Play_Object_sound(WorldObject object_number,std::string obj_name, std::string sound_name);
 

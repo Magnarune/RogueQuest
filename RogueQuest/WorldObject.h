@@ -71,4 +71,5 @@ public:
 	virtual void Update(float delta) override;
 	virtual void AfterUpdate(float delta) override;
 	virtual bool OnCollision(std::shared_ptr<Collidable> other, olc::vf2d vOverlap) = 0;
+	
 };

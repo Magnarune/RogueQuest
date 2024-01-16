@@ -66,7 +66,7 @@ return
 		MaxMana = 20,
 		Ammo = 0, 
 		MaxAmmo = 0,
-		MoveSpeed = 40,       
+		MoveSpeed = 160,       
 		AttackRange = 21, 
 		AttackDamage = 2,
 		AttackSpeed = 5,

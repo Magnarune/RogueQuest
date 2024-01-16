@@ -78,8 +78,9 @@ bool Game_Engine::OnUserCreate() {
     researchmanager.reset(new Research);
     mainmenu.reset(new MainMenu);
     cmapmanager.reset(new CollisionMap);
+    //New
     nodemanager.reset(new MoveLogic);
-
+    
     
     // Configure Controllers
     cmapmanager->ImportCollisionData();//Imports all the possible world map objects
@@ -174,9 +175,10 @@ bool Game_Engine::UpdateLocalMap(float fElapsedTime) {
     
     userinputs->DrawUserInput();
     hud->DrawLeaderHud();
+    
     hud->DrawHud();
     hud->DrawMiniMap();
-
+    
 
     
    // DrawStringDecal(GetMousePos() - olc::vi2d(-5, -20), std::to_string((float)GetMousePos().x / (float)ScreenWidth()) + "/" + std::to_string((float)GetMousePos().y / (float)ScreenHeight()));
@@ -194,7 +196,13 @@ return mainmenu->MainMenuSelection(fElapsedTime);
 
 void Game_Engine::DrawCursor() {//Assets\Gui\Cursors\cursor.png
     if(curCursor == nullptr) return;
+    //Draw Dev
+    for (int i = 0; i < nodemanager->Move_Node.size(); i++) {
+        tv.DrawStringDecal(nodemanager->Move_Node[i], "`", olc::RED, {1.f,1.f});
 
+       
+    }
+    tv.DrawStringDecal(nodemanager->Test_Node, "`", olc::BLACK, { 1.f,1.f });
     DrawDecal(GetMousePos(), curCursor->decal.get(), curCursor->scale);
 }
 
@@ -416,7 +424,7 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
 
     for(int i=0; i< 20; i++)
         worldManager->GenerateUnit("Archer", 1, {3*i+19.f * 32.f,10 * 32.f });
-    worldManager->GenerateUnit("Builder", 1, { 19 * 32.f,14 * 32.f });
+    worldManager->GenerateUnit("Builder", 1, { 21 * 32.f,14 * 32.f });
 
     worldManager->GenerateBuilding("GoldMine", 0, { 18 * 32.f,30 * 32.f });
 

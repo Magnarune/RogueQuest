@@ -292,7 +292,7 @@ void Unit::UnitGraphicUpdate(float delta) {
 
 	if (Graphic_State == Dead && curFrame == textureMetadata[Graphic_State].ani_len - 1) {
 		Stop();
-		engine.soundmanager->Play_Random_PackSound("Move");
+		engine.soundmanager->Play_Random_PackSound("Death",sUnitName);
 		Destroy();
 	}
 	//if (currentTask) {//Exceptions to the rule
