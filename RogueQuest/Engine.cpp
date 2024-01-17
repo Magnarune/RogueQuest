@@ -197,12 +197,41 @@ return mainmenu->MainMenuSelection(fElapsedTime);
 void Game_Engine::DrawCursor() {//Assets\Gui\Cursors\cursor.png
     if(curCursor == nullptr) return;
     //Draw Dev
-    for (int i = 0; i < nodemanager->Move_Node.size(); i++) {
-        tv.DrawStringDecal(nodemanager->Move_Node[i], "`", olc::RED, {1.f,1.f});
 
-       
+
+    for (int i = 0; i < nodemanager->Move_Node.size(); i++) {
+        
+        tv.DrawLineDecal(nodemanager->Move_Node[i] - nodemanager->UnitW / 2.f, nodemanager->Move_Node[i] + olc::vf2d(-nodemanager->UnitW.x, nodemanager->UnitW.y) / 2.f, olc::RED);
+        tv.DrawLineDecal(nodemanager->Move_Node[i] - nodemanager->UnitW / 2.f, nodemanager->Move_Node[i] + olc::vf2d(nodemanager->UnitW.x, -nodemanager->UnitW.y) / 2.f, olc::RED);
+        tv.DrawLineDecal(nodemanager->Move_Node[i] +  nodemanager->UnitW / 2.f, nodemanager->Move_Node[i] + olc::vf2d(-nodemanager->UnitW.x, nodemanager->UnitW.y) / 2.f, olc::RED);
+        tv.DrawLineDecal(nodemanager->Move_Node[i] +  nodemanager->UnitW / 2.f, nodemanager->Move_Node[i] + olc::vf2d(nodemanager->UnitW.x, -nodemanager->UnitW.y) / 2.f, olc::RED);
+
+        //tv.DrawStringDecal(nodemanager->Move_Node[i], "`", olc::RED, {1.f,1.f});
     }
     tv.DrawStringDecal(nodemanager->Test_Node, "`", olc::BLACK, { 1.f,1.f });
+
+    tv.DrawStringDecal(nodemanager->dev_X, "`", olc::BLACK, { 1.f,1.f });
+    tv.DrawStringDecal(nodemanager->dev_W, "`", olc::BLACK, { 1.f,1.f });
+    tv.DrawStringDecal(nodemanager->dev_Z, "`", olc::BLACK, { 1.f,1.f });
+    tv.DrawStringDecal(nodemanager->dev_Y, "`", olc::BLUE, { 1.f,1.f });
+    tv.DrawStringDecal(nodemanager->dev_Pos, "`", olc::CYAN);
+
+
+    tv.DrawLineDecal(nodemanager->dev2_ZZ, nodemanager->dev2_WW, olc::CYAN);
+    tv.DrawLineDecal(nodemanager->dev2_ZZ, nodemanager->dev2_XX, olc::CYAN);
+    tv.DrawLineDecal(nodemanager->dev2_YY, nodemanager->dev2_XX, olc::CYAN);
+    tv.DrawLineDecal(nodemanager->dev2_WW, nodemanager->dev2_YY, olc::CYAN);
+
+    tv.DrawLineDecal(nodemanager->dev2_Z, nodemanager->dev2_W, olc::CYAN);
+    tv.DrawLineDecal(nodemanager->dev2_Z, nodemanager->dev2_X, olc::CYAN);
+    tv.DrawLineDecal(nodemanager->dev2_Y, nodemanager->dev2_X, olc::CYAN);
+    tv.DrawLineDecal(nodemanager->dev2_W, nodemanager->dev2_Y, olc::CYAN);
+
+    tv.DrawStringDecal(nodemanager->dev2_X, "l", olc::BLACK, { 1.f,1.f });
+    tv.DrawStringDecal(nodemanager->dev2_W, "l", olc::BLACK, { 1.f,1.f });
+    tv.DrawStringDecal(nodemanager->dev2_Z, "l", olc::BLACK, { 1.f,1.f });
+    tv.DrawStringDecal(nodemanager->dev2_Y, "l", olc::BLACK, { 1.f,1.f });
+
     DrawDecal(GetMousePos(), curCursor->decal.get(), curCursor->scale);
 }
 

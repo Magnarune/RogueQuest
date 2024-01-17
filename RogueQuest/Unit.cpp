@@ -375,45 +375,45 @@ void Unit::Draw(olc::TileTransformedView* gfx){
 		SpriteSheetOffset, SpriteSheetTileSize, 
 		(bSelected ? olc::WHITE: engine.highlightmanagment->OwnerColor(Owner)) - engine.worldManager->currentMap->Darkness);
 	
-	if (bSelected == true) {//Debug Selection
-		//static Circle debugCircle{ 512.f };
-		//debugCircle.position = Position ;	
+	//if (bSelected == true) {//Debug Selection
+	//	//static Circle debugCircle{ 512.f };
+	//	//debugCircle.position = Position ;	
 
-		//debugCircle.radius = olc::vf2d(mask.radius, mask.radius);
-		//debugCircle.col = olc::Pixel(0x700F0AAA);
-		//debugCircle.Draw();
-		////DrawCircleDecal(Position, AgroRange, olc::DARK_RED, gfx);
-		//DrawCircleDecal(Position, mask.radius, olc::GREEN, gfx);
-		//DrawCircleDecal(Position, fAttackRange, olc::BLACK, gfx);
+	//	//debugCircle.radius = olc::vf2d(mask.radius, mask.radius);
+	//	//debugCircle.col = olc::Pixel(0x700F0AAA);
+	//	//debugCircle.Draw();
+	//	////DrawCircleDecal(Position, AgroRange, olc::DARK_RED, gfx);
+	//	//DrawCircleDecal(Position, mask.radius, olc::GREEN, gfx);
+	//	//DrawCircleDecal(Position, fAttackRange, olc::BLACK, gfx);
 
-		if (Target.has_value()) {
-			gfx->DrawLineDecal(Position, Target.value());
+	//	if (Target.has_value()) {
+	//		gfx->DrawLineDecal(Position, Target.value());
 
-			if (ActionZone > olc::vf2d(0.f, 0.f)) {
-				if (ActionMode)
-					DrawCircleDecal(Target.value(), ActionZone.mag(), olc::WHITE, gfx);
-				else {
-					auto homebase = HomeBase.lock();
-					auto minetarget = TreeObject.lock();
-					if (TreeObject.lock() && Target != homebase->Position) {
-						gfx->DrawLineDecal(minetarget->Position - ActionZone, olc::vf2d({ minetarget->Position.x + ActionZone.x, minetarget->Position.y - ActionZone.y }));
-						gfx->DrawLineDecal(minetarget->Position - ActionZone, olc::vf2d({ minetarget->Position.x - ActionZone.x  ,minetarget->Position.y + ActionZone.y }));
-						gfx->DrawLineDecal(minetarget->Position + ActionZone, olc::vf2d({ minetarget->Position.x + ActionZone.x  ,minetarget->Position.y - ActionZone.y }));
-						gfx->DrawLineDecal(minetarget->Position + ActionZone, olc::vf2d({ minetarget->Position.x - ActionZone.x ,minetarget->Position.y + ActionZone.y }));
-					}
-					else 
-					{					
-						if (homebase) {
-							gfx->DrawLineDecal(homebase->Position - ActionZone, olc::vf2d({ homebase->Position.x + ActionZone.x, homebase->Position.y - ActionZone.y }));
-							gfx->DrawLineDecal(homebase->Position - ActionZone, olc::vf2d({ homebase->Position.x - ActionZone.x  ,homebase->Position.y + ActionZone.y }));
-							gfx->DrawLineDecal(homebase->Position + ActionZone, olc::vf2d({ homebase->Position.x + ActionZone.x  ,homebase->Position.y - ActionZone.y }));
-							gfx->DrawLineDecal(homebase->Position + ActionZone, olc::vf2d({ homebase->Position.x - ActionZone.x ,homebase->Position.y + ActionZone.y }));
-						}
-					}
-				}
-			}
-		}
-	}
+	//		if (ActionZone > olc::vf2d(0.f, 0.f)) {
+	//			if (ActionMode)
+	//				DrawCircleDecal(Target.value(), ActionZone.mag(), olc::WHITE, gfx);
+	//			else {
+	//				auto homebase = HomeBase.lock();
+	//				auto minetarget = TreeObject.lock();
+	//				if (TreeObject.lock() && Target != homebase->Position) {
+	//					gfx->DrawLineDecal(minetarget->Position - ActionZone, olc::vf2d({ minetarget->Position.x + ActionZone.x, minetarget->Position.y - ActionZone.y }));
+	//					gfx->DrawLineDecal(minetarget->Position - ActionZone, olc::vf2d({ minetarget->Position.x - ActionZone.x  ,minetarget->Position.y + ActionZone.y }));
+	//					gfx->DrawLineDecal(minetarget->Position + ActionZone, olc::vf2d({ minetarget->Position.x + ActionZone.x  ,minetarget->Position.y - ActionZone.y }));
+	//					gfx->DrawLineDecal(minetarget->Position + ActionZone, olc::vf2d({ minetarget->Position.x - ActionZone.x ,minetarget->Position.y + ActionZone.y }));
+	//				}
+	//				else 
+	//				{					
+	//					if (homebase) {
+	//						gfx->DrawLineDecal(homebase->Position - ActionZone, olc::vf2d({ homebase->Position.x + ActionZone.x, homebase->Position.y - ActionZone.y }));
+	//						gfx->DrawLineDecal(homebase->Position - ActionZone, olc::vf2d({ homebase->Position.x - ActionZone.x  ,homebase->Position.y + ActionZone.y }));
+	//						gfx->DrawLineDecal(homebase->Position + ActionZone, olc::vf2d({ homebase->Position.x + ActionZone.x  ,homebase->Position.y - ActionZone.y }));
+	//						gfx->DrawLineDecal(homebase->Position + ActionZone, olc::vf2d({ homebase->Position.x - ActionZone.x ,homebase->Position.y + ActionZone.y }));
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
 }
 

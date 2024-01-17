@@ -179,7 +179,7 @@ bool WorldManager::IterateObjects(std::function<bool(std::shared_ptr<WorldObject
 }
 
 bool WorldManager::IterateObjectsQT(olc::utils::geom2d::rect<float> searchArea, std::function<bool(std::shared_ptr<WorldObject>&)> cb) {
-    auto found = objectList.search(searchArea); // position of object and size of search area
+    auto found = objectList.search(searchArea); // position of object{} and size{} of search area
     for (auto& _obj : found) { // returns a list if found objects
         auto& obj = _obj->item;
 

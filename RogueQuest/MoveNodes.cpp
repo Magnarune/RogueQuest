@@ -24,6 +24,8 @@ void MoveLogic::SearchObjects(olc::vf2d Width_Of_Unit, olc::vf2d Initial_Positio
         Move_Node.push_back(Ray_to_Target.rpoint(startDist));
     }       
     
+    
+
     for (int i = 1; i < Center_Of_Rectangles.size()-1; i++) {
         engine.worldManager->IterateObjectsQT(
             olc::utils::geom2d::rect<float>(  Center_Of_Rectangles[i] - Width_Of_Unit / 2.f, Width_Of_Unit),
@@ -52,13 +54,34 @@ olc::vf2d MoveLogic::Adjust(olc::vf2d Position_of_Unit, olc::vf2d width_of_Unit,
     olc::vf2d Next_Node;
     olc::utils::geom2d::line<float> DistanceTester;
     std::vector<olc::vf2d> Mid_Point{ { Position_Of_Object.x,Position_Of_Object.y + Size_of_Object.y + width_of_Unit.y },
+                                      { Position_Of_Object.x,Position_Of_Object.y - Size_of_Object.y/2.f- width_of_Unit.y },
                                       { Position_Of_Object.x + Size_of_Object.x + width_of_Unit.x,Position_Of_Object.y },
-                                      { Position_Of_Object.x,Position_Of_Object.y - Size_of_Object.y - width_of_Unit.y },
-                                      { Position_Of_Object.x - Size_of_Object.x - width_of_Unit.x ,Position_Of_Object.y}};
+                                      { Position_Of_Object.x - Size_of_Object.x - width_of_Unit.x ,Position_Of_Object.y} };
+    //Dev stuff
+    dev_W = Mid_Point[0];
+    dev_X = Mid_Point[1];
+    dev_Y = Mid_Point[2];
+    dev_Z = Mid_Point[3];
+    UnitW = width_of_Unit;
+    dev_Pos = Position_Of_Object;
+    dev2_WW = olc::vf2d({ Position_Of_Object.x + Size_of_Object.x / 2.f, Position_Of_Object.y + Size_of_Object.y / 2.f });
+    dev2_XX = olc::vf2d({ Position_Of_Object.x - Size_of_Object.x / 2.f, Position_Of_Object.y - Size_of_Object.y / 2.f });
+    dev2_YY = olc::vf2d({ Position_Of_Object.x - Size_of_Object.x / 2.f, Position_Of_Object.y + Size_of_Object.y / 2.f });
+    dev2_ZZ = olc::vf2d({ Position_Of_Object.x + Size_of_Object.x /2.f, Position_Of_Object.y - Size_of_Object.y / 2.f });
 
+    dev2_W = { Position_Of_Object.x + Size_of_Object.x,Position_Of_Object.y + Size_of_Object.y };
+    dev2_X = { Position_Of_Object.x - Size_of_Object.x,Position_Of_Object.y - Size_of_Object.y };
+    dev2_Y = { Position_Of_Object.x - Size_of_Object.x,Position_Of_Object.y + Size_of_Object.y };//Im too Tall!!!
+    dev2_Z = { Position_Of_Object.x + Size_of_Object.x,Position_Of_Object.y - Size_of_Object.y };
+
+
+
+    DevFlipper = true;
+    //
    Next_Node = GetClosestPoint(Position_of_Unit, Mid_Point); 
 
     //Left to right Up and Down
+   
    return Next_Node;
 }
 

@@ -416,8 +416,10 @@ void UnitManager::ConditionedDelegateTask(std::shared_ptr<Unit> unit, const std:
 
     if (name == "Move") {
         std::pair<olc::vf2d, bool> devtest = std::any_cast<std::pair<olc::vf2d, bool>>(data);
+        eng.nodemanager->DevFlipper = false;
         eng.nodemanager.get()->RayCaster(unit->mask.rect, unit.get()->Position, devtest.first);
-        devtest.first = eng.nodemanager->Test_Node;
+        if(eng.nodemanager->DevFlipper)
+            devtest.first = eng.nodemanager->Test_Node;
         unit->taskQueue.push(taskMgr.PrepareTask(name, std::pair<std::shared_ptr<Unit>, std::any>{unit, devtest}));
     }
     unit->taskQueue.push(taskMgr.PrepareTask(name, std::pair<std::shared_ptr<Unit>, std::any>{unit, data}));       
