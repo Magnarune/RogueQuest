@@ -64,4 +64,15 @@ return
 		SpellCooldown = 0.2,
 		KnockBackResist = 1
 	},
+	Sounds = 
+	{
+		Death = {"Assets/Units/Mage/Sounds/Dead.wav"},
+		Hurt = {""},
+		Selected = {"Assets/Units/Mage/Sounds/What.wav","Assets/Units/Mage/Sounds/What1.wav","Assets/Units/Mage/Sounds/What2.wav", "Assets/Units/Mage/Sounds/What3.wav"},
+		Attack = {"Assets/Units/Archer/Sounds/Attack.wav"},
+		Swing = {""},
+		Move = {""},
+		Meme = {""}
+
+	},
 }

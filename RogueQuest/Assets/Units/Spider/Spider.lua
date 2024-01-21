@@ -64,4 +64,16 @@ return
 		SpellCooldown = 1.6,
 		KnockBackResist = 1
 	},
+	Sounds = 
+	{
+		Death = {"Assets/Units/Spider/Sounds/Dead.wav"},
+		Hurt = {""},
+		Selected = {"Assets/Units/Spider/Sounds/What.wav","Assets/Units/Spider/Sounds/What1.wav"},
+		Attack = {""},
+		Swing = {""},
+		Move = {""},
+		Meme = {""}
+
+	},
+
 }

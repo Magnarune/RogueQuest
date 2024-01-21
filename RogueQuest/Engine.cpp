@@ -416,6 +416,15 @@ const std::map<std::string, CommandFunction> commands = {
         std::cout << "Building Crushed\n";
     }
     } },
+    { "Cursor", [](std::stringstream& ss) {
+    auto& engine = Game_Engine::Current();
+    std::string name;
+    size_t index{};
+    ss >> name;
+   std::cout << engine.tv.ScreenToWorld(engine.GetMousePos());
+    
+    } },
+    
     /*
     {"", [](std::stringstream& ss){
         auto& engine = Game_Engine::Current();
@@ -469,6 +478,66 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
     worldManager->GenerateUnit("Builder", 0, { 19 * 32.f,30 * 32.f });
     for (int i = 0; i < 20; i++)
         worldManager->GenerateUnit("Archer", 0, { 3* i + 19.f * 32.f,38 * 32.f });
+
+
+    std::vector<olc::vf2d>Location{ olc::vf2d(52,378),   //leader starting locations
+                                    olc::vf2d(302,188),
+                                    olc::vf2d(453,330)
+                                  };
+
+
+    for (int Leader = 2; Leader <= 4; Leader++) {
+        const auto& Castles = worldManager->GenerateBuilding("Castle", Leader, Location[Leader - 2] * 32.f);
+        Castles->Health = Castles->maxHealth;
+        Castles->curStage = 1;
+        const auto& Houses = worldManager->GenerateBuilding("House", Leader, Location[Leader - 2] * 32.f + olc::vf2d(-2.f,5.f)*32.f);
+        Houses->Health = Houses->maxHealth;
+        Houses->curStage = 1;
+        const auto& Towers = worldManager->GenerateBuilding("StoneTower", Leader, Location[Leader - 2] * 32.f + olc::vf2d(5.f, 5.f) * 32.f);
+        Towers->Health = Towers->maxHealth;
+        Towers->curStage = 2;
+        worldManager->GenerateUnit("Builder", Leader, Location[Leader - 2] * 32.f + olc::vf2d(-3.f, 0.f) * 32.f);
+        worldManager->GenerateBuilding("GoldMine", Leader, Location[Leader - 2] * 32.f + olc::vf2d(-17.f, 0.f) * 32.f);
+        for (int i = 0; i < 20; i++)
+            worldManager->GenerateUnit("Archer", Leader, Location[Leader - 2] * 32.f + olc::vf2d(-0.f, 5.f+0.7* i) * 32.f);
+    }
+ 
+    leaders->FindHomeBase();
+    for (int k = 0; k < 1000; k++)
+    {
+        int x = rand() % 553;
+        int y = rand() % 550;
+        std::vector<olc::vf2d>Locations{ olc::vf2d(52,378),   //leader starting locations
+                                   olc::vf2d(302,188),
+                                   olc::vf2d(453,330),
+                                    olc::vf2d(19,38),
+                                    olc::vf2d(36,14)
+        };
+            bool not_Next_to_Base = true;
+        for (auto i = 0; i < Locations.size(); i++) {
+            not_Next_to_Base = true;
+            olc::utils::geom2d::line<float> Testline{ olc::vf2d(x * 32.f, y * 32.f), Locations[i] };
+            if (Testline.length2() < 15 * 15) {
+                not_Next_to_Base = false;
+
+            }
+        }
+
+            if (not_Next_to_Base) {
+
+                const auto& spider = worldManager->GenerateUnit("Spider", 0, olc::vd2d(x * 32.f, y * 32.f));
+                spider->ULogic = spider->Aggressive;
+            }
+        
+
+    }
+
+
+
+
+
+
+
 }
 
 void Game_Engine::DrawCenteredStringDecal(olc::vf2d pos, const std::string& str, olc::Pixel col, olc::vf2d scale) {

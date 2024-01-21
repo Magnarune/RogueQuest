@@ -21,6 +21,6 @@ return
 	},
 	Reward = 
 	{	
-		Unlocks = {"Mage", "Sara"}
+		Unlocks = {"Mage", "Sara", "Wands","HellCircle"}
 	}
 }

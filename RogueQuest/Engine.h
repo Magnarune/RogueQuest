@@ -70,7 +70,8 @@ public:
 
 	//Cursor BS
 	RECT my_rect;
-
+	//Debug
+	bool One_Cycle = false;
     enum MapModes{
 		MODE_LOCAL_MAP,
 		MODE_OPTIONS_MENU,

@@ -580,16 +580,18 @@ olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& s
         return {};
     }
     static std::map<std::string, Clock> timeout_map;
-    if (!timeout_map.count(sound_pack_name)) {
+    if(sound_pack_name != "Death")
+        if (!timeout_map.count(sound_pack_name)) {
         Clock Timeout; 
        Timeout.setMilliseconds(100);
         timeout_map.insert_or_assign(sound_pack_name, Timeout);
-    }
-    else if (timeout_map.at(sound_pack_name).getMilliseconds() > 2000) {
+        }
+        else if (timeout_map.at(sound_pack_name).getMilliseconds() > 2000) {
         timeout_map.at(sound_pack_name).restart();
-    }
-    else
-        return{};
+        }
+        else
+            return{};
+
 
     auto& sound_pack = soundpacks.at(link).at(sound_pack_name);
     int idx = rand() % sound_pack.size()+1;
