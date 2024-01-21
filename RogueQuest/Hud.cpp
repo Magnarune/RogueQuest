@@ -107,7 +107,7 @@ void Hud::ImportHudAssets() {
 
 void Hud::Update(float delta) {
     if(minimapRefreshTimer.getSeconds() > 1.0) {
-        RefreshMiniMap();
+       // RefreshMiniMap();
         minimapRefreshTimer.restart();
     }
 }
@@ -151,8 +151,9 @@ void Hud::RefreshMiniMap() {
     if(!minimapCanvas) return;
     
     // draw background tileset
+    //minimapCanvas.reset();
+    //engine.Clear(olc::BLANK);
     (*minimapCanvas) = *minimapTileCanvas->Duplicate(); // refresh tilemap to canvas
-
     engine.SetDrawTarget(minimapCanvas.get()); // draw units
 
     // draw units
@@ -171,6 +172,7 @@ void Hud::RefreshMiniMap() {
     engine.SetDrawTarget(nullptr);
 
     minimapDecal->Update();
+
 }
 
 void Hud::DrawMiniMap() {

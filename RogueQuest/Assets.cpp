@@ -579,14 +579,17 @@ olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& s
     if (!soundpacks.at(link).count(sound_pack_name)) {
         return {};
     }
-    //static std::map<std::string, Clock> timeout_map;
-    //if (!timeout_map.count(sound_pack_name)) {
-    //    timeout_map.insert_or_assign(sound_pack_name, Clock{}).first->second.setMilliseconds(100);
-    //}
-    //if (timeout_map.at(sound_pack_name).getMilliseconds() < 5) {
-    //    return {};
-    //}
-    //timeout_map.at(sound_pack_name).restart();
+    static std::map<std::string, Clock> timeout_map;
+    if (!timeout_map.count(sound_pack_name)) {
+        Clock Timeout; 
+       Timeout.setMilliseconds(100);
+        timeout_map.insert_or_assign(sound_pack_name, Timeout);
+    }
+    else if (timeout_map.at(sound_pack_name).getMilliseconds() > 2000) {
+        timeout_map.at(sound_pack_name).restart();
+    }
+    else
+        return{};
 
     auto& sound_pack = soundpacks.at(link).at(sound_pack_name);
     int idx = rand() % sound_pack.size()+1;
