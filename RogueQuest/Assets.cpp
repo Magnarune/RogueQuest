@@ -525,10 +525,25 @@ void SoundManager::Stop_all_sounds() {
 void SoundManager::OnWaveFinished(olc::sound::PlayingWave wave) {
     playing_sounds.remove_if([&wave](const auto& w) { return wave == w; });
 }
-void SoundManager::Master_Volume(float volume) {
-    soundEngine.SetOutputVolume(volume); //volume = volume input
+
+float SoundManager::Volume_Calculator(int vol_id) {
+    auto& engine = Game_Engine::Current();
+    switch (vol_id) {
+    case 3:
+        return engine.config->GetValue<float>("Unit_Audio_Level");
+    case 2:
+        return engine.config->GetValue<float>("SFX_Audio_Level");
+    case 1:
+        return engine.config->GetValue<float>("Music_Audio_Level");
+    case 0:
+        return engine.config->GetValue<float>("Master_Audio_Level");
+    default:
+        return engine.config->GetValue<float>("Master_Audio_Level");
+    }
+    return {};
 
 }
+
 olc::sound::PlayingWave SoundManager::Play_Sound_Effect(olc::sound::Wave& soundeffect, double vol) {
 
     olc::sound::PlayingWave w =  soundEngine.PlayWaveform( &soundeffect , false, 1.0, 0.2); //play actual sound, dont loop it when finished, normal speed
@@ -608,12 +623,16 @@ olc::sound::PlayingWave SoundManager::Play_Random_PackSound(const std::string& s
     return {};
 }
 
-olc::sound::PlayingWave SoundManager::Play_System_Sound(const std::string& soundname) {
+olc::sound::PlayingWave SoundManager::Play_System_Sound(const std::string& soundname, int vol_id) {
+
+
+    float Volume = Volume_Calculator(vol_id);
+    soundEngine.SetOutputVolume(Volume);
     if (!SystemSounds.count(soundname)) {
         return {};
     }
     for (auto& [name, snd] : SystemSounds) {
-        return Play_Sound_Effect(snd);
+        return Play_Sound_Effect(snd,Volume);
     }
     return {};
 }

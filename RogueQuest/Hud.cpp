@@ -107,7 +107,7 @@ void Hud::ImportHudAssets() {
 
 void Hud::Update(float delta) {
     if(minimapRefreshTimer.getSeconds() > 1.0) {
-       // RefreshMiniMap();
+        RefreshMiniMap();
         minimapRefreshTimer.restart();
     }
 }

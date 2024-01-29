@@ -51,15 +51,15 @@ return
 	},
 	Stats =
 	{
-		Health = 20,
-		MaxHealth = 20,
+		Health = 260,
+		MaxHealth = 260,
 		Mana = 20,
 		MaxMana = 20,
 		Ammo = 0, 
 		MaxAmmo = 0,
 		MoveSpeed = 40,       
-		AttackRange = 42, 
-		AttackDamage = 2,
+		AttackRange = 4, 
+		AttackDamage = 20,
 		AttackSpeed = 1.6,
 		SpellCooldown = 1.6,
 		KnockBackResist = 1

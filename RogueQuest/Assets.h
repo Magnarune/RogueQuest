@@ -237,18 +237,24 @@ public:
     //System controls
     void Stop_all_sounds();
     void Stop_Game_Sound(int sound_id);
-
-    void Master_Volume(float volume); //maybe have an into to decide what channel audio goes down
-    void SFX_Volume(float volume);//"Whack" "Bam" etc.
-    void Dialog_Volume(float volume);// "Attack!!!" "We are under attack" etc.
-    void Music_Volume(float volume);// do i need to explain this??? god damn
-    void Other_Volume(float volume);// idk what else to put here
-
+    
+    float Volume_Calculator(int type_id);
+    float Master_Volume;
+    float Unit_Volume;
+    float Music_Volume;
+    float SFX_Volume;
+    
+    //maybe have an into to decide what channel audio goes down
+    //void SFX_Volume(float volume);//"Whack" "Bam" etc.
+    //void Dialog_Volume(float volume);// "Attack!!!" "We are under attack" etc.
+    //void Music_Volume(float volume);// do i need to explain this??? god damn
+    //void Other_Volume(float volume);// idk what else to put here
+    //
     //bool LoadAudioFile(const std::string& snd_pack_name, const std::string& Sound_path);//How do i know if im loading a "song" or "sound"
     bool LoadAudioFile(const std::string& Object_name, const std::string& snd_pack_name, const std::string& Sound_Path);
     bool LoadAudioFile(const std::string& Song_Name, const std::string& Sound_Path, bool is_System_Sound);
     olc::sound::PlayingWave Play_Random_PackSound(const std::string& soundpack, std::string link = nullptr); // For single event sounds E.g. "Death"  "Hurt"   "Selected" etc  
-    olc::sound::PlayingWave Play_System_Sound(const std::string& soundname);
+    olc::sound::PlayingWave Play_System_Sound(const std::string& soundname, int vol_id = 0);
   //  uint64_t Play_Object_sound(WorldObject object_number,std::string obj_name, std::string sound_name);
 
 private:

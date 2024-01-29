@@ -115,13 +115,13 @@ bool Game_Engine::OnUserCreate() {
     tv.SetWorldOffset(Camera.vPOS);
 
     curCursor = assetManager->GetCursor("default");
-
+   
     bIsLocked = config->GetValue<bool>("ScreenLocked");
 
     SetLocked(bIsLocked);
     cmapmanager->GenerateCollisionObject("Bussy Tree", { 3 * 190.4f,3 * 200.5f });
 
-   // soundmanager->Play_System_Sound("Main Menu");
+    soundmanager->Play_System_Sound("Main Menu",1);
 
     return true;
 }
@@ -198,7 +198,7 @@ void Game_Engine::DrawCursor() {//Assets\Gui\Cursors\cursor.png
     if(curCursor == nullptr) return;
     //Draw Dev
 
-
+    /*
     for (int i = 0; i < nodemanager->Move_Node.size(); i++) {
         
         tv.DrawLineDecal(nodemanager->Move_Node[i] - nodemanager->UnitW / 2.f, nodemanager->Move_Node[i] + olc::vf2d(-nodemanager->UnitW.x, nodemanager->UnitW.y) / 2.f, olc::RED);
@@ -231,6 +231,7 @@ void Game_Engine::DrawCursor() {//Assets\Gui\Cursors\cursor.png
     tv.DrawStringDecal(nodemanager->dev2_W, "l", olc::BLACK, { 1.f,1.f });
     tv.DrawStringDecal(nodemanager->dev2_Z, "l", olc::BLACK, { 1.f,1.f });
     tv.DrawStringDecal(nodemanager->dev2_Y, "l", olc::BLACK, { 1.f,1.f });
+    */
 
     DrawDecal(GetMousePos(), curCursor->decal.get(), curCursor->scale);
 }
@@ -480,9 +481,10 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
         worldManager->GenerateUnit("Archer", 0, { 3* i + 19.f * 32.f,38 * 32.f });
 
 
-    std::vector<olc::vf2d>Location{ olc::vf2d(52,378),   //leader starting locations
+                                   
+    std::vector<olc::vf2d>Location{ olc::vf2d(453,330),
                                     olc::vf2d(302,188),
-                                    olc::vf2d(453,330)
+                                    olc::vf2d(52,378)   //leader starting locations
                                   };
 
 
@@ -503,21 +505,22 @@ void Game_Engine::InitiateGame() {//For Debugging Ease
     }
  
     leaders->FindHomeBase();
-    for (int k = 0; k < 1000; k++)
+    for (int k = 0; k < 200; k++)
     {
         int x = rand() % 553;
         int y = rand() % 550;
-        std::vector<olc::vf2d>Locations{ olc::vf2d(52,378),   //leader starting locations
+        std::vector<olc::vf2d>Locations{    //leader starting locations
                                    olc::vf2d(302,188),
                                    olc::vf2d(453,330),
-                                    olc::vf2d(19,38),
-                                    olc::vf2d(36,14)
+                                   olc::vf2d(52,378),
+                                    olc::vf2d(19,34),
+                                    olc::vf2d(18,14)
         };
             bool not_Next_to_Base = true;
         for (auto i = 0; i < Locations.size(); i++) {
             not_Next_to_Base = true;
             olc::utils::geom2d::line<float> Testline{ olc::vf2d(x * 32.f, y * 32.f), Locations[i] };
-            if (Testline.length2() < 15 * 15) {
+            if (Testline.length2() < 45 * 45) {
                 not_Next_to_Base = false;
 
             }
